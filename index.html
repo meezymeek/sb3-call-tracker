@@ -76,7 +76,8 @@
             color: var(--accent-green);
         }
 
-        .controls {
+
+        .controls, .email-template-section {
             margin-bottom: 25px;
             padding: 15px;
             background-color: var(--dark-bg-tertiary);
@@ -87,6 +88,41 @@
             flex-wrap: wrap;
         }
         
+        .email-template-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .email-template-section label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-text-primary);
+        }
+        
+        .email-template-section input[type="text"],
+        .email-template-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color-dark);
+            border-radius: 4px;
+            font-size: 0.95em;
+            background-color: var(--dark-bg-primary);
+            color: var(--dark-text-primary);
+        }
+        .email-template-section input[type="text"]:focus,
+        .email-template-section textarea:focus {
+            border-color: var(--accent-green);
+            outline: none;
+        }
+        
+        .email-template-section textarea {
+            min-height: 120px; 
+            resize: vertical;
+        }
+        .email-template-section small {
+            color: var(--dark-text-secondary);
+        }
+
         .controls button, .controls label.button-like {
             padding: 10px 15px;
             color: white;
@@ -110,7 +146,7 @@
         }
 
         .controls button#resetData,
-        .controls button#editMyInfo, /* Kept for potential future use, though name/location less critical without email */
+        .controls button#editMyInfo,
         .controls button#showGuideBtn {
             background-color: var(--utility-button-bg);
         }
@@ -144,7 +180,7 @@
             overflow-wrap: break-word;
         }
         
-        td a { /* For phone links */
+        td a { 
             word-break: break-all;
             overflow-wrap: break-word; 
         }
@@ -158,14 +194,16 @@
             z-index: 1;
         }
         
-        /* Adjusted column widths for 7 columns (Called, District, Representative, Party, Phone, Email, Response Summary) */
-        th:nth-child(1), td:nth-child(1) { width: 8%; }  /* Called */
-        th:nth-child(2), td:nth-child(2) { width: 8%; }  /* District */
-        th:nth-child(3), td:nth-child(3) { width: 20%; } /* Representative */
-        th:nth-child(4), td:nth-child(4) { width: 7%; }  /* Party */
-        th:nth-child(5), td:nth-child(5) { width: 15%; } /* Phone */
-        th:nth-child(6), td:nth-child(6) { width: 22%; } /* Email */
-        th:nth-child(7), td:nth-child(7) { width: 20%; } /* Response Summary */
+        /* Adjusted column widths for 8 columns */
+        th:nth-child(1), td:nth-child(1) { width: 7%; }  /* Called */
+        th:nth-child(2), td:nth-child(2) { width: 7%; }  /* Emailed */
+        th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
+        th:nth-child(4), td:nth-child(4) { width: 18%; } /* Representative */
+        th:nth-child(5), td:nth-child(5) { width: 7%; }  /* Party */
+        th:nth-child(6), td:nth-child(6) { width: 20%; } /* Email */
+        th:nth-child(7), td:nth-child(7) { width: 13%; } /* Phone */
+        th:nth-child(8), td:nth-child(8) { width: 20%; } /* Response Summary */
+
 
         tr:nth-child(even) {
             background-color: var(--dark-bg-tertiary); 
@@ -195,12 +233,14 @@
             margin-top: 30px;
             text-align: right;
         }
-         .footer-actions button { /* Only saveAllChanges button remains, primarily for future-proofing if templates return */
+         .footer-actions button {
             margin-left: 10px;
+         }
+         .footer-actions button#saveAllChanges {
             background-color: var(--accent-green);
             color: white; 
          }
-         .footer-actions button:hover {
+         .footer-actions button#saveAllChanges:hover {
             background-color: var(--accent-green-darker);
          }
 
@@ -347,14 +387,15 @@
             }
 
             th, td { padding: 8px 4px; font-size: 0.7em; } 
-            /* 7 columns, all visible */
-            th:nth-child(1), td:nth-child(1) { width: 10%; } /* Called */
-            th:nth-child(2), td:nth-child(2) { width: 10%; } /* District */
-            th:nth-child(3), td:nth-child(3) { width: 20%; } /* Rep */
-            th:nth-child(4), td:nth-child(4) { width: 8%; }  /* Party */
-            th:nth-child(5), td:nth-child(5) { width: 15%; } /* Phone */
-            th:nth-child(6), td:nth-child(6) { width: 22%; } /* Email */
-            th:nth-child(7), td:nth-child(7) { width: 15%; } /* Summary */
+            /* Adjusted for 8 columns */
+            th:nth-child(1), td:nth-child(1) { width: 8%; }  /* Called */
+            th:nth-child(2), td:nth-child(2) { width: 8%; }  /* Emailed */
+            th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
+            th:nth-child(4), td:nth-child(4) { width: 18%; } /* Rep */
+            th:nth-child(5), td:nth-child(5) { width: 7%; }  /* Party */
+            th:nth-child(6), td:nth-child(6) { width: 13%; } /* Phone */
+            th:nth-child(7), td:nth-child(7) { width: 20%; } /* Email */
+            th:nth-child(8), td:nth-child(8) { width: 18%; } /* Summary */
 
             .modal-content { width: 90%; margin: 10% auto; padding: 20px; }
         }
@@ -365,16 +406,17 @@
 
             th, td { padding: 6px 3px; font-size: 0.60em; } 
 
-            th:nth-child(2), td:nth-child(2) { display: none; } /* Hide District */
-            th:nth-child(4), td:nth-child(4) { display: none; } /* Hide Party */
-            /* 5 columns visible: Called, Rep, Phone, Email, Summary */
+            th:nth-child(3), td:nth-child(3) { display: none; } /* Hide District */
+            th:nth-child(5), td:nth-child(5) { display: none; } /* Hide Party */
+            /* 6 columns visible: Called, Emailed, Rep, Phone, Email, Summary */
             th:nth-child(1), td:nth-child(1) { width: 10%; } /* Called */
-            /* Child 2 (District) is hidden */
-            th:nth-child(3), td:nth-child(3) { width: 25%; } /* Rep */
-            /* Child 4 (Party) is hidden */
-            th:nth-child(5), td:nth-child(5) { width: 20%; } /* Phone */
-            th:nth-child(6), td:nth-child(6) { width: 25%; } /* Email */
-            th:nth-child(7), td:nth-child(7) { width: 20%; } /* Summary */
+            th:nth-child(2), td:nth-child(2) { width: 10%; } /* Emailed */
+            /* Child 3 (District) is hidden */
+            th:nth-child(4), td:nth-child(4) { width: 25%; } /* Rep */
+            /* Child 5 (Party) is hidden */
+            th:nth-child(6), td:nth-child(6) { width: 15%; } /* Phone */
+            th:nth-child(7), td:nth-child(7) { width: 20%; } /* Email */
+            th:nth-child(8), td:nth-child(8) { width: 20%; } /* Summary */
          }
     </style>
 </head>
@@ -383,7 +425,7 @@
         <header>
             <h1>SB3 Stakeholders Call Tracker</h1>
             <span class="version-number">v1.0</span>
-            <p>Track your calls to representatives, their responses, and your notes.</p>
+            <p>Track your calls and emails to representatives, their responses, and your notes.</p>
             <div class="report-problem-link">
                 <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.0">Report Problems</a>
             </div>
@@ -392,10 +434,19 @@
         <div class="controls">
             <button id="showGuideBtn">User Guide</button> 
             <button id="exportData">Export Progress</button>
-            <label for="importFile" class="button-like" role="button" aria-label="Import Progress">Import Progress</label>
+            <label for="importFile" class="button-like">Import Progress</label>
             <input type="file" id="importFile" accept=".json">
             <button id="editMyInfo">Edit My Info</button>
             <button id="resetData">Reset All Data</button>
+        </div>
+
+        <div class="email-template-section">
+            <label for="emailSubjectTemplate">Email Subject Template:</label>
+            <input type="text" id="emailSubjectTemplate">
+            
+            <label for="emailBodyTemplate" style="margin-top:10px;">Email Body Template:</label>
+            <textarea id="emailBodyTemplate"></textarea>
+            <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template.</em></small>
         </div>
 
         <div class="table-container">
@@ -403,11 +454,12 @@
                 <thead>
                     <tr>
                         <th>Called</th>
+                        <th>Emailed</th>
                         <th>District</th>
                         <th>Representative</th>
                         <th>Party</th>
-                        <th>Phone</th>
                         <th>Email</th>
+                        <th>Phone</th>
                         <th>Response Summary</th>
                     </tr>
                 </thead>
@@ -417,32 +469,31 @@
             </table>
         </div>
          <div class="footer-actions">
-            <button id="saveAllChanges" class="button-like">Save Data Manually</button>
+            <button id="saveAllChanges" class="button-like">Save All Changes</button>
         </div>
     </div>
 
     <!-- Onboarding Modal -->
-    <div id="onboardingModal" class="modal" role="dialog" aria-labelledby="onboardingModalTitle" aria-describedby="onboardingModalDesc">
+    <div id="onboardingModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeOnboardingModal" role="button" aria-label="Close welcome dialog">×</span>
-            <h2 id="onboardingModalTitle">Welcome! Quick Setup</h2>
-            <p id="onboardingModalDesc">This info is stored locally and helps if email features are added later.</p>
-            <label for="onboardingUserName">Your Full Name (Optional):</label>
+            <span class="close-button" id="closeOnboardingModal">×</span>
+            <h2>Welcome! Let's Get You Set Up</h2>
+            <p>Please provide a few details to personalize your email templates. This information is stored locally in your browser.</p>
+            <label for="onboardingUserName">Your Full Name (for email signature):</label>
             <input type="text" id="onboardingUserName" placeholder="e.g., Jane Doe">
             
-            <label for="onboardingUserLocation">Your City/Town (Optional):</label>
-            <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX">
+            <label for="onboardingUserLocation">Your City/Town (e.g., "Austin resident"):</label>
+            <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX or concerned Texan">
             
             <button id="saveOnboardingInfo">Save and Continue</button>
         </div>
     </div>
 
     <!-- Response Modal -->
-    <div id="responseModal" class="modal" role="dialog" aria-labelledby="responseModalTitleText" aria-describedby="responseModalDesc">
+    <div id="responseModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeResponseModal" role="button" aria-label="Close response dialog">×</span>
-            <h3 id="responseModalTitleText">Log Call Response</h3>
-            <p id="responseModalDesc" class="sr-only">Log the response and any notes for the call.</p> 
+            <span class="close-button" id="closeResponseModal">×</span>
+            <h3 id="responseModalTitle">Log Call Response</h3>
             <input type="hidden" id="currentRepIdForModal">
 
             <label for="modalResponseSelect">Response:</label>
@@ -458,22 +509,30 @@
         </div>
     </div>
 
-    <!-- User Guide Modal (Needs update to remove email references) -->
-    <div id="guideModal" class="modal" role="dialog" aria-labelledby="guideModalTitle" aria-describedby="guideModalDesc">
+    <!-- User Guide Modal -->
+    <div id="guideModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeGuideModal" role="button" aria-label="Close user guide">×</span>
-            <h2 id="guideModalTitle">SB3 Call Tracker - Easy Mobile Guide (v1.0)</h2>
-            <p id="guideModalDesc">This tool is like a digital checklist to help you contact lawmakers about SB3 using your phone. It remembers what you've done.</p>
+            <span class="close-button" id="closeGuideModal">×</span>
+            <h2>SB3 Call Tracker - Easy Mobile Guide (v1.0)</h2>
+            <p>This tool is like a digital checklist to help you contact lawmakers about SB3 using your phone. It remembers what you've done.</p>
 
-            <h4>1. First Time Opening? (Optional Setup):</h4>
+            <h4>1. First Time Opening? (Quick Setup):</h4>
             <ul>
-                <li>A "Welcome" box may pop up. Filling in your Name and City/Town is optional as email features are currently disabled.</li>
-                <li>Tap "Save and Continue."</li>
-                <li><em>To change this info later, Tap "Edit My Info."</em></li>
+                <li>A "Welcome" box will pop up.</li>
+                <li>Type in your <strong>Full Name</strong> (so emails can have your signature).</li>
+                <li>Type in your <strong>City/Town</strong> (like "Austin resident" or just "Texas").</li>
+                <li>Tap "Save and Continue." That's it for setup!</li>
+                <li><em>Need to change your name/town later? Tap "Edit My Info."</em></li>
             </ul>
 
-            <h4>2. Contacting Lawmakers (The List):</h4>
-            <p>You'll see a list of lawmakers. Here's how to track your calls:</p>
+            <h4>2. Sending Emails (Easy Mode):</h4>
+            <ul>
+                <li>The tool has a pre-written email ready for you.</li>
+                <li>If you want to peek or change it, look for "Email Subject Template" and "Email Body Template" on the main screen. (Most people won't need to touch this).</li>
+            </ul>
+
+            <h4>3. Contacting Lawmakers (The List):</h4>
+            <p>You'll see a list of lawmakers. Here's how to track your contacts:</p>
             <ul>
                 <li><strong>To Call a Lawmaker:</strong>
                     <ul>
@@ -488,19 +547,26 @@
                         <li>Tap "Save Response."</li>
                     </ul>
                 </li>
+                <li><strong>To Email a Lawmaker:</strong>
+                    <ul>
+                        <li>Find their name and tap their <strong>Email Address</strong>. Your phone's email app should open with the email mostly written for you!</li>
+                        <li>Just check it over and hit "Send" in your email app.</li>
+                        <li>The tool will automatically check the box in the <strong>"Emailed"</strong> column for you.</li>
+                    </ul>
+                </li>
                 <li><strong>Keeping Track:</strong>
                     <ul>
-                        <li>The <strong>"Called"</strong> box shows who you've contacted.</li>
+                        <li>The <strong>"Called"</strong> and <strong>"Emailed"</strong> boxes show who you've contacted.</li>
                         <li>The "Response Summary" column shows what happened on your calls.</li>
                     </ul>
                 </li>
             </ul>
 
-            <h4>3. Your Progress:</h4>
+            <h4>4. Your Progress:</h4>
             <ul>
-                <li><strong>It Saves Automatically!</strong> When you check boxes or save call notes, the tool remembers in your browser.</li>
-                <li><strong>"Save Data Manually" Button:</strong> Tap this green button at the bottom as an extra save, though most changes save as you make them.</li>
-                <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup or to share.</li>
+                <li><strong>It Saves Automatically!</strong> When you check boxes or save call notes, the tool remembers.</li>
+                <li><strong>"Save All Changes" Button:</strong> If you <em>do</em> change the email templates, tap this green button at the bottom to save those specific changes.</li>
+                <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup.</li>
                 <li><strong>Import Progress:</strong> Lets you load a saved copy (an exported file) back into the tool.</li>
                 <li><strong>Reset All Data:</strong> Wipes everything clean and starts over. <strong>Be careful, it can't be undone!</strong></li>
             </ul>
@@ -516,20 +582,20 @@
             <button id="dismissGuideModal" class="button-outline" style="margin-top: 20px;">Dismiss</button>
         </div>
     </div>
-    <style>.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }</style>
+
     <script>
         // Global error handler
         window.onerror = function(message, source, lineno, colno, error) {
             const errorDetails = `CRITICAL SCRIPT ERROR:\nMessage: ${message}\nSource: ${source}\nLine: ${lineno}\nColumn: ${colno}\nError: ${error ? JSON.stringify(error) : 'N/A'}`;
             alert(errorDetails);
             console.error("GLOBAL ERROR:", message, source, lineno, colno, error);
-            return true; 
+            return true; // Suppress default browser error handling
         };
 
-        try { 
+        try { // Wrap DOMContentLoaded setup
             document.addEventListener('DOMContentLoaded', function() {
                 console.log("DOMContentLoaded event fired.");
-                // --- NEW DATA ---
+                // --- DATA (Representative List) ---
                 const initialRepresentativesData_JSON = [
                   {
                     "representative_name": "ALLEN, Alma",
@@ -609,21 +675,19 @@
                     "email": "chris.turner@house.texas.gov"
                   }
                 ];
-
-                // Transform new data into the structure the tool expects
                 const initialRepresentativesData = initialRepresentativesData_JSON.map((rep, index) => ({
-                    id: `rep-${index}-${rep.district}`, // Create a unique ID
+                    id: `rep-${index}-${rep.district}`,
                     district: rep.district,
                     name: rep.representative_name,
                     phone: rep.phone_number,
                     party: rep.party,
                     email: rep.email
                 }));
+                let representatives = []; // Holds the current state of representative data
+                let userFullName = '';    // User's name for email personalization
+                let userLocation = '';  // User's location for email personalization
 
-                let representatives = []; 
-                let userFullName = '';    
-                let userLocation = '';  
-
+                // --- DOM Element References ---
                 const tableBody = document.getElementById('repsTable').getElementsByTagName('tbody')[0];
                 const exportButton = document.getElementById('exportData');
                 const importFile = document.getElementById('importFile');
@@ -631,13 +695,18 @@
                 const saveAllButton = document.getElementById('saveAllChanges');
                 const editMyInfoButton = document.getElementById('editMyInfo');
                 const showGuideButton = document.getElementById('showGuideBtn');
+                
+                const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
+                const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
 
+                // Onboarding Modal Elements
                 const onboardingModal = document.getElementById('onboardingModal');
                 const closeOnboardingModalBtn = document.getElementById('closeOnboardingModal');
                 const onboardingUserNameInput = document.getElementById('onboardingUserName');
                 const onboardingUserLocationInput = document.getElementById('onboardingUserLocation');
                 const saveOnboardingInfoBtn = document.getElementById('saveOnboardingInfo');
 
+                // Response Modal Elements
                 const responseModal = document.getElementById('responseModal');
                 const closeResponseModalBtn = document.getElementById('closeResponseModal');
                 const responseModalTitle = document.getElementById('responseModalTitle');
@@ -647,51 +716,72 @@
                 const saveResponseModalBtn = document.getElementById('saveResponseModal');
                 const cancelResponseModalBtn = document.getElementById('cancelResponseModal');
 
+                // Guide Modal Elements
                 const guideModal = document.getElementById('guideModal');
                 const closeGuideModalBtn = document.getElementById('closeGuideModal');
                 const dismissGuideModalBtn = document.getElementById('dismissGuideModal');
 
-                // --- Modal Interaction Functions ---
-                function closeModalOnClick(modalElement) {
-                    if (modalElement) {
-                        modalElement.style.display = 'none';
-                    }
-                }
+                // --- Default Email Content ---
+                const defaultEmailSubject = "Regarding CSSB 3 & SB 3 - A Message from a Constituent";
+                const defaultEmailBody = `Dear {RepName},
 
-                function openModal(modalElement) {
-                    if (modalElement) {
-                        modalElement.style.display = 'block';
-                    }
-                }
-                
-                // --- User Info & Onboarding Logic (Kept, but less critical without email) ---
+I’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.
+
+These bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.
+
+This is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.
+
+Driving them to unregulated, illegal markets will only increase public health risks.
+
+If the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:
+
+* Restricting sales to adults age 21 and older
+* Requiring child-resistant packaging
+* Establishing retail buffer zones around schools
+
+Every $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.
+
+Thank you,
+{UserName}
+{UserLocation}`;
+
+                // --- User Info & Onboarding Logic ---
                 function loadUserInfo() {
                     userFullName = localStorage.getItem('userFullName') || '';
                     userLocation = localStorage.getItem('userLocation') || '';
                     const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
 
-                    // Onboarding is less critical now, but we can keep the mechanism
                     if (!onboardingComplete) {
-                    // onboardingModal.style.display = 'block'; // Optionally disable auto-popup
+                        onboardingModal.style.display = 'block';
                     }
                     onboardingUserNameInput.value = userFullName;
                     onboardingUserLocationInput.value = userLocation;
                 }
-                
-                function saveAndCloseOnboarding() {
+
+                closeOnboardingModalBtn.onclick = () => onboardingModal.style.display = 'none';
+                editMyInfoButton.onclick = () => {
+                    onboardingUserNameInput.value = userFullName; 
+                    onboardingUserLocationInput.value = userLocation;
+                    onboardingModal.style.display = 'block';
+                };
+                saveOnboardingInfoBtn.onclick = function() {
                     userFullName = onboardingUserNameInput.value.trim();
                     userLocation = onboardingUserLocationInput.value.trim();
-                    localStorage.setItem('userFullName', userFullName);
-                    localStorage.setItem('userLocation', userLocation);
-                    localStorage.setItem('onboardingComplete', 'true');
-                    closeModalOnClick(onboardingModal);
-                    alert('Your information has been saved (optional).');
-                }
+                    if (userFullName) { 
+                        localStorage.setItem('userFullName', userFullName);
+                        localStorage.setItem('userLocation', userLocation);
+                        localStorage.setItem('onboardingComplete', 'true');
+                        onboardingModal.style.display = 'none';
+                        alert('Your information has been saved.');
+                    } else {
+                        alert('Please enter your full name.');
+                    }
+                };
 
                 // --- Data Persistence (Local Storage) ---
                 function loadDataFromLocalStorage() {
                     console.log("loadDataFromLocalStorage called.");
-                    try { 
+                    try { // localStorage availability test
                         localStorage.setItem('__testLocalStorage', 'test');
                         localStorage.removeItem('__testLocalStorage');
                         console.log("localStorage appears to be available.");
@@ -699,33 +789,42 @@
                         alert("localStorage is not available or access is restricted. Progress will not be saved. Error: " + e.message);
                         console.error("localStorage test failed:", e);
                     }
+
                     loadUserInfo(); 
+
                     const storedData = localStorage.getItem('representativesCallData');
                     if (storedData) {
                         const parsedStoredData = JSON.parse(storedData);
                         representatives = initialRepresentativesData.map(initialRep => {
-                            const storedRep = parsedStoredData.find(s => s.id === initialRep.id);
+                            const storedRepData = parsedStoredData.find(s => s.id === initialRep.id);
                             return {
                                 ...initialRep, 
-                                called: storedRep?.called || false,
-                                response: storedRep?.response || 'not_selected',
-                                notes: storedRep?.notes || '',
-                                // party and email will be part of initialRep, so they are covered
+                                called: storedRepData?.called || false,
+                                emailed: storedRepData?.emailed || false, 
+                                response: storedRepData?.response || 'not_selected',
+                                notes: storedRepData?.notes || '',
+                                party: initialRep.party, // Ensure party from new data is used
+                                // email is already part of initialRep
                             };
                         });
                     } else {
                         representatives = initialRepresentativesData.map(rep => ({
-                            ...rep, // This will include party and email from initialRepresentativesData
+                            ...rep,
                             called: false,
+                            emailed: false, 
                             response: 'not_selected',
                             notes: ''
                         }));
                     }
+                    emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
+                    emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
                 }
 
                 function saveDataToLocalStorage() {
                     try {
                         localStorage.setItem('representativesCallData', JSON.stringify(representatives));
+                        localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
+                        localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
                         console.log("Data saved to local storage.");
                     } catch (e) {
                         console.error("Error saving data to localStorage:", e);
@@ -733,6 +832,7 @@
                     }
                 }
                 
+                // --- UI Rendering & Event Handlers ---
                 const responseOptions = ['', 'For', 'Against', 'Not Advised/Neutral', 'No Stance Yet', 'Left Voicemail', 'Other'];
                 responseOptions.forEach(val => {
                     const option = document.createElement('option');
@@ -761,21 +861,34 @@
                         calledCheckbox.addEventListener('change', handleCalledChange);
                         cellCalled.appendChild(calledCheckbox);
 
+                        const cellEmailed = row.insertCell();
+                        const emailedCheckbox = document.createElement('input');
+                        emailedCheckbox.type = 'checkbox';
+                        emailedCheckbox.checked = !!rep.emailed; 
+                        emailedCheckbox.dataset.repId = rep.id;
+                        emailedCheckbox.addEventListener('change', handleEmailedChange);
+                        cellEmailed.appendChild(emailedCheckbox);
+
                         row.insertCell().textContent = rep.district;
-                        row.insertCell().textContent = rep.name; 
-                        row.insertCell().textContent = rep.party;
+                        row.insertCell().textContent = rep.name;
+                        row.insertCell().textContent = rep.party; // Add party cell
                         
+                        const cellEmail = row.insertCell();
+                        const emailLink = document.createElement('a');
+                        emailLink.href = "#"; 
+                        emailLink.textContent = rep.email;
+                        emailLink.dataset.email = rep.email;
+                        emailLink.dataset.repName = rep.name;
+                        emailLink.dataset.repId = rep.id; 
+                        emailLink.classList.add('email-link');
+                        emailLink.addEventListener('click', handleEmailClick);
+                        cellEmail.appendChild(emailLink);
+
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
                         phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
                         phoneLink.textContent = rep.phone;
                         cellPhone.appendChild(phoneLink);
-
-                        const cellEmail = row.insertCell();
-                        const emailLink = document.createElement('a');
-                        emailLink.href = `mailto:${rep.email}`;
-                        emailLink.textContent = rep.email;
-                        cellEmail.appendChild(emailLink);
 
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
@@ -789,6 +902,7 @@
                         let summaryText = 'N/A';
                         const selectedOptionText = responseOptions.find(opt => opt.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected') === rep.response);
                         summaryText = selectedOptionText || (rep.response !== 'not_selected' ? String(rep.response).replace(/_/g, ' ') : 'No response logged');
+                        
                         let summary = `Response: ${summaryText}`;
                         if (rep.notes) {
                             summary += `<br>Notes: ${String(rep.notes).substring(0, 35)}${String(rep.notes).length > 35 ? '...' : ''}`;
@@ -803,16 +917,19 @@
                     const repId = event.target.dataset.repId;
                     const repIndex = representatives.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
+
                     const rep = representatives[repIndex];
                     rep.called = event.target.checked;
+
                     const row = document.querySelector(`tr[data-id="${repId}"]`);
                     const summaryCell = row ? row.cells[row.cells.length -1] : null; 
-                    if (rep.called) {
+
+                    if (rep.called) { 
                         currentRepIdForModalInput.value = rep.id;
                         responseModalTitle.textContent = `Log Response: ${rep.name}`;
                         modalResponseSelect.value = rep.response || 'not_selected';
                         modalNotesTextarea.value = rep.notes || '';
-                        openModal(responseModal);
+                        responseModal.style.display = 'block';
                     } else { 
                         rep.response = 'not_selected';
                         rep.notes = '';
@@ -820,8 +937,61 @@
                     }
                     saveDataToLocalStorage();
                 }
+
+                function handleEmailedChange(event) {
+                    const repId = event.target.dataset.repId;
+                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    if (repIndex === -1) return;
+                    representatives[repIndex].emailed = event.target.checked;
+                    saveDataToLocalStorage();
+                }
                 
-                function saveAndCloseResponseModal() {
+                function handleEmailClick(event) {
+                    console.log("handleEmailClick triggered.");
+                    event.preventDefault(); 
+                    const targetLink = event.currentTarget; 
+                    const recipientEmail = targetLink.dataset.email;
+                    const repName = targetLink.dataset.repName;
+                    const repId = targetLink.dataset.repId; 
+                    console.log("Rep ID from dataset:", repId);
+
+                    if (!recipientEmail) { console.error("Email address missing."); alert("Error: Rep email missing."); return; }
+                    if (!emailSubjectTemplateInput || !emailBodyTemplateInput) { console.error("Template fields missing."); alert("Error: Email template fields missing."); return; }
+
+                    let subject = emailSubjectTemplateInput.value || "";
+                    let body = emailBodyTemplateInput.value || "";
+                    
+                    const repNameStr = repName || ""; 
+                    const userNameStr = userFullName || "[Your Name]";
+                    const userLocationStr = userLocation || "[Your Location]";
+
+                    try {
+                        subject = subject.replace(/{RepName}/g, repNameStr).replace(/{UserName}/g, userNameStr).replace(/{UserLocation}/g, userLocationStr);
+                        body = body.replace(/{RepName}/g, repNameStr).replace(/{UserName}/g, userNameStr).replace(/{UserLocation}/g, userLocationStr);
+                    } catch (e) { console.error("Placeholder replacement error:", e); alert("Error preparing email template."); return; }
+                    
+                    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    console.log("Final mailtoLink:", mailtoLink);
+                    
+                    try {
+                        window.location.href = mailtoLink;
+                        if (repId) {
+                            const repIndex = representatives.findIndex(r => r.id === repId);
+                            if (repIndex !== -1 && !representatives[repIndex].emailed) {
+                                representatives[repIndex].emailed = true;
+                                const emailedCheckboxInRow = document.querySelector(`tr[data-id="${repId}"] td:nth-child(2) input[type="checkbox"]`);
+                                if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
+                                saveDataToLocalStorage();
+                                console.log(`Marked rep ${repId} as emailed.`);
+                            }
+                        } else { console.warn("repId not found on email link, cannot auto-check 'emailed'.");}
+                    } catch (e) { console.error("Error opening mailto link:", e); alert("Could not open email client."); }
+                }
+
+                // --- Modal Control ---
+                closeResponseModalBtn.onclick = () => responseModal.style.display = 'none';
+                cancelResponseModalBtn.onclick = () => responseModal.style.display = 'none';
+                saveResponseModalBtn.onclick = function() {
                     const repId = currentRepIdForModalInput.value;
                     if (!repId) return;
                     const repIndex = representatives.findIndex(r => r.id === repId);
@@ -830,50 +1000,31 @@
                     representatives[repIndex].notes = modalNotesTextarea.value;
                     const row = document.querySelector(`tr[data-id="${repId}"]`);
                     if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], representatives[repIndex]);
-                    closeModalOnClick(responseModal);
+                    responseModal.style.display = 'none';
                     saveDataToLocalStorage();
-                }
-
-                // --- Event Listener Setup ---
-                function setupEventListeners() {
-                    closeOnboardingModalBtn.onclick = () => closeModalOnClick(onboardingModal);
-                    editMyInfoButton.onclick = () => {
-                        onboardingUserNameInput.value = userFullName; 
-                        onboardingUserLocationInput.value = userLocation;
-                        openModal(onboardingModal);
-                    };
-                    saveOnboardingInfoBtn.onclick = saveAndCloseOnboarding;
-
-                    closeResponseModalBtn.onclick = () => closeModalOnClick(responseModal);
-                    cancelResponseModalBtn.onclick = () => closeModalOnClick(responseModal);
-                    saveResponseModalBtn.onclick = saveAndCloseResponseModal;
+                };
                 
-                    showGuideButton.onclick = () => openModal(guideModal);
-                    closeGuideModalBtn.onclick = () => closeModalOnClick(guideModal);
-                    dismissGuideModalBtn.onclick = () => closeModalOnClick(guideModal);
+                showGuideButton.onclick = () => guideModal.style.display = 'block';
+                closeGuideModalBtn.onclick = () => guideModal.style.display = 'none';
+                dismissGuideModalBtn.onclick = () => guideModal.style.display = 'none';
 
-                    window.onclick = function(event) {
-                        if (event.target == responseModal) closeModalOnClick(responseModal);
-                        if (event.target == onboardingModal) closeModalOnClick(onboardingModal);
-                        if (event.target == guideModal) closeModalOnClick(guideModal);
-                    };
+                window.onclick = function(event) {
+                    if (event.target == responseModal) responseModal.style.display = 'none';
+                    if (event.target == onboardingModal) onboardingModal.style.display = 'none';
+                    if (event.target == guideModal) guideModal.style.display = 'none';
+                };
 
-                    exportButton.addEventListener('click', exportData);
-                    importFile.addEventListener('change', importData);
-                    resetButton.addEventListener('click', resetAllData);
-                    saveAllButton.addEventListener('click', manualSaveData);
-                }
-
-                // --- Data Handling Functions ---
-                function exportData() {
+                // --- Data Management Buttons ---
+                exportButton.addEventListener('click', () => {
                     saveDataToLocalStorage(); 
-                    const dataToExport = {
+                    const dataStr = JSON.stringify({
                         representatives: representatives,
+                        emailSubject: emailSubjectTemplateInput.value,
+                        emailBody: emailBodyTemplateInput.value,
                         userFullName: userFullName,
                         userLocation: userLocation,
                         onboardingComplete: localStorage.getItem('onboardingComplete') === 'true'
-                    };
-                    const dataStr = JSON.stringify(dataToExport, null, 2);
+                    }, null, 2);
                     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                     const exportFileDefaultName = 'sb3_call_tracker_progress.json';
                     let linkElement = document.createElement('a');
@@ -881,9 +1032,9 @@
                     linkElement.setAttribute('download', exportFileDefaultName);
                     linkElement.click();
                     linkElement.remove();
-                }
+                });
 
-                function importData(event) {
+                importFile.addEventListener('change', (event) => {
                     const file = event.target.files[0];
                     if (file) {
                         const reader = new FileReader();
@@ -891,18 +1042,20 @@
                             try {
                                 const importedData = JSON.parse(e.target.result);
                                 if (importedData.representatives && Array.isArray(importedData.representatives)) {
-                                    representatives = initialRepresentativesData.map(initialRep => {
+                                    representatives = initialRepresentativesData.map(initialRep => { // Use initialRepresentativesData for structure
                                         const importedRepData = importedData.representatives.find(ir => ir.id === initialRep.id);
                                         return {
-                                            ...initialRep, // Includes party and email from new structure
+                                            ...initialRep, // Start with new structure (includes party)
                                             called: importedRepData?.called || false,
+                                            emailed: importedRepData?.emailed || false, // Ensure emailed is handled
                                             response: importedRepData?.response || 'not_selected',
                                             notes: importedRepData?.notes || ''
-                                            // Ensure imported party/email are used if present, otherwise defaults from initialRep
-                                            // party: importedRepData?.party || initialRep.party, 
-                                            // email: importedRepData?.email || initialRep.email
+                                            // Party and email will come from initialRep if not in importedRepData,
+                                            // or from importedRepData if present (though new data structure should always have them)
                                         };
                                     });
+                                    emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
+                                    emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
                                     userFullName = importedData.userFullName || '';
                                     userLocation = importedData.userLocation || '';
                                     onboardingUserNameInput.value = userFullName; 
@@ -926,37 +1079,32 @@
                         };
                         reader.readAsText(file);
                     }
-                } // Added closing curly brace for importData function
+                });
                 
-                function resetAllData() { // Changed to a named function
+                resetButton.addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
                         localStorage.clear(); 
                         loadDataFromLocalStorage(); 
                         renderTable();
                         alert('All data has been reset.');
                     }
-                }
+                });
 
-                function manualSaveData() {
+                saveAllButton.addEventListener('click', () => {
                     saveDataToLocalStorage();
-                    alert('Data saved manually!');
-                }
+                    alert('All changes saved!');
+                });
 
-                // --- Initialization ---
-                function initializeApp() {
-                    console.log("Attempting initial load and render...");
-                    try {
-                        loadDataFromLocalStorage(); 
-                        renderTable();
-                        setupEventListeners(); // Call to setup event listeners
-                        console.log("Initial load, render, and event listener setup successful.");
-                    } catch (e) {
-                        alert("Error during app initialization: " + e.message + "\nSee console for details.");
-                        console.error("Error during app initialization:", e);
-                    }
+                // --- Initial Load ---
+                console.log("Attempting initial load and render...");
+                try {
+                    loadDataFromLocalStorage(); 
+                    renderTable();
+                    console.log("Initial load and render successful.");
+                } catch (e) {
+                    alert("Error during initial load/render: " + e.message + "\nSee console for details.");
+                    console.error("Error during initial load/render:", e);
                 }
-                
-                initializeApp(); // Initialize the application
             });
         } catch (e) {
             alert("CRITICAL ERROR SETTING UP DOMContentLoaded: " + e.message);
