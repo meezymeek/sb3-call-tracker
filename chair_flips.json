@@ -1,0 +1,37 @@
+[
+  {
+    "representative_name": "KING, Ken",
+    "phone_number": "(512) 463-0736",
+    "district": "88",
+    "party": "R",
+    "email": "ken.king@house.texas.gov"
+  },
+  {
+    "representative_name": "ISAAC, Carrie",
+    "phone_number": "(512) 463-0325",
+    "district": "73",
+    "party": "R",
+    "email": "carrie.isaac@house.texas.gov"
+  },
+  {
+    "representative_name": "PHELAN, Dade",
+    "phone_number": "(512) 463-0706",
+    "district": "21",
+    "party": "R",
+    "email": "dade.phelan@house.texas.gov"
+  },
+  {
+    "representative_name": "SIMMONS, Lauren A.",
+    "phone_number": "(512) 463-0518",
+    "district": "146",
+    "party": "D",
+    "email": "lauren.simmons@house.texas.gov"
+  },
+  {
+    "representative_name": "CUNNINGHAM, Charles",
+    "phone_number": "(512) 463-0520",
+    "district": "127",
+    "party": "R",
+    "email": "charles.cunningham@house.texas.gov"
+  }
+]

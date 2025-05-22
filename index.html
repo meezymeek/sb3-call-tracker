@@ -162,12 +162,13 @@
 
         .table-container {
             overflow-x: auto; 
+            margin-bottom: 20px; /* Add some space between tables */
         }
 
         table {
             width: 100%; 
             border-collapse: collapse;
-            margin-bottom: 25px;
+            /* margin-bottom removed to be controlled by table-container */
             table-layout: fixed; 
         }
 
@@ -194,7 +195,7 @@
             z-index: 1;
         }
         
-        /* Adjusted column widths for 8 columns */
+        /* Column widths for 8 columns */
         th:nth-child(1), td:nth-child(1) { width: 7%; }  /* Called */
         th:nth-child(2), td:nth-child(2) { width: 7%; }  /* Emailed */
         th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
@@ -449,8 +450,9 @@
             <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template.</em></small>
         </div>
 
+        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">YAE Dems List</h2>
         <div class="table-container">
-            <table id="repsTable">
+            <table id="repsTableYaeDems">
                 <thead>
                     <tr>
                         <th>Called</th>
@@ -464,10 +466,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Rows will be inserted here by JavaScript -->
+                    <!-- Rows for YAE Dems will be inserted here by JavaScript -->
                 </tbody>
             </table>
         </div>
+
+        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Chair Flips Target List</h2>
+        <div class="table-container">
+            <table id="repsTableChairFlips">
+                <thead>
+                    <tr>
+                        <th>Called</th>
+                        <th>Emailed</th>
+                        <th>District</th>
+                        <th>Representative</th>
+                        <th>Party</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Response Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows for chair flips will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+
          <div class="footer-actions">
             <button id="saveAllChanges" class="button-like">Save All Changes</button>
         </div>
@@ -495,6 +519,8 @@
             <span class="close-button" id="closeResponseModal">×</span>
             <h3 id="responseModalTitle">Log Call Response</h3>
             <input type="hidden" id="currentRepIdForModal">
+            <input type="hidden" id="currentListIdentifierForModal">
+
 
             <label for="modalResponseSelect">Response:</label>
             <select id="modalResponseSelect">
@@ -595,15 +621,18 @@
         try { // Wrap DOMContentLoaded setup
             document.addEventListener('DOMContentLoaded', function() {
                 console.log("DOMContentLoaded event fired.");
-                // --- DATA (Representative List) ---
-                // initialRepresentativesData_JSON is now fetched from an external file.
-                let initialRepresentativesData = []; // Will be populated after fetching
-                let representatives = []; // Holds the current state of representative data
-                let userFullName = '';    // User's name for email personalization
-                let userLocation = '';  // User's location for email personalization
+                
+                let initialYaeDemsData = [];
+                let representativesYaeDems = [];
+                let initialChairFlipsData = [];
+                let representativesChairFlips = [];
+                
+                let userFullName = '';    
+                let userLocation = '';
 
                 // --- DOM Element References ---
-                const tableBody = document.getElementById('repsTable').getElementsByTagName('tbody')[0];
+                const yaeDemsTableBody = document.getElementById('repsTableYaeDems').getElementsByTagName('tbody')[0];
+                const chairFlipsTableBody = document.getElementById('repsTableChairFlips').getElementsByTagName('tbody')[0];
                 const exportButton = document.getElementById('exportData');
                 const importFile = document.getElementById('importFile');
                 const resetButton = document.getElementById('resetData');
@@ -614,71 +643,38 @@
                 const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
                 const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
 
-                // Onboarding Modal Elements
                 const onboardingModal = document.getElementById('onboardingModal');
                 const closeOnboardingModalBtn = document.getElementById('closeOnboardingModal');
                 const onboardingUserNameInput = document.getElementById('onboardingUserName');
                 const onboardingUserLocationInput = document.getElementById('onboardingUserLocation');
                 const saveOnboardingInfoBtn = document.getElementById('saveOnboardingInfo');
 
-                // Response Modal Elements
                 const responseModal = document.getElementById('responseModal');
                 const closeResponseModalBtn = document.getElementById('closeResponseModal');
                 const responseModalTitle = document.getElementById('responseModalTitle');
                 const currentRepIdForModalInput = document.getElementById('currentRepIdForModal');
+                const currentListIdentifierForModalInput = document.getElementById('currentListIdentifierForModal');
                 const modalResponseSelect = document.getElementById('modalResponseSelect');
                 const modalNotesTextarea = document.getElementById('modalNotesTextarea');
                 const saveResponseModalBtn = document.getElementById('saveResponseModal');
                 const cancelResponseModalBtn = document.getElementById('cancelResponseModal');
 
-                // Guide Modal Elements
                 const guideModal = document.getElementById('guideModal');
                 const closeGuideModalBtn = document.getElementById('closeGuideModal');
                 const dismissGuideModalBtn = document.getElementById('dismissGuideModal');
 
-                // --- Default Email Content ---
                 const defaultEmailSubject = "Regarding CSSB 3 & SB 3 - A Message from a Constituent";
-                const defaultEmailBody = `Dear {RepName},
+                const defaultEmailBody = `Dear {RepName},\n\nI’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.\n\nThese bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.\n\nThis is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.\n\nDriving them to unregulated, illegal markets will only increase public health risks.\n\nIf the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:\n\n* Restricting sales to adults age 21 and older\n* Requiring child-resistant packaging\n* Establishing retail buffer zones around schools\n\nEvery $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.\n\nThank you,\n{UserName}\n{UserLocation}`;
 
-I’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.
-
-These bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.
-
-This is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.
-
-Driving them to unregulated, illegal markets will only increase public health risks.
-
-If the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:
-
-* Restricting sales to adults age 21 and older
-* Requiring child-resistant packaging
-* Establishing retail buffer zones around schools
-
-Every $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.
-
-Thank you,
-{UserName}
-{UserLocation}`;
-
-                // --- User Info & Onboarding Logic ---
                 function loadUserInfo() {
                     userFullName = localStorage.getItem('userFullName') || '';
                     userLocation = localStorage.getItem('userLocation') || '';
                     const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-
-                    if (!onboardingComplete) {
-                        onboardingModal.style.display = 'block';
-                    }
+                    if (!onboardingComplete) onboardingModal.style.display = 'block';
                     onboardingUserNameInput.value = userFullName;
                     onboardingUserLocationInput.value = userLocation;
                 }
 
-                closeOnboardingModalBtn.onclick = () => onboardingModal.style.display = 'none';
-                editMyInfoButton.onclick = () => {
-                    onboardingUserNameInput.value = userFullName; 
-                    onboardingUserLocationInput.value = userLocation;
-                    onboardingModal.style.display = 'block';
-                };
                 saveOnboardingInfoBtn.onclick = function() {
                     userFullName = onboardingUserNameInput.value.trim();
                     userLocation = onboardingUserLocationInput.value.trim();
@@ -689,91 +685,67 @@ Thank you,
                         onboardingModal.style.display = 'none';
                         alert('Your information has been saved.');
                     } else {
-                        alert('Please enter your full name.');
+                        alert('Please enter your full name for email personalization.');
                     }
                 };
-
-                // --- Data Fetching ---
-                async function fetchInitialData(filePath) {
+                
+                async function fetchAndProcessData(filePath, listIdentifier) {
                     try {
                         const response = await fetch(filePath);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
                         const jsonData = await response.json();
                         return jsonData.map((rep, index) => ({
-                            id: `rep-${index}-${rep.district}`,
+                            id: `${listIdentifier}-${index}-${rep.district}`, // Ensure unique IDs across lists
                             district: rep.district,
                             name: rep.representative_name,
                             phone: rep.phone_number,
                             party: rep.party,
-                            email: rep.email
+                            email: rep.email,
+                            list: listIdentifier // Store which list this rep belongs to
                         }));
                     } catch (error) {
-                        console.error("Error fetching initial representative data:", error);
-                        alert(`Error loading representative data from ${filePath}. Please check the file and console for details.`);
-                        return []; // Return empty array on error
+                        console.error(`Error fetching initial data for ${listIdentifier}:`, error);
+                        alert(`Error loading data from ${filePath}.`);
+                        return [];
                     }
                 }
 
-                // --- Data Persistence (Local Storage) ---
-                function loadDataFromLocalStorage() { // Will be called AFTER initialData is fetched
-                    console.log("loadDataFromLocalStorage called.");
-                    try { 
-                        localStorage.setItem('__testLocalStorage', 'test');
-                        localStorage.removeItem('__testLocalStorage');
-                        console.log("localStorage appears to be available.");
-                    } catch (e) {
-                        alert("localStorage is not available or access is restricted. Progress will not be saved. Error: " + e.message);
-                        console.error("localStorage test failed:", e);
-                    }
-
-                    loadUserInfo(); 
-
-                    const storedData = localStorage.getItem('representativesCallData');
-                    if (storedData && initialRepresentativesData.length > 0) { // Ensure initialData is populated
-                        const parsedStoredData = JSON.parse(storedData);
-                        representatives = initialRepresentativesData.map(initialRep => {
-                            const storedRepData = parsedStoredData.find(s => s.id === initialRep.id);
-                            return {
-                                ...initialRep, 
-                                called: storedRepData?.called || false,
-                                emailed: storedRepData?.emailed || false, 
-                                response: storedRepData?.response || 'not_selected',
-                                notes: storedRepData?.notes || ''
-                                // party and email are already part of initialRep from the fetched data
-                            };
-                        });
-                    } else if (initialRepresentativesData.length > 0) { // If no stored data, use fetched initialData
-                        representatives = initialRepresentativesData.map(rep => ({
-                            ...rep,
-                            called: false,
-                            emailed: false, 
-                            response: 'not_selected',
-                            notes: ''
-                        }));
-                    } else {
-                        // If initialRepresentativesData is still empty (fetch failed or not run yet),
-                        // representatives will remain empty. renderTable should handle this.
-                        representatives = [];
-                    }
+                function loadListsFromLocalStorage() {
+                    loadUserInfo();
                     emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
                     emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
+
+                    const processStoredList = (storageKey, initialData) => {
+                        const storedData = localStorage.getItem(storageKey);
+                        if (storedData && initialData.length > 0) {
+                            const parsedStoredData = JSON.parse(storedData);
+                            return initialData.map(initialRep => {
+                                const storedRepData = parsedStoredData.find(s => s.id === initialRep.id);
+                                return { ...initialRep, called: storedRepData?.called || false, emailed: storedRepData?.emailed || false, response: storedRepData?.response || 'not_selected', notes: storedRepData?.notes || '' };
+                            });
+                        } else if (initialData.length > 0) {
+                            return initialData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                        }
+                        return [];
+                    };
+
+                    representativesYaeDems = processStoredList('representativesYaeDemsCallData', initialYaeDemsData);
+                    representativesChairFlips = processStoredList('representativesChairFlipsCallData', initialChairFlipsData);
                 }
 
                 function saveDataToLocalStorage() {
                     try {
-                        localStorage.setItem('representativesCallData', JSON.stringify(representatives));
+                        localStorage.setItem('representativesYaeDemsCallData', JSON.stringify(representativesYaeDems));
+                        localStorage.setItem('representativesChairFlipsCallData', JSON.stringify(representativesChairFlips));
                         localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
                         localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                        console.log("Data saved to local storage.");
+                        console.log("Data for all lists saved.");
                     } catch (e) {
                         console.error("Error saving data to localStorage:", e);
-                        alert("Could not save data. Your browser's local storage might be full or disabled.");
+                        alert("Could not save data.");
                     }
                 }
                 
-                // --- UI Rendering & Event Handlers ---
                 const responseOptions = ['', 'For', 'Against', 'Not Advised/Neutral', 'No Stance Yet', 'Left Voicemail', 'Other'];
                 responseOptions.forEach(val => {
                     const option = document.createElement('option');
@@ -782,60 +754,67 @@ Thank you,
                     modalResponseSelect.appendChild(option);
                 });
 
-                function renderTable() {
-                    console.log("renderTable called.");
-                    if (!tableBody) {
-                        console.error("Table body not found! Cannot render table.");
-                        alert("Error: Table structure missing in the HTML. Cannot display representatives.");
+                function renderTable(tableBodyElement, dataArray, listIdentifier) {
+                    if (!tableBodyElement) {
+                        console.error(`Table body for ${listIdentifier} not found!`);
                         return;
                     }
-                    tableBody.innerHTML = ''; 
-                    representatives.forEach((rep) => {
-                        const row = tableBody.insertRow();
+                    tableBodyElement.innerHTML = ''; 
+                    dataArray.forEach((rep) => {
+                        const row = tableBodyElement.insertRow();
                         row.setAttribute('data-id', rep.id);
+                        row.setAttribute('data-list', listIdentifier); // Identify which list the row belongs to
 
+                        // Called Checkbox
                         const cellCalled = row.insertCell();
                         const calledCheckbox = document.createElement('input');
                         calledCheckbox.type = 'checkbox';
-                        calledCheckbox.checked = !!rep.called; 
+                        calledCheckbox.checked = !!rep.called;
                         calledCheckbox.dataset.repId = rep.id;
+                        calledCheckbox.dataset.list = listIdentifier;
                         calledCheckbox.addEventListener('change', handleCalledChange);
                         cellCalled.appendChild(calledCheckbox);
 
+                        // Emailed Checkbox
                         const cellEmailed = row.insertCell();
                         const emailedCheckbox = document.createElement('input');
                         emailedCheckbox.type = 'checkbox';
-                        emailedCheckbox.checked = !!rep.emailed; 
+                        emailedCheckbox.checked = !!rep.emailed;
                         emailedCheckbox.dataset.repId = rep.id;
+                        emailedCheckbox.dataset.list = listIdentifier;
                         emailedCheckbox.addEventListener('change', handleEmailedChange);
                         cellEmailed.appendChild(emailedCheckbox);
 
                         row.insertCell().textContent = rep.district;
                         row.insertCell().textContent = rep.name;
-                        row.insertCell().textContent = rep.party; // Add party cell
+                        row.insertCell().textContent = rep.party;
                         
+                        // Email Link
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
                         emailLink.href = "#"; 
                         emailLink.textContent = rep.email;
                         emailLink.dataset.email = rep.email;
                         emailLink.dataset.repName = rep.name;
-                        emailLink.dataset.repId = rep.id; 
+                        emailLink.dataset.repId = rep.id;
+                        emailLink.dataset.list = listIdentifier;
                         emailLink.classList.add('email-link');
                         emailLink.addEventListener('click', handleEmailClick);
                         cellEmail.appendChild(emailLink);
 
+                        // Phone Link
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
                         phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
                         phoneLink.textContent = rep.phone;
                         cellPhone.appendChild(phoneLink);
 
+                        // Response Summary
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
                         updateResponseSummaryCell(cellResponseSummary, rep);
                     });
-                    console.log("Table rendered with " + representatives.length + " rows.");
+                    console.log(`Table ${listIdentifier} rendered with ${dataArray.length} rows.`);
                 }
 
                 function updateResponseSummaryCell(cell, rep) {
@@ -843,30 +822,34 @@ Thank you,
                         let summaryText = 'N/A';
                         const selectedOptionText = responseOptions.find(opt => opt.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected') === rep.response);
                         summaryText = selectedOptionText || (rep.response !== 'not_selected' ? String(rep.response).replace(/_/g, ' ') : 'No response logged');
-                        
                         let summary = `Response: ${summaryText}`;
-                        if (rep.notes) {
-                            summary += `<br>Notes: ${String(rep.notes).substring(0, 35)}${String(rep.notes).length > 35 ? '...' : ''}`;
-                        }
+                        if (rep.notes) summary += `<br>Notes: ${String(rep.notes).substring(0, 35)}${String(rep.notes).length > 35 ? '...' : ''}`;
                         cell.innerHTML = summary;
                     } else {
                         cell.innerHTML = '<i>Not called yet</i>';
                     }
                 }
+                
+                function getRepresentativeListByIdentifier(listIdentifier) {
+                    return listIdentifier === 'yaeDems' ? representativesYaeDems : representativesChairFlips;
+                }
 
                 function handleCalledChange(event) {
                     const repId = event.target.dataset.repId;
-                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    const listIdentifier = event.target.dataset.list;
+                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                    const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
 
-                    const rep = representatives[repIndex];
+                    const rep = currentList[repIndex];
                     rep.called = event.target.checked;
 
-                    const row = document.querySelector(`tr[data-id="${repId}"]`);
+                    const row = event.target.closest('tr'); // More robust way to find the row
                     const summaryCell = row ? row.cells[row.cells.length -1] : null; 
 
                     if (rep.called) { 
                         currentRepIdForModalInput.value = rep.id;
+                        currentListIdentifierForModalInput.value = listIdentifier;
                         responseModalTitle.textContent = `Log Response: ${rep.name}`;
                         modalResponseSelect.value = rep.response || 'not_selected';
                         modalNotesTextarea.value = rep.notes || '';
@@ -881,66 +864,68 @@ Thank you,
 
                 function handleEmailedChange(event) {
                     const repId = event.target.dataset.repId;
-                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    const listIdentifier = event.target.dataset.list;
+                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                    const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
-                    representatives[repIndex].emailed = event.target.checked;
+                    currentList[repIndex].emailed = event.target.checked;
                     saveDataToLocalStorage();
                 }
                 
                 function handleEmailClick(event) {
-                    console.log("handleEmailClick triggered.");
                     event.preventDefault(); 
                     const targetLink = event.currentTarget; 
                     const recipientEmail = targetLink.dataset.email;
                     const repName = targetLink.dataset.repName;
                     const repId = targetLink.dataset.repId; 
-                    console.log("Rep ID from dataset:", repId);
+                    const listIdentifier = targetLink.dataset.list;
 
-                    if (!recipientEmail) { console.error("Email address missing."); alert("Error: Rep email missing."); return; }
-                    if (!emailSubjectTemplateInput || !emailBodyTemplateInput) { console.error("Template fields missing."); alert("Error: Email template fields missing."); return; }
-
+                    if (!userFullName) {
+                        alert("Please set your name in 'Edit My Info' before sending emails.");
+                        onboardingModal.style.display = 'block';
+                        onboardingUserNameInput.focus();
+                        return;
+                    }
+                    if (!recipientEmail) { alert("Error: Rep email missing."); return; }
+                    
                     let subject = emailSubjectTemplateInput.value || "";
                     let body = emailBodyTemplateInput.value || "";
+                    subject = subject.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
+                    body = body.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
                     
-                    const repNameStr = repName || ""; 
-                    const userNameStr = userFullName || "[Your Name]";
-                    const userLocationStr = userLocation || "[Your Location]";
-
-                    try {
-                        subject = subject.replace(/{RepName}/g, repNameStr).replace(/{UserName}/g, userNameStr).replace(/{UserLocation}/g, userLocationStr);
-                        body = body.replace(/{RepName}/g, repNameStr).replace(/{UserName}/g, userNameStr).replace(/{UserLocation}/g, userLocationStr);
-                    } catch (e) { console.error("Placeholder replacement error:", e); alert("Error preparing email template."); return; }
+                    window.location.href = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                     
-                    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    console.log("Final mailtoLink:", mailtoLink);
-                    
-                    try {
-                        window.location.href = mailtoLink;
-                        if (repId) {
-                            const repIndex = representatives.findIndex(r => r.id === repId);
-                            if (repIndex !== -1 && !representatives[repIndex].emailed) {
-                                representatives[repIndex].emailed = true;
-                                const emailedCheckboxInRow = document.querySelector(`tr[data-id="${repId}"] td:nth-child(2) input[type="checkbox"]`);
-                                if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
-                                saveDataToLocalStorage();
-                                console.log(`Marked rep ${repId} as emailed.`);
-                            }
-                        } else { console.warn("repId not found on email link, cannot auto-check 'emailed'.");}
-                    } catch (e) { console.error("Error opening mailto link:", e); alert("Could not open email client."); }
+                    if (repId) {
+                        const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                        const repIndex = currentList.findIndex(r => r.id === repId);
+                        if (repIndex !== -1 && !currentList[repIndex].emailed) {
+                            currentList[repIndex].emailed = true;
+                            const row = targetLink.closest('tr');
+                            const emailedCheckboxInRow = row ? row.querySelector('td:nth-child(2) input[type="checkbox"]') : null;
+                            if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
+                            saveDataToLocalStorage();
+                        }
+                    }
                 }
 
-                // --- Modal Control ---
                 closeResponseModalBtn.onclick = () => responseModal.style.display = 'none';
                 cancelResponseModalBtn.onclick = () => responseModal.style.display = 'none';
                 saveResponseModalBtn.onclick = function() {
                     const repId = currentRepIdForModalInput.value;
-                    if (!repId) return;
-                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    const listIdentifier = currentListIdentifierForModalInput.value;
+                    if (!repId || !listIdentifier) return;
+
+                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                    const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
-                    representatives[repIndex].response = modalResponseSelect.value;
-                    representatives[repIndex].notes = modalNotesTextarea.value;
-                    const row = document.querySelector(`tr[data-id="${repId}"]`);
-                    if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], representatives[repIndex]);
+
+                    currentList[repIndex].response = modalResponseSelect.value;
+                    currentList[repIndex].notes = modalNotesTextarea.value;
+                    
+                    const tableBodyElement = listIdentifier === 'yaeDems' ? yaeDemsTableBody : chairFlipsTableBody;
+                    const row = tableBodyElement.querySelector(`tr[data-id="${repId}"]`);
+                    if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], currentList[repIndex]);
+                    
                     responseModal.style.display = 'none';
                     saveDataToLocalStorage();
                 };
@@ -955,17 +940,18 @@ Thank you,
                     if (event.target == guideModal) guideModal.style.display = 'none';
                 };
 
-                // --- Data Management Buttons ---
                 exportButton.addEventListener('click', () => {
                     saveDataToLocalStorage(); 
-                    const dataStr = JSON.stringify({
-                        representatives: representatives,
+                    const dataToExport = {
+                        representativesYaeDems: representativesYaeDems,
+                        representativesChairFlips: representativesChairFlips,
                         emailSubject: emailSubjectTemplateInput.value,
                         emailBody: emailBodyTemplateInput.value,
                         userFullName: userFullName,
                         userLocation: userLocation,
                         onboardingComplete: localStorage.getItem('onboardingComplete') === 'true'
-                    }, null, 2);
+                    };
+                    const dataStr = JSON.stringify(dataToExport, null, 2);
                     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                     const exportFileDefaultName = 'sb3_call_tracker_progress.json';
                     let linkElement = document.createElement('a');
@@ -982,36 +968,42 @@ Thank you,
                         reader.onload = (e) => {
                             try {
                                 const importedData = JSON.parse(e.target.result);
-                                if (importedData.representatives && Array.isArray(importedData.representatives)) {
-                                    representatives = initialRepresentativesData.map(initialRep => { // Use initialRepresentativesData for structure
-                                        const importedRepData = importedData.representatives.find(ir => ir.id === initialRep.id);
-                                        return {
-                                            ...initialRep, // Start with new structure (includes party)
-                                            called: importedRepData?.called || false,
-                                            emailed: importedRepData?.emailed || false, // Ensure emailed is handled
-                                            response: importedRepData?.response || 'not_selected',
-                                            notes: importedRepData?.notes || ''
-                                            // Party and email will come from initialRep if not in importedRepData,
-                                            // or from importedRepData if present (though new data structure should always have them)
-                                        };
+                                
+                                // Process YAE Dems
+                                if (importedData.representativesYaeDems && Array.isArray(importedData.representativesYaeDems) && initialYaeDemsData.length > 0) {
+                                    representativesYaeDems = initialYaeDemsData.map(initialRep => {
+                                        const importedRepData = importedData.representativesYaeDems.find(ir => ir.id === initialRep.id);
+                                        return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
                                     });
-                                    emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
-                                    emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
-                                    userFullName = importedData.userFullName || '';
-                                    userLocation = importedData.userLocation || '';
-                                    onboardingUserNameInput.value = userFullName; 
-                                    onboardingUserLocationInput.value = userLocation;
-                                    localStorage.setItem('userFullName', userFullName);
-                                    localStorage.setItem('userLocation', userLocation);
-                                    if(importedData.onboardingComplete !== undefined) {
-                                       localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
-                                    }
-                                    saveDataToLocalStorage(); 
-                                    renderTable(); 
-                                    alert('Progress imported successfully!');
-                                } else {
-                                    alert('Error: Invalid file format.');
+                                } else if (initialYaeDemsData.length > 0) {
+                                     representativesYaeDems = initialYaeDemsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
                                 }
+
+                                // Process Chair Flips
+                                if (importedData.representativesChairFlips && Array.isArray(importedData.representativesChairFlips) && initialChairFlipsData.length > 0) {
+                                    representativesChairFlips = initialChairFlipsData.map(initialRep => {
+                                        const importedRepData = importedData.representativesChairFlips.find(ir => ir.id === initialRep.id);
+                                        return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
+                                    });
+                                } else if (initialChairFlipsData.length > 0) {
+                                    representativesChairFlips = initialChairFlipsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                }
+
+                                emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
+                                emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
+                                userFullName = importedData.userFullName || '';
+                                userLocation = importedData.userLocation || '';
+                                onboardingUserNameInput.value = userFullName; 
+                                onboardingUserLocationInput.value = userLocation;
+                                localStorage.setItem('userFullName', userFullName);
+                                localStorage.setItem('userLocation', userLocation);
+                                if(importedData.onboardingComplete !== undefined) {
+                                   localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
+                                }
+                                saveDataToLocalStorage(); 
+                                renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
+                                renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
+                                alert('Progress imported successfully!');
                             } catch (error) {
                                 console.error('Error importing data:', error);
                                 alert('Error importing file.');
@@ -1025,8 +1017,10 @@ Thank you,
                 resetButton.addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
                         localStorage.clear(); 
-                        loadDataFromLocalStorage(); 
-                        renderTable();
+                        // Re-initialize from fetched data, then load (which will effectively be empty)
+                        initialYaeDemsData = []; // Clear to re-fetch if needed, or rely on already fetched.
+                        initialChairFlipsData = [];
+                        initializeApp(); // This will re-fetch and then load empty storage
                         alert('All data has been reset.');
                     }
                 });
@@ -1036,40 +1030,31 @@ Thank you,
                     alert('All changes saved!');
                 });
 
-                // --- Initial Load ---
                 async function initializeApp() {
-                    console.log("Attempting to fetch initial data...");
-                    initialRepresentativesData = await fetchInitialData('yae_dems.json'); // Load the specific JSON file
+                    console.log("Attempting to fetch initial data for all lists...");
+                    initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
+                    initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
                     
-                    if (initialRepresentativesData.length > 0) {
-                        console.log("Initial data fetched successfully. Proceeding with app initialization.");
-                        loadDataFromLocalStorage(); // Load saved progress against the fetched data
-                        renderTable(); // Render the table with the potentially merged data
+                    loadListsFromLocalStorage();
+                    
+                    if (initialYaeDemsData.length > 0) {
+                        renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
                     } else {
-                        console.error("App initialization failed: Could not load initial representative data.");
-                        // Optionally, render an empty table or an error message in the table
-                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load representative data.</td></tr>';
+                        yaeDemsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load YAE Dems data.</td></tr>';
                     }
-                    // Event listeners can be set up regardless of data loading success,
-                    // as they might be for UI elements not dependent on the table data (e.g., modals, import/export).
-                    // However, some might need to be rethought if data loading is critical for them.
-                    // For now, keeping it simple:
-                    // setupEventListeners(); // This was the original placement, might need adjustment if it depends on `representatives`
-                    console.log("Initial load and render process finished.");
+
+                    if (initialChairFlipsData.length > 0) {
+                        renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
+                    } else {
+                        chairFlipsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load Chair Flips data.</td></tr>';
+                    }
+                    console.log("Initial load and render process finished for all lists.");
                 }
 
-                console.log("Attempting initial load and render...");
-                try {
-                    // DOMContentLoaded ensures elements are available before this script runs.
-                    // Initialize app, which now includes fetching data.
-                    initializeApp().catch(e => { // Catch errors from async initializeApp
-                        alert("Error during app initialization: " + e.message + "\nSee console for details.");
-                        console.error("Error during app initialization:", e);
-                    });
-                } catch (e) { // Catch synchronous errors, though less likely now with async initializeApp
-                    alert("Error during initial load/render: " + e.message + "\nSee console for details.");
-                    console.error("Error during initial load/render:", e);
-                }
+                initializeApp().catch(e => {
+                    alert("Error during app initialization: " + e.message + "\nSee console for details.");
+                    console.error("Error during app initialization:", e);
+                });
             });
         } catch (e) {
             alert("CRITICAL ERROR SETTING UP DOMContentLoaded: " + e.message);
