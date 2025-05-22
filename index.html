@@ -663,7 +663,9 @@
                     userFullName = localStorage.getItem('userFullName') || '';
                     userLocation = localStorage.getItem('userLocation') || '';
                     const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-                    if (!onboardingComplete && !currentUser) { // Show onboarding if not signed in and not complete
+                    // Show onboarding if not complete, regardless of Firebase auth state for this specific modal.
+                    // Firebase auth will handle data sync once info is entered.
+                    if (!onboardingComplete) { 
                          onboardingModal.style.display = 'block';
                     }
                     onboardingUserNameInput.value = userFullName;

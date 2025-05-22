@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "devices": {
+      "$deviceId": {
+        ".read": "auth != null && auth.uid == $deviceId",
+        "latest": {
+          ".write": "auth != null && auth.uid == $deviceId"
+        },
+        "history": {
+          ".write": "auth != null && auth.uid == $deviceId"
+        }
+      }
+    }
+  }
+}
