@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SB3 Stakeholders Call Tracker</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
     <style>
         :root {
             --dark-bg-primary: #1e1e1e;
@@ -194,7 +199,6 @@
             z-index: 1;
         }
         
-        /* Column widths for 8 columns */
         th:nth-child(1), td:nth-child(1) { width: 7%; }  /* Called */
         th:nth-child(2), td:nth-child(2) { width: 7%; }  /* Emailed */
         th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
@@ -232,8 +236,9 @@
         .footer-actions {
             margin-top: 30px;
             text-align: right;
+            min-height: 40px; /* Ensure space even if button is removed */
         }
-         .footer-actions button { /* Style for any button in footer, though only one might remain */
+         .footer-actions button { 
             margin-left: 10px;
             background-color: var(--accent-green);
             color: white; 
@@ -390,15 +395,14 @@
             }
 
             th, td { padding: 8px 4px; font-size: 0.7em; } 
-            /* Adjusted for 8 columns */
-            th:nth-child(1), td:nth-child(1) { width: 8%; }  /* Called */
-            th:nth-child(2), td:nth-child(2) { width: 8%; }  /* Emailed */
-            th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
-            th:nth-child(4), td:nth-child(4) { width: 18%; } /* Rep */
-            th:nth-child(5), td:nth-child(5) { width: 7%; }  /* Party */
-            th:nth-child(6), td:nth-child(6) { width: 13%; } /* Phone */
-            th:nth-child(7), td:nth-child(7) { width: 20%; } /* Email */
-            th:nth-child(8), td:nth-child(8) { width: 18%; } /* Summary */
+            th:nth-child(1), td:nth-child(1) { width: 8%; }
+            th:nth-child(2), td:nth-child(2) { width: 8%; }
+            th:nth-child(3), td:nth-child(3) { width: 8%; }
+            th:nth-child(4), td:nth-child(4) { width: 18%; }
+            th:nth-child(5), td:nth-child(5) { width: 7%; }
+            th:nth-child(6), td:nth-child(6) { width: 13%; }
+            th:nth-child(7), td:nth-child(7) { width: 20%; }
+            th:nth-child(8), td:nth-child(8) { width: 18%; }
 
             .modal-content { width: 90%; margin: 10% auto; padding: 20px; }
         }
@@ -409,17 +413,14 @@
 
             th, td { padding: 6px 3px; font-size: 0.60em; } 
 
-            th:nth-child(3), td:nth-child(3) { display: none; } /* Hide District */
-            th:nth-child(5), td:nth-child(5) { display: none; } /* Hide Party */
-            /* 6 columns visible: Called, Emailed, Rep, Phone, Email, Summary */
-            th:nth-child(1), td:nth-child(1) { width: 10%; } /* Called */
-            th:nth-child(2), td:nth-child(2) { width: 10%; } /* Emailed */
-            /* Child 3 (District) is hidden */
-            th:nth-child(4), td:nth-child(4) { width: 25%; } /* Rep */
-            /* Child 5 (Party) is hidden */
-            th:nth-child(6), td:nth-child(6) { width: 15%; } /* Phone */
-            th:nth-child(7), td:nth-child(7) { width: 20%; } /* Email */
-            th:nth-child(8), td:nth-child(8) { width: 20%; } /* Summary */
+            th:nth-child(3), td:nth-child(3) { display: none; } 
+            th:nth-child(5), td:nth-child(5) { display: none; } 
+            th:nth-child(1), td:nth-child(1) { width: 10%; } 
+            th:nth-child(2), td:nth-child(2) { width: 10%; } 
+            th:nth-child(4), td:nth-child(4) { width: 25%; } 
+            th:nth-child(6), td:nth-child(6) { width: 15%; } 
+            th:nth-child(7), td:nth-child(7) { width: 20%; } 
+            th:nth-child(8), td:nth-child(8) { width: 20%; } 
          }
     </style>
 </head>
@@ -427,10 +428,10 @@
     <div class="container">
         <header>
             <h1>SB3 Stakeholders Call Tracker</h1>
-            <span class="version-number">v1.0</span>
-            <p>Track your calls and emails to representatives, their responses, and your notes.</p>
+            <span class="version-number">v1.1 (Firebase Beta)</span>
+            <p>Track your calls and emails to representatives, their responses, and your notes. Progress is saved automatically to your device and backed up to a secure cloud database.</p>
             <div class="report-problem-link">
-                <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.0">Report Problems</a>
+                <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
             </div>
         </header>
 
@@ -449,7 +450,7 @@
             
             <label for="emailBodyTemplate" style="margin-top:10px;">Email Body Template:</label>
             <textarea id="emailBodyTemplate"></textarea>
-            <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template.</em></small>
+            <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template. Changes save automatically.</em></small>
         </div>
 
         <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">YAE Dems List</h2>
@@ -467,9 +468,7 @@
                         <th>Response Summary</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Rows for YAE Dems will be inserted here by JavaScript -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
 
@@ -488,9 +487,7 @@
                         <th>Response Summary</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Rows for chair flips will be inserted here -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
         
@@ -509,125 +506,72 @@
                         <th>Response Summary</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Rows for NAY Voters will be inserted here -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
 
          <div class="footer-actions">
-            <!-- <button id="saveAllChanges" class="button-like">Save All Changes</button> Removed for auto-save -->
+            <!-- Save All Changes button removed due to auto-save implementation -->
         </div>
     </div>
 
-    <!-- Onboarding Modal -->
     <div id="onboardingModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeOnboardingModal">×</span>
             <h2>Welcome! Let's Get You Set Up</h2>
-            <p>Please provide a few details to personalize your email templates. This information is stored locally in your browser.</p>
+            <p>Please provide a few details to personalize your email templates. This information is stored locally in your browser and backed up.</p>
             <label for="onboardingUserName">Your Full Name (for email signature):</label>
             <input type="text" id="onboardingUserName" placeholder="e.g., Jane Doe">
-            
             <label for="onboardingUserLocation">Your City/Town (e.g., "Austin resident"):</label>
             <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX or concerned Texan">
-            
             <button id="saveOnboardingInfo">Save and Continue</button>
         </div>
     </div>
 
-    <!-- Response Modal -->
     <div id="responseModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeResponseModal">×</span>
             <h3 id="responseModalTitle">Log Call Response</h3>
             <input type="hidden" id="currentRepIdForModal">
             <input type="hidden" id="currentListIdentifierForModal">
-
-
             <label for="modalResponseSelect">Response:</label>
-            <select id="modalResponseSelect">
-                <!-- Options populated by JS -->
-            </select>
-
+            <select id="modalResponseSelect"></select>
             <label for="modalNotesTextarea">Notes (e.g., staffer name, key points discussed):</label>
             <textarea id="modalNotesTextarea" placeholder="Enter notes here..."></textarea>
-            
             <button id="saveResponseModal">Save Response</button>
             <button id="cancelResponseModal" class="button-outline">Cancel</button>
         </div>
     </div>
 
-    <!-- User Guide Modal -->
     <div id="guideModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeGuideModal">×</span>
-            <h2>SB3 Call Tracker - Easy Mobile Guide (v1.0)</h2>
-            <p>This tool is like a digital checklist to help you contact lawmakers about SB3 using your phone. It remembers what you've done.</p>
-
+            <h2>SB3 Call Tracker - Easy Mobile Guide (v1.1 - Firebase Beta)</h2>
+            <p>This tool helps you contact lawmakers. Your progress is saved automatically to this device and backed up to a secure cloud database (Firebase) linked to this device only.</p>
             <h4>1. First Time Opening? (Quick Setup):</h4>
             <ul>
                 <li>A "Welcome" box will pop up.</li>
-                <li>Type in your <strong>Full Name</strong> (so emails can have your signature).</li>
-                <li>Type in your <strong>City/Town</strong> (like "Austin resident" or just "Texas").</li>
-                <li>Tap "Save and Continue." That's it for setup!</li>
-                <li><em>Need to change your name/town later? Tap "Edit My Info."</em></li>
+                <li>Type in your <strong>Full Name</strong> and <strong>City/Town</strong>.</li>
+                <li>Tap "Save and Continue." This info is saved to your device and backed up.</li>
+                <li><em>Need to change it later? Tap "Edit My Info."</em></li>
             </ul>
-
-            <h4>2. Sending Emails (Easy Mode):</h4>
+            <h4>2. Sending Emails:</h4>
             <ul>
-                <li>The tool has a pre-written email ready for you.</li>
-                <li>If you want to peek or change it, look for "Email Subject Template" and "Email Body Template" on the main screen. (Most people won't need to touch this).</li>
-                 <li>Changes to email templates are saved automatically as you type.</li>
+                <li>Email templates are provided. You can edit them on the main screen.</li>
+                <li>Changes to templates are saved automatically.</li>
             </ul>
-
-            <h4>3. Contacting Lawmakers (The List):</h4>
-            <p>You'll see lists of lawmakers. Here's how to track your contacts:</p>
+            <h4>3. Contacting Lawmakers:</h4>
             <ul>
-                <li><strong>To Call a Lawmaker:</strong>
-                    <ul>
-                        <li>Find their name and tap their <strong>Phone Number</strong>. Your phone should offer to call.</li>
-                        <li>After your call, find that lawmaker in the list and check the little box in the <strong>"Called"</strong> column.</li>
-                        <li>A new box will pop up:
-                            <ul>
-                                <li><strong>Response:</strong> Pick how the call went (like "For," "Against," or "Left Voicemail").</li>
-                                <li><strong>Notes:</strong> You can type quick notes here (like "Spoke to Aide Sarah").</li>
-                            </ul>
-                        </li>
-                        <li>Tap "Save Response." (This saves automatically).</li>
-                    </ul>
-                </li>
-                <li><strong>To Email a Lawmaker:</strong>
-                    <ul>
-                        <li>Find their name and tap their <strong>Email Address</strong>. Your phone's email app should open with the email mostly written for you!</li>
-                        <li>Just check it over and hit "Send" in your email app.</li>
-                        <li>The tool will automatically check the box in the <strong>"Emailed"</strong> column for you. (This saves automatically).</li>
-                    </ul>
-                </li>
-                <li><strong>Keeping Track:</strong>
-                    <ul>
-                        <li>The <strong>"Called"</strong> and <strong>"Emailed"</strong> boxes show who you've contacted.</li>
-                        <li>The "Response Summary" column shows what happened on your calls.</li>
-                    </ul>
-                </li>
+                <li><strong>To Call:</strong> Tap the phone number. After, check "Called." A box appears to log the response and notes. Tap "Save Response."</li>
+                <li><strong>To Email:</strong> Tap the email address. Your email app opens. After sending, the "Emailed" box is checked automatically.</li>
+                <li>All these actions are saved automatically.</li>
             </ul>
-
             <h4>4. Your Progress:</h4>
             <ul>
-                <li><strong>It Saves Automatically!</strong> When you check boxes, save call notes, or edit email templates, the tool remembers. The "Save All Changes" button has been removed.</li>
-                <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup.</li>
-                <li><strong>Import Progress:</strong> Lets you load a saved copy (an exported file) back into the tool.</li>
-                <li><strong>Reset All Data:</strong> Wipes everything clean and starts over. <strong>Be careful, it can't be undone!</strong></li>
+                <li><strong>Auto-Save:</strong> All changes (checkboxes, notes, templates, user info) are saved automatically to your device and backed up. The "Save All Changes" button has been removed.</li>
+                <li><strong>Export/Import:</strong> Still available for manual backups or transferring to a *new* device if needed (though Firebase aims to make this less necessary for the same device).</li>
+                <li><strong>Reset All Data:</strong> Clears data from *this device's local storage and its Firebase backup*. Use with caution!</li>
             </ul>
-            
-            <h4>Tips for Your Phone:</h4>
-            <ul>
-                <li>Everything should fit on your screen. If text is long, it will wrap to the next line.</li>
-                <li>On really small phone screens, the "District" info might hide to make more space.</li>
-            </ul>
-
-            <h4>Got a Problem with the Tool?</h4>
-            <p>Look under the big title at the top for a "Report Problems" link. Tap it to send an email.</p>
             <button id="dismissGuideModal" class="button-outline" style="margin-top: 20px;">Dismiss</button>
         </div>
     </div>
@@ -638,12 +582,37 @@
             const errorDetails = `CRITICAL SCRIPT ERROR:\nMessage: ${message}\nSource: ${source}\nLine: ${lineno}\nColumn: ${colno}\nError: ${error ? JSON.stringify(error) : 'N/A'}`;
             alert(errorDetails);
             console.error("GLOBAL ERROR:", message, source, lineno, colno, error);
-            return true; // Suppress default browser error handling
+            return true; 
         };
 
-        try { // Wrap DOMContentLoaded setup
+        try { 
             document.addEventListener('DOMContentLoaded', function() {
                 console.log("DOMContentLoaded event fired.");
+
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAm-QMDte5ytPN7Z8Cz7VaDe7hUVGsTE-8",
+                    authDomain: "sb3calltool.firebaseapp.com",
+                    projectId: "sb3calltool",
+                    storageBucket: "sb3calltool.firebasestorage.app", // Corrected from .app
+                    messagingSenderId: "834566220861",
+                    appId: "1:834566220861:web:6475e1ddf50c00e54b0e54",
+                    measurementId: "G-BC4Z144B00",
+                    databaseURL: "https://sb3calltool-default-rtdb.firebaseio.com" // Added databaseURL
+                };
+
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                firebase.analytics(); // Initialize Analytics
+                const auth = firebase.auth();
+                const db = firebase.database();
+                let currentUser = null;
+                let deviceId = localStorage.getItem('sb3CallToolDeviceId');
+
+                if (!deviceId) {
+                    deviceId = 'device-' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+                    localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                }
                 
                 let initialYaeDemsData = [];
                 let representativesYaeDems = [];
@@ -655,14 +624,12 @@
                 let userFullName = '';    
                 let userLocation = '';
 
-                // --- DOM Element References ---
                 const yaeDemsTableBody = document.getElementById('repsTableYaeDems').getElementsByTagName('tbody')[0];
                 const chairFlipsTableBody = document.getElementById('repsTableChairFlips').getElementsByTagName('tbody')[0];
                 const nayVotersTableBody = document.getElementById('repsTableNayVoters').getElementsByTagName('tbody')[0];
                 const exportButton = document.getElementById('exportData');
                 const importFile = document.getElementById('importFile');
                 const resetButton = document.getElementById('resetData');
-                // const saveAllButton = document.getElementById('saveAllChanges'); // Button removed
                 const editMyInfoButton = document.getElementById('editMyInfo');
                 const showGuideButton = document.getElementById('showGuideBtn');
                 
@@ -692,15 +659,17 @@
                 const defaultEmailSubject = "Regarding CSSB 3 & SB 3 - A Message from a Constituent";
                 const defaultEmailBody = `Dear {RepName},\n\nI’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.\n\nThese bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.\n\nThis is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.\n\nDriving them to unregulated, illegal markets will only increase public health risks.\n\nIf the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:\n\n* Restricting sales to adults age 21 and older\n* Requiring child-resistant packaging\n* Establishing retail buffer zones around schools\n\nEvery $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.\n\nThank you,\n{UserName}\n{UserLocation}`;
 
-                function loadUserInfo() {
+                function loadUserInfoFromLocal() { // Renamed to avoid conflict
                     userFullName = localStorage.getItem('userFullName') || '';
                     userLocation = localStorage.getItem('userLocation') || '';
                     const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-                    if (!onboardingComplete) onboardingModal.style.display = 'block';
+                    if (!onboardingComplete && !currentUser) { // Show onboarding if not signed in and not complete
+                         onboardingModal.style.display = 'block';
+                    }
                     onboardingUserNameInput.value = userFullName;
                     onboardingUserLocationInput.value = userLocation;
                 }
-
+                
                 saveOnboardingInfoBtn.onclick = function() {
                     userFullName = onboardingUserNameInput.value.trim();
                     userLocation = onboardingUserLocationInput.value.trim();
@@ -710,7 +679,7 @@
                         localStorage.setItem('onboardingComplete', 'true');
                         onboardingModal.style.display = 'none';
                         alert('Your information has been saved.');
-                        saveDataToLocalStorage(); // Auto-save on user info change
+                        saveDataToAllStorages(); 
                     } else {
                         alert('Please enter your full name for email personalization.');
                     }
@@ -737,11 +706,40 @@
                     }
                 }
 
-                function loadListsFromLocalStorage() {
-                    loadUserInfo();
+                async function loadDataFromAllSources() {
+                    loadUserInfoFromLocal(); // Load user info from local first
                     emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
                     emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
 
+                    if (currentUser) {
+                        const userDeviceRef = db.ref(`devices/${deviceId}/latest`);
+                        try {
+                            const snapshot = await userDeviceRef.once('value');
+                            const firebaseData = snapshot.val();
+                            if (firebaseData) {
+                                console.log("Loading data from Firebase for device:", deviceId);
+                                representativesYaeDems = firebaseData.representativesYaeDems || initialYaeDemsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                representativesChairFlips = firebaseData.representativesChairFlips || initialChairFlipsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                representativesNayVoters = firebaseData.representativesNayVoters || initialNayVotersData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                emailSubjectTemplateInput.value = firebaseData.emailSubject || defaultEmailSubject;
+                                emailBodyTemplateInput.value = firebaseData.emailBody || defaultEmailBody;
+                                userFullName = firebaseData.userFullName || userFullName; // Prioritize Firebase if exists
+                                userLocation = firebaseData.userLocation || userLocation;
+                                onboardingUserNameInput.value = userFullName;
+                                onboardingUserLocationInput.value = userLocation;
+                                localStorage.setItem('userFullName', userFullName); // Sync local
+                                localStorage.setItem('userLocation', userLocation);
+                                localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
+                                localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
+                                return; // Data loaded from Firebase, skip local list processing
+                            }
+                        } catch (error) {
+                            console.error("Error loading data from Firebase:", error);
+                        }
+                    }
+                    
+                    // Fallback to local storage if no Firebase data or not signed in
+                    console.log("Loading data from Local Storage.");
                     const processStoredList = (storageKey, initialData) => {
                         const storedData = localStorage.getItem(storageKey);
                         if (storedData && initialData.length > 0) {
@@ -755,25 +753,46 @@
                         }
                         return [];
                     };
-
                     representativesYaeDems = processStoredList('representativesYaeDemsCallData', initialYaeDemsData);
                     representativesChairFlips = processStoredList('representativesChairFlipsCallData', initialChairFlipsData);
                     representativesNayVoters = processStoredList('representativesNayVotersCallData', initialNayVotersData);
                 }
 
-                function saveDataToLocalStorage() {
+                function saveDataToAllStorages() {
+                    // Save to Local Storage (as primary quick access)
                     try {
                         localStorage.setItem('representativesYaeDemsCallData', JSON.stringify(representativesYaeDems));
                         localStorage.setItem('representativesChairFlipsCallData', JSON.stringify(representativesChairFlips));
                         localStorage.setItem('representativesNayVotersCallData', JSON.stringify(representativesNayVoters));
                         localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
                         localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                        localStorage.setItem('userFullName', userFullName); // Ensure user info is also saved here
+                        localStorage.setItem('userFullName', userFullName);
                         localStorage.setItem('userLocation', userLocation);
-                        console.log("Data for all lists saved (auto-save).");
+                        console.log("Data saved to Local Storage.");
                     } catch (e) {
                         console.error("Error saving data to localStorage:", e);
-                        // Avoid alerting for auto-saves to prevent spamming user, log to console instead.
+                    }
+
+                    // Save to Firebase
+                    if (currentUser && deviceId) {
+                        const dataToSave = {
+                            timestamp: firebase.database.ServerValue.TIMESTAMP,
+                            representativesYaeDems: representativesYaeDems,
+                            representativesChairFlips: representativesChairFlips,
+                            representativesNayVoters: representativesNayVoters,
+                            emailSubject: emailSubjectTemplateInput.value,
+                            emailBody: emailBodyTemplateInput.value,
+                            userFullName: userFullName,
+                            userLocation: userLocation
+                        };
+                        // Save to a 'latest' node and also push to a historical log
+                        db.ref(`devices/${deviceId}/latest`).set(dataToSave)
+                            .then(() => console.log("Data saved to Firebase (latest)."))
+                            .catch(error => console.error("Error saving 'latest' data to Firebase:", error));
+                        
+                        db.ref(`devices/${deviceId}/history`).push(dataToSave)
+                            .then(() => console.log("Data pushed to Firebase history."))
+                            .catch(error => console.error("Error pushing data to Firebase history:", error));
                     }
                 }
                 
@@ -795,7 +814,6 @@
                         const row = tableBodyElement.insertRow();
                         row.setAttribute('data-id', rep.id);
                         row.setAttribute('data-list', listIdentifier);
-
                         const cellCalled = row.insertCell();
                         const calledCheckbox = document.createElement('input');
                         calledCheckbox.type = 'checkbox';
@@ -804,7 +822,6 @@
                         calledCheckbox.dataset.list = listIdentifier;
                         calledCheckbox.addEventListener('change', handleCalledChange);
                         cellCalled.appendChild(calledCheckbox);
-
                         const cellEmailed = row.insertCell();
                         const emailedCheckbox = document.createElement('input');
                         emailedCheckbox.type = 'checkbox';
@@ -813,11 +830,9 @@
                         emailedCheckbox.dataset.list = listIdentifier;
                         emailedCheckbox.addEventListener('change', handleEmailedChange);
                         cellEmailed.appendChild(emailedCheckbox);
-
                         row.insertCell().textContent = rep.district;
                         row.insertCell().textContent = rep.name;
                         row.insertCell().textContent = rep.party;
-                        
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
                         emailLink.href = "#"; 
@@ -829,18 +844,15 @@
                         emailLink.classList.add('email-link');
                         emailLink.addEventListener('click', handleEmailClick);
                         cellEmail.appendChild(emailLink);
-
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
                         phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
                         phoneLink.textContent = rep.phone;
                         cellPhone.appendChild(phoneLink);
-
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
                         updateResponseSummaryCell(cellResponseSummary, rep);
                     });
-                    console.log(`Table ${listIdentifier} rendered with ${dataArray.length} rows.`);
                 }
 
                 function updateResponseSummaryCell(cell, rep) {
@@ -869,13 +881,10 @@
                     const currentList = getRepresentativeListByIdentifier(listIdentifier);
                     const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
-
                     const rep = currentList[repIndex];
                     rep.called = event.target.checked;
-
                     const row = event.target.closest('tr'); 
                     const summaryCell = row ? row.cells[row.cells.length -1] : null; 
-
                     if (rep.called) { 
                         currentRepIdForModalInput.value = rep.id;
                         currentListIdentifierForModalInput.value = listIdentifier;
@@ -888,7 +897,7 @@
                         rep.notes = '';
                         if (summaryCell) updateResponseSummaryCell(summaryCell, rep);
                     }
-                    saveDataToLocalStorage();
+                    saveDataToAllStorages();
                 }
 
                 function handleEmailedChange(event) {
@@ -898,7 +907,7 @@
                     const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
                     currentList[repIndex].emailed = event.target.checked;
-                    saveDataToLocalStorage();
+                    saveDataToAllStorages();
                 }
                 
                 function handleEmailClick(event) {
@@ -908,7 +917,6 @@
                     const repName = targetLink.dataset.repName;
                     const repId = targetLink.dataset.repId; 
                     const listIdentifier = targetLink.dataset.list;
-
                     if (!userFullName) {
                         alert("Please set your name in 'Edit My Info' before sending emails.");
                         onboardingModal.style.display = 'block';
@@ -916,14 +924,11 @@
                         return;
                     }
                     if (!recipientEmail) { alert("Error: Rep email missing."); return; }
-                    
                     let subject = emailSubjectTemplateInput.value || "";
                     let body = emailBodyTemplateInput.value || "";
                     subject = subject.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
                     body = body.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
-                    
                     window.location.href = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    
                     if (repId) {
                         const currentList = getRepresentativeListByIdentifier(listIdentifier);
                         const repIndex = currentList.findIndex(r => r.id === repId);
@@ -932,7 +937,7 @@
                             const row = targetLink.closest('tr');
                             const emailedCheckboxInRow = row ? row.querySelector('td:nth-child(2) input[type="checkbox"]') : null;
                             if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
-                            saveDataToLocalStorage();
+                            saveDataToAllStorages();
                         }
                     }
                 }
@@ -943,32 +948,26 @@
                     const repId = currentRepIdForModalInput.value;
                     const listIdentifier = currentListIdentifierForModalInput.value;
                     if (!repId || !listIdentifier) return;
-
                     const currentList = getRepresentativeListByIdentifier(listIdentifier);
                     const repIndex = currentList.findIndex(r => r.id === repId);
                     if (repIndex === -1) return;
-
                     currentList[repIndex].response = modalResponseSelect.value;
                     currentList[repIndex].notes = modalNotesTextarea.value;
-                    
                     let tableBodyElement;
                     if (listIdentifier === 'yaeDems') tableBodyElement = yaeDemsTableBody;
                     else if (listIdentifier === 'chairFlips') tableBodyElement = chairFlipsTableBody;
                     else if (listIdentifier === 'nayVoters') tableBodyElement = nayVotersTableBody;
-                    
                     if (tableBodyElement) {
                         const row = tableBodyElement.querySelector(`tr[data-id="${repId}"]`);
                         if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], currentList[repIndex]);
                     }
-                    
                     responseModal.style.display = 'none';
-                    saveDataToLocalStorage();
+                    saveDataToAllStorages();
                 };
                 
                 showGuideButton.onclick = () => guideModal.style.display = 'block';
                 closeGuideModalBtn.onclick = () => guideModal.style.display = 'none';
                 dismissGuideModalBtn.onclick = () => guideModal.style.display = 'none';
-
                 window.onclick = function(event) {
                     if (event.target == responseModal) responseModal.style.display = 'none';
                     if (event.target == onboardingModal) onboardingModal.style.display = 'none';
@@ -976,8 +975,9 @@
                 };
 
                 exportButton.addEventListener('click', () => {
-                    saveDataToLocalStorage(); // Ensure latest data is saved before export
+                    saveDataToAllStorages(); 
                     const dataToExport = {
+                        deviceId: deviceId, // Include deviceId for potential re-import on same device context
                         representativesYaeDems: representativesYaeDems,
                         representativesChairFlips: representativesChairFlips,
                         representativesNayVoters: representativesNayVoters,
@@ -1004,8 +1004,7 @@
                         reader.onload = (e) => {
                             try {
                                 const importedData = JSON.parse(e.target.result);
-                                
-                                const processImportedList = (dataKey, initialDataArray, targetArrayRef) => {
+                                const processImportedList = (dataKey, initialDataArray) => {
                                     let listToUpdate = [];
                                     if (importedData[dataKey] && Array.isArray(importedData[dataKey]) && initialDataArray.length > 0) {
                                         listToUpdate = initialDataArray.map(initialRep => {
@@ -1017,10 +1016,9 @@
                                     }
                                     return listToUpdate;
                                 };
-
-                                representativesYaeDems = processImportedList('representativesYaeDems', initialYaeDemsData, representativesYaeDems);
-                                representativesChairFlips = processImportedList('representativesChairFlips', initialChairFlipsData, representativesChairFlips);
-                                representativesNayVoters = processImportedList('representativesNayVoters', initialNayVotersData, representativesNayVoters);
+                                representativesYaeDems = processImportedList('representativesYaeDems', initialYaeDemsData);
+                                representativesChairFlips = processImportedList('representativesChairFlips', initialChairFlipsData);
+                                representativesNayVoters = processImportedList('representativesNayVoters', initialNayVotersData);
 
                                 emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
                                 emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
@@ -1028,15 +1026,14 @@
                                 userLocation = importedData.userLocation || '';
                                 onboardingUserNameInput.value = userFullName; 
                                 onboardingUserLocationInput.value = userLocation;
-                                localStorage.setItem('userFullName', userFullName);
-                                localStorage.setItem('userLocation', userLocation);
                                 if(importedData.onboardingComplete !== undefined) {
                                    localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
                                 }
-                                saveDataToLocalStorage(); 
-                                renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
-                                renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
-                                renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
+                                // If imported data contains a deviceId, prefer it for consistency if user is importing their own data.
+                                // However, for a fresh import on a new device, we'd use the new device's generated ID.
+                                // For now, we'll stick to the current deviceId.
+                                saveDataToAllStorages(); 
+                                renderAllTables();
                                 alert('Progress imported successfully!');
                             } catch (error) {
                                 console.error('Error importing data:', error);
@@ -1049,8 +1046,20 @@
                 });
                 
                 resetButton.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                    if (confirm('Are you sure you want to reset all data? This will clear local storage and attempt to clear Firebase data for this device. This cannot be undone.')) {
                         localStorage.clear(); 
+                        // Clear Firebase data for this device
+                        if (currentUser && deviceId) {
+                            db.ref(`devices/${deviceId}`).remove()
+                                .then(() => console.log("Firebase data for device cleared."))
+                                .catch(error => console.error("Error clearing Firebase data:", error));
+                        }
+                        // Regenerate deviceId for a fresh start if needed, or keep it to re-associate if user logs back in.
+                        // For now, we'll keep it simple and just clear local. A new deviceId will be generated if not found.
+                        deviceId = null; // Force re-generation or re-association on next load
+                        localStorage.removeItem('sb3CallToolDeviceId');
+
+
                         initialYaeDemsData = []; 
                         initialChairFlipsData = [];
                         initialNayVotersData = [];
@@ -1059,16 +1068,14 @@
                     }
                 });
 
-                // Remove manualSaveData function and its event listener
-                // saveAllButton.addEventListener('click', () => {
-                //     saveDataToLocalStorage();
-                //     alert('All changes saved!'); // This alert is no longer needed with auto-save
-                // });
+                emailSubjectTemplateInput.addEventListener('input', saveDataToAllStorages);
+                emailBodyTemplateInput.addEventListener('input', saveDataToAllStorages);
 
-                // Add event listeners for auto-saving email templates
-                emailSubjectTemplateInput.addEventListener('input', saveDataToLocalStorage);
-                emailBodyTemplateInput.addEventListener('input', saveDataToLocalStorage);
-
+                function renderAllTables() {
+                    renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
+                    renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
+                    renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
+                }
 
                 async function initializeApp() {
                     console.log("Attempting to fetch initial data for all lists...");
@@ -1076,13 +1083,35 @@
                     initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
                     initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
                     
-                    loadListsFromLocalStorage();
-                    
-                    renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
-                    renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
-                    renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
-                    
-                    console.log("Initial load and render process finished for all lists.");
+                    auth.onAuthStateChanged(async user => {
+                        if (user) {
+                            console.log("User signed in anonymously:", user.uid);
+                            currentUser = user;
+                            // If the anonymous UID is different from stored deviceId, update deviceId to user.uid
+                            // This makes the Firebase path based on the auth UID.
+                            if (deviceId !== user.uid) {
+                                console.log(`Device ID changing from ${deviceId} to auth UID ${user.uid}`);
+                                deviceId = user.uid;
+                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                            }
+                        } else {
+                            console.log("User is signed out. Signing in anonymously...");
+                            currentUser = null;
+                            try {
+                                const userCredential = await auth.signInAnonymously();
+                                currentUser = userCredential.user;
+                                console.log("Signed in anonymously:", currentUser.uid);
+                                deviceId = currentUser.uid; // Use auth UID as deviceId
+                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                            } catch (error) {
+                                console.error("Error signing in anonymously:", error);
+                                alert("Could not connect to the database for backup. Progress will only be saved locally. Error: " + error.message);
+                            }
+                        }
+                        await loadDataFromAllSources();
+                        renderAllTables();
+                        console.log("Initial load and render process finished for all lists.");
+                    });
                 }
 
                 initializeApp().catch(e => {
