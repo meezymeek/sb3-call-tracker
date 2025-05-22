@@ -8,29 +8,158 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #333; }
+        :root {
+            --dark-bg-primary: #1e1e1e;
+            --dark-bg-secondary: #2c2c2c;
+            --dark-bg-tertiary: #383838;
+            --dark-text-primary: #e0e0e0;
+            --dark-text-secondary: #b0b0b0;
+            --accent-green: #4CAF50;
+            --accent-green-darker: #388E3C;
+            --border-color-dark: #444444;
+            --utility-button-bg: #5a5a5a;
+            --utility-button-hover-bg: #4a4a4a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg-primary);
+            color: var(--dark-text-primary);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: var(--dark-bg-secondary);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        h1, h2, h3 {
+            color: var(--dark-text-primary);
+        }
+        h1 { color: var(--accent-green); text-align: center; margin-bottom: 30px;}
+        h2 { border-bottom: 1px solid var(--border-color-dark); padding-bottom: 10px; margin-top: 30px;}
+        h3 { color: var(--accent-green-darker); }
+
         input[type="email"], input[type="password"], button {
             padding: 10px;
             margin: 5px 0 10px 0;
             border-radius: 4px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color-dark);
+            background-color: var(--dark-bg-tertiary);
+            color: var(--dark-text-primary);
         }
-        button { background-color: #4CAF50; color: white; cursor: pointer; border: none; }
-        button:hover { background-color: #45a049; }
-        #loginSection, #dashboardContent, #adminInfo { margin-bottom: 20px; }
+        input[type="email"]:focus, input[type="password"]:focus {
+            border-color: var(--accent-green);
+            outline: none;
+        }
+
+        button { 
+            background-color: var(--accent-green); 
+            color: white; 
+            cursor: pointer; 
+            border: none; 
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: var(--accent-green-darker); }
+        
+        #loginSection { text-align: center; max-width: 400px; margin: 40px auto; padding: 20px; background-color: var(--dark-bg-tertiary); border-radius: 6px;}
+        #loginSection input { width: 100%; }
+        #adminInfo { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: var(--dark-bg-tertiary); border-radius: 6px; margin-bottom: 20px;}
+        #adminInfo p { margin: 0; }
+        #logoutButton { background-color: var(--utility-button-bg); }
+        #logoutButton:hover { background-color: var(--utility-button-hover-bg); }
+
         .hidden { display: none; }
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom:20px;}
-        .metric { border: 1px solid #eee; padding: 15px; border-radius: 5px; background-color: #f9f9f9; }
-        .metric h3 { margin-top: 0; font-size: 1.2em; color: #4CAF50; }
+
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin-bottom:20px;
+        }
+        .metric { 
+            border: 1px solid var(--border-color-dark); 
+            padding: 15px; 
+            border-radius: 6px; 
+            background-color: var(--dark-bg-tertiary); 
+        }
+        .metric h3 { margin-top: 0; font-size: 1.2em; color: var(--accent-green); }
         .metric p, .metric ul { font-size: 1em; margin-bottom: 0;}
         .metric ul { list-style: none; padding-left: 0;}
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #4CAF50; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
+        
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid var(--border-color-dark); padding: 10px; text-align: left; }
+        th { background-color: var(--accent-green-darker); color: white; }
+        tr:nth-child(even) { background-color: var(--dark-bg-tertiary); }
+        tr:hover { background-color: #404040; }
+
+        .collapsible-section {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color-dark);
+            border-radius: 6px;
+            background-color: var(--dark-bg-tertiary);
+        }
+        .collapsible-toggle {
+            background-color: var(--accent-green-darker);
+            color: white;
+            cursor: pointer;
+            padding: 12px 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1em;
+            border-radius: 6px 6px 0 0;
+            transition: background-color 0.3s ease;
+        }
+        .collapsible-toggle:hover {
+            background-color: var(--accent-green);
+        }
+        .collapsible-toggle.active {
+             border-radius: 6px 6px 0 0;
+        }
+        .collapsible-toggle::after {
+            content: '\\2795'; /* Corrected: Unicode for "plus" sign (+) */
+            font-size: 0.8em;
+            color: white;
+            float: right;
+            margin-left: 5px;
+        }
+        .collapsible-toggle.active::after {
+            content: '\\2796'; /* Corrected: Unicode for "minus" sign (-) */
+        }
+        .collapsible-content {
+            padding: 15px;
+            display: none;
+            overflow: hidden;
+            background-color: var(--dark-bg-secondary); 
+            border-radius: 0 0 6px 6px;
+        }
+        .collapsible-content.active {
+            display: block; 
+        }
+        .chart-metric canvas { max-height: 300px; } 
+
+        @media screen and (max-width: 768px) {
+            .metrics-grid { grid-template-columns: 1fr; } 
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+        }
+
     </style>
 </head>
 <body>
@@ -46,21 +175,42 @@
         </div>
 
         <div id="dashboardContent" class="hidden">
-            <div id="adminInfo" style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="adminInfo">
                 <p>Logged in as: <span id="adminUserEmail"></span></p>
                 <button id="logoutButton">Logout</button>
             </div>
-            <h2>Live Metrics</h2>
+            
+            <h2>Summary Metrics</h2>
             <div id="metricsContainer" class="metrics-grid">
                 <!-- Metrics will be loaded here -->
             </div>
-            <div id="representativeDetailsContainer">
-                 <!-- Representative details table will be loaded here -->
+
+            <div class="collapsible-section">
+                <button class="collapsible-toggle">Visualizations</button>
+                <div class="collapsible-content">
+                    <div id="chartsContainer" class="metrics-grid">
+                        <div class="metric chart-metric">
+                            <h3>Overall Response Summary</h3>
+                            <canvas id="overallResponsesChart"></canvas>
+                        </div>
+                        <div class="metric chart-metric">
+                            <h3>Contact Volume by List</h3>
+                            <canvas id="listVolumeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
             
-            <!-- Raw Data Section Removed -->
-            <!-- <pre id="rawDataOutput" style="background-color: #eee; padding:10px; border:1px solid #ccc; max-height: 300px; overflow-y: auto;"></pre> -->
+            <div class="collapsible-section">
+                <button class="collapsible-toggle">Representative Details</button>
+                <div class="collapsible-content">
+                    <div id="representativeDetailsContainer" class="table-container">
+                        <!-- Representative details table will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
         </div>
     </div>
 
@@ -88,15 +238,18 @@
         const logoutButton = document.getElementById('logoutButton');
         const adminUserEmailSpan = document.getElementById('adminUserEmail');
         const loginErrorP = document.getElementById('loginError');
-        // const rawDataOutput = document.getElementById('rawDataOutput'); // Removed
         const metricsContainer = document.getElementById('metricsContainer');
         const representativeDetailsContainer = document.getElementById('representativeDetailsContainer');
         const refreshDataButton = document.getElementById('refreshDataButton');
+        const overallResponsesChartCtx = document.getElementById('overallResponsesChart')?.getContext('2d');
+        const listVolumeChartCtx = document.getElementById('listVolumeChart')?.getContext('2d');
+        let overallResponsesChartInstance = null;
+        let listVolumeChartInstance = null;
 
         let initialYaeDemsData = [];
         let initialChairFlipsData = [];
         let initialNayVotersData = [];
-        let allMasterRepData = []; // To store a flat list of all reps from JSON files
+        let allMasterRepData = []; 
 
         async function fetchAndProcessData(filePath, listIdentifier) {
             try {
@@ -105,12 +258,8 @@
                 const jsonData = await response.json();
                 return jsonData.map((rep, index) => ({
                     id: `${listIdentifier}-${index}-${rep.district}`, 
-                    district: rep.district,
-                    name: rep.representative_name,
-                    phone: rep.phone_number,
-                    party: rep.party,
-                    email: rep.email,
-                    list: listIdentifier 
+                    district: rep.district, name: rep.representative_name, phone: rep.phone_number,
+                    party: rep.party, email: rep.email, list: listIdentifier 
                 }));
             } catch (error) {
                 console.error(`Error fetching initial data for ${listIdentifier} in dashboard:`, error);
@@ -119,7 +268,7 @@
         }
 
         async function loadInitialRepLists() {
-            if (allMasterRepData.length > 0) return; // Already loaded
+            if (allMasterRepData.length > 0 && initialYaeDemsData.length > 0) return; 
             initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
             initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
             initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
@@ -134,13 +283,12 @@
                 adminUserEmailSpan.textContent = user.email;
                 loginSection.classList.add('hidden');
                 dashboardContent.classList.remove('hidden');
-                await loadInitialRepLists(); // Ensure rep lists are loaded before fetching/processing
+                await loadInitialRepLists(); 
                 fetchAndDisplayDashboardData();
             } else {
                 console.log("User logged out.");
                 loginSection.classList.remove('hidden');
                 dashboardContent.classList.add('hidden');
-                // if (rawDataOutput) rawDataOutput.textContent = ''; // Clear raw data output on logout
             }
         });
 
@@ -160,13 +308,10 @@
 
         async function fetchAndDisplayDashboardData() {
             if (!auth.currentUser) {
-                console.log("Not logged in, cannot fetch dashboard data.");
                 metricsContainer.innerHTML = "<p>Please log in as admin to view data.</p>";
                 representativeDetailsContainer.innerHTML = "";
-                // if (rawDataOutput) rawDataOutput.textContent = ""; // Clear raw data output
                 return;
             }
-            console.log("Attempting to fetch dashboard data as user:", auth.currentUser.uid);
             metricsContainer.innerHTML = "<p>Loading metrics...</p>";
             representativeDetailsContainer.innerHTML = "";
 
@@ -176,16 +321,12 @@
                 const allDevicesData = snapshot.val();
 
                 if (allDevicesData) {
-                    console.log("Successfully fetched data from /devices node.");
-                    // rawDataOutput.textContent = JSON.stringify(allDevicesData, null, 2); // Removed
                     processDashboardMetrics(allDevicesData);
                 } else {
-                    // if (rawDataOutput) rawDataOutput.textContent = 'No data found at /devices or access denied.'; // Removed
                     metricsContainer.innerHTML = '<p>No dashboard data found or access denied.</p>';
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
-                // if (rawDataOutput) rawDataOutput.textContent = `Error fetching data: ${error.message}.`; // Removed
                 metricsContainer.innerHTML = `<p>Error loading dashboard data: ${error.message}</p>`;
             }
         }
@@ -194,25 +335,14 @@
             let totalCalls = 0;
             let totalEmails = 0;
             const overallResponsesCount = {}; 
-            const repDataMap = new Map(); // Using a Map for easier rep data management
+            const repDataMap = new Map(); 
             const uniqueParticipants = Object.keys(allDevicesData).length;
 
-            console.log("allMasterRepData for dashboard processing:", JSON.parse(JSON.stringify(allMasterRepData))); // Deep copy for logging
-
-            // Initialize repDataMap from allMasterRepData
             allMasterRepData.forEach(masterRep => {
-                // console.log("Initializing repDataMap with masterRep:", masterRep); // Log each masterRep
-                if (!masterRep.party) {
-                    console.warn("Master rep missing party:", masterRep);
-                }
+                if (!masterRep.party) console.warn("Master rep missing party:", masterRep);
                 repDataMap.set(masterRep.id, {
-                    name: masterRep.name,
-                    district: masterRep.district,
-                    party: masterRep.party,
-                    listName: masterRep.list,
-                    calls: 0,
-                    emails: 0,
-                    responses: {} // e.g. { against: 1, for: 0 }
+                    name: masterRep.name, district: masterRep.district, party: masterRep.party,
+                    listName: masterRep.list, calls: 0, emails: 0, responses: {}
                 });
             });
 
@@ -223,21 +353,17 @@
                 const processListForDevice = (repsListFromDevice) => {
                     if (!repsListFromDevice) return;
                     repsListFromDevice.forEach(deviceRep => {
-                        if (!repDataMap.has(deviceRep.id)) {
-                            // This case should ideally not happen if all reps are in master lists
-                            // but as a fallback, create an entry
+                        let repAggregatedData = repDataMap.get(deviceRep.id);
+                        if (!repAggregatedData) { 
                             const masterRepInfo = allMasterRepData.find(mr => mr.name === deviceRep.name && mr.district === deviceRep.district && mr.list === deviceRep.list);
                             repDataMap.set(deviceRep.id, {
-                                name: deviceRep.name,
-                                district: deviceRep.district,
-                                party: masterRepInfo ? masterRepInfo.party : 'N/A',
-                                listName: deviceRep.list,
+                                name: deviceRep.name, district: deviceRep.district,
+                                party: masterRepInfo ? masterRepInfo.party : 'N/A', listName: deviceRep.list,
                                 calls: 0, emails: 0, responses: {}
                             });
+                            repAggregatedData = repDataMap.get(deviceRep.id);
                         }
                         
-                        const repAggregatedData = repDataMap.get(deviceRep.id);
-
                         if (deviceRep.called) {
                             totalCalls++;
                             repAggregatedData.calls++;
@@ -257,29 +383,24 @@
                 processListForDevice(deviceLatestData.representativesNayVoters);
             }
             
-            // --- Display Metrics ---
-            metricsContainer.innerHTML = ''; // Clear "Loading..."
+            metricsContainer.innerHTML = ''; 
+            if (overallResponsesChartInstance) overallResponsesChartInstance.destroy();
+            if (listVolumeChartInstance) listVolumeChartInstance.destroy();
 
-            // Metric 6: Unique Participants
             metricsContainer.innerHTML += `<div class="metric"><h3>Unique Participants</h3><p>${uniqueParticipants}</p></div>`;
-            
-            // Total Calls & Emails
             metricsContainer.innerHTML += `<div class="metric"><h3>Total Calls Logged</h3><p>${totalCalls}</p></div>`;
             metricsContainer.innerHTML += `<div class="metric"><h3>Total Emails Logged</h3><p>${totalEmails}</p></div>`;
-
-            // Metric 1: Overall "Against" Count
             const totalAgainst = overallResponsesCount['against'] || 0;
             metricsContainer.innerHTML += `<div class="metric"><h3>Overall "Against" Responses</h3><p>${totalAgainst}</p></div>`;
 
-            // Metric 7: Overall Response Breakdown
             let overallResponsesHTML = '<ul>';
+            if (Object.keys(overallResponsesCount).length === 0) overallResponsesHTML += '<li>No responses logged yet.</li>';
             for (const responseType in overallResponsesCount) {
                 overallResponsesHTML += `<li>${responseType.replace(/_/g, ' ')}: ${overallResponsesCount[responseType]}</li>`;
             }
             overallResponsesHTML += '</ul>';
             metricsContainer.innerHTML += `<div class="metric"><h3>Overall Response Summary</h3>${overallResponsesHTML}</div>`;
 
-            // Metric 3: Contact Volume for Target Lists
             const listContactVolume = { yaeDems: {calls:0, emails:0, responses:{}}, chairFlips: {calls:0, emails:0, responses:{}}, nayVoters: {calls:0, emails:0, responses:{}} };
             repDataMap.forEach(rep => {
                 if (listContactVolume[rep.listName]) {
@@ -294,30 +415,29 @@
             for(const listName in listContactVolume) {
                 listVolumeHTML += `<h4>${listName.replace(/([A-Z])/g, ' $1').trim()} List:</h4>`;
                 listVolumeHTML += `<p>Calls: ${listContactVolume[listName].calls}, Emails: ${listContactVolume[listName].emails}</p>`;
-                listVolumeHTML += '<ul>Response Details:';
-                for(const resp in listContactVolume[listName].responses) {
-                     listVolumeHTML += `<li>${resp.replace(/_/g, ' ')}: ${listContactVolume[listName].responses[resp]}</li>`;
+                if (Object.keys(listContactVolume[listName].responses).length > 0) {
+                    listVolumeHTML += '<ul>Response Details:';
+                    for(const resp in listContactVolume[listName].responses) {
+                         listVolumeHTML += `<li>${resp.replace(/_/g, ' ')}: ${listContactVolume[listName].responses[resp]}</li>`;
+                    }
+                    listVolumeHTML += '</ul>';
+                } else {
+                    listVolumeHTML += '<p><em>No responses logged for this list.</em></p>';
                 }
-                listVolumeHTML += '</ul>';
             }
             metricsContainer.innerHTML += `<div class="metric"><h3>Contact Volume by List</h3>${listVolumeHTML}</div>`;
             
-            // Representative Details Table (includes Metric 2, 4, 5)
-            representativeDetailsContainer.innerHTML = '<h2>Representative Details</h2>';
+            representativeDetailsContainer.innerHTML = ''; 
             const repTable = document.createElement('table');
             repTable.innerHTML = `<thead><tr><th>Representative</th><th>District</th><th>Party</th><th>List</th><th>Calls</th><th>Emails</th><th>"Against" Responses</th><th>"For" Responses</th><th>Against/For Ratio</th></tr></thead><tbody></tbody>`;
             const repTableBody = repTable.getElementsByTagName('tbody')[0];
-
             const sortedReps = Array.from(repDataMap.values()).sort((a,b) => (b.responses.against || 0) - (a.responses.against || 0)); 
-
             sortedReps.forEach(detail => {
-                if (!detail.party) {
-                    console.warn("Detail missing party before rendering table:", detail);
-                }
+                if (!detail.party) console.warn("Detail missing party before rendering table:", detail);
                 const row = repTableBody.insertRow();
                 row.insertCell().textContent = detail.name;
                 row.insertCell().textContent = detail.district;
-                row.insertCell().textContent = detail.party;
+                row.insertCell().textContent = detail.party || 'N/A'; 
                 row.insertCell().textContent = detail.listName.replace(/([A-Z])/g, ' $1').trim();
                 row.insertCell().textContent = detail.calls;
                 row.insertCell().textContent = detail.emails;
@@ -327,13 +447,55 @@
                 row.insertCell().textContent = forResp;
                 let ratio = 'N/A';
                 if (forResp > 0) ratio = (againstResp / forResp).toFixed(2);
-                else if (againstResp > 0) ratio = 'Infinity (all against)';
+                else if (againstResp > 0) ratio = 'Infinity';
                 row.insertCell().textContent = ratio;
             });
             representativeDetailsContainer.appendChild(repTable);
+
+            if (overallResponsesChartCtx && Object.keys(overallResponsesCount).length > 0) {
+                const responseLabels = Object.keys(overallResponsesCount).map(key => key.replace(/_/g, ' '));
+                const responseData = Object.values(overallResponsesCount);
+                overallResponsesChartInstance = new Chart(overallResponsesChartCtx, {
+                    type: 'pie', data: { labels: responseLabels, datasets: [{
+                        label: 'Overall Responses', data: responseData,
+                        backgroundColor: ['rgba(255, 99, 132, 0.7)','rgba(54, 162, 235, 0.7)','rgba(255, 206, 86, 0.7)','rgba(75, 192, 192, 0.7)','rgba(153, 102, 255, 0.7)','rgba(255, 159, 64, 0.7)','rgba(199, 199, 199, 0.7)']
+                    }]}, options: { responsive: true, maintainAspectRatio: false }});
+            } else if (overallResponsesChartCtx) { 
+                 overallResponsesChartCtx.clearRect(0,0, overallResponsesChartCtx.canvas.width, overallResponsesChartCtx.canvas.height);
+                 // Simple text placeholder for empty chart
+                 overallResponsesChartCtx.font = "16px Arial";
+                 overallResponsesChartCtx.fillStyle = "var(--dark-text-secondary)";
+                 overallResponsesChartCtx.textAlign = "center";
+                 overallResponsesChartCtx.fillText("No response data to display.", overallResponsesChartCtx.canvas.width / 2, overallResponsesChartCtx.canvas.height / 2);
+            }
+
+
+            if (listVolumeChartCtx) {
+                const listNames = Object.keys(listContactVolume).map(name => name.replace(/([A-Z])/g, ' $1').trim());
+                const callData = Object.values(listContactVolume).map(list => list.calls);
+                const emailData = Object.values(listContactVolume).map(list => list.emails);
+                listVolumeChartInstance = new Chart(listVolumeChartCtx, {
+                    type: 'bar', data: { labels: listNames, datasets: [
+                        { label: 'Calls', data: callData, backgroundColor: 'rgba(54, 162, 235, 0.7)' },
+                        { label: 'Emails', data: emailData, backgroundColor: 'rgba(75, 192, 192, 0.7)' }
+                    ]}, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }});
+            }
         }
-        // Load initial rep lists when script loads, so they are available for metric processing
         loadInitialRepLists();
+
+        document.querySelectorAll('.collapsible-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                if (content.style.display === "block" || content.classList.contains('active')) {
+                    content.style.display = "none";
+                    content.classList.remove('active');
+                } else {
+                    content.style.display = "block";
+                    content.classList.add('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
