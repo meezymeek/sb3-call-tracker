@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SB3 Call Tracker - Admin Dashboard</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #333; }
+        input[type="email"], input[type="password"], button {
+            padding: 10px;
+            margin: 5px 0 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button { background-color: #4CAF50; color: white; cursor: pointer; border: none; }
+        button:hover { background-color: #45a049; }
+        #loginSection, #dashboardContent, #adminInfo { margin-bottom: 20px; }
+        .hidden { display: none; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom:20px;}
+        .metric { border: 1px solid #eee; padding: 15px; border-radius: 5px; background-color: #f9f9f9; }
+        .metric h3 { margin-top: 0; font-size: 1.2em; color: #4CAF50; }
+        .metric p, .metric ul { font-size: 1em; margin-bottom: 0;}
+        .metric ul { list-style: none; padding-left: 0;}
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard - SB3 Call Tracker</h1>
+
+        <div id="loginSection">
+            <h2>Admin Login</h2>
+            <input type="email" id="adminEmail" placeholder="Email">
+            <input type="password" id="adminPassword" placeholder="Password">
+            <button id="loginButton">Login</button>
+            <p id="loginError" style="color:red;"></p>
+        </div>
+
+        <div id="dashboardContent" class="hidden">
+            <div id="adminInfo" style="display: flex; justify-content: space-between; align-items: center;">
+                <p>Logged in as: <span id="adminUserEmail"></span></p>
+                <button id="logoutButton">Logout</button>
+            </div>
+            <h2>Live Metrics</h2>
+            <div id="metricsContainer" class="metrics-grid">
+                <!-- Metrics will be loaded here -->
+            </div>
+            <div id="representativeDetailsContainer">
+                 <!-- Representative details table will be loaded here -->
+            </div>
+            <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
+            
+            <h2>Raw Data (from /devices)</h2>
+            <pre id="rawDataOutput" style="background-color: #eee; padding:10px; border:1px solid #ccc; max-height: 300px; overflow-y: auto;"></pre>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAm-QMDte5ytPN7Z8Cz7VaDe7hUVGsTE-8",
+            authDomain: "sb3calltool.firebaseapp.com",
+            projectId: "sb3calltool",
+            storageBucket: "sb3calltool.appspot.com",
+            messagingSenderId: "834566220861",
+            appId: "1:834566220861:web:6475e1ddf50c00e54b0e54",
+            measurementId: "G-BC4Z144B00",
+            databaseURL: "https://sb3calltool-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const loginSection = document.getElementById('loginSection');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const adminUserEmailSpan = document.getElementById('adminUserEmail');
+        const loginErrorP = document.getElementById('loginError');
+        const rawDataOutput = document.getElementById('rawDataOutput');
+        const metricsContainer = document.getElementById('metricsContainer');
+        const representativeDetailsContainer = document.getElementById('representativeDetailsContainer');
+        const refreshDataButton = document.getElementById('refreshDataButton');
+
+        let initialYaeDemsData = [];
+        let initialChairFlipsData = [];
+        let initialNayVotersData = [];
+        let allMasterRepData = []; // To store a flat list of all reps from JSON files
+
+        async function fetchAndProcessData(filePath, listIdentifier) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
+                const jsonData = await response.json();
+                return jsonData.map((rep, index) => ({
+                    id: `${listIdentifier}-${index}-${rep.district}`, 
+                    district: rep.district,
+                    name: rep.representative_name,
+                    phone: rep.phone_number,
+                    party: rep.party,
+                    email: rep.email,
+                    list: listIdentifier 
+                }));
+            } catch (error) {
+                console.error(`Error fetching initial data for ${listIdentifier} in dashboard:`, error);
+                return [];
+            }
+        }
+
+        async function loadInitialRepLists() {
+            if (allMasterRepData.length > 0) return; // Already loaded
+            initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
+            initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
+            initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
+            console.log("Fetched list lengths:", initialYaeDemsData.length, initialChairFlipsData.length, initialNayVotersData.length);
+            allMasterRepData = [...initialYaeDemsData, ...initialChairFlipsData, ...initialNayVotersData];
+            console.log("Initial representative lists loaded for dashboard reference. Total master reps:", allMasterRepData.length);
+        }
+        
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                console.log("User logged in:", user.email);
+                adminUserEmailSpan.textContent = user.email;
+                loginSection.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                await loadInitialRepLists(); // Ensure rep lists are loaded before fetching/processing
+                fetchAndDisplayDashboardData();
+            } else {
+                console.log("User logged out.");
+                loginSection.classList.remove('hidden');
+                dashboardContent.classList.add('hidden');
+            }
+        });
+
+        loginButton.addEventListener('click', () => {
+            const email = adminEmailInput.value;
+            const password = adminPasswordInput.value;
+            loginErrorP.textContent = '';
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    console.error("Admin login error:", error);
+                    loginErrorP.textContent = error.message;
+                });
+        });
+
+        logoutButton.addEventListener('click', () => auth.signOut());
+        refreshDataButton.addEventListener('click', fetchAndDisplayDashboardData);
+
+        async function fetchAndDisplayDashboardData() {
+            if (!auth.currentUser) {
+                console.log("Not logged in, cannot fetch dashboard data.");
+                metricsContainer.innerHTML = "<p>Please log in as admin to view data.</p>";
+                representativeDetailsContainer.innerHTML = "";
+                rawDataOutput.textContent = "";
+                return;
+            }
+            console.log("Attempting to fetch dashboard data as user:", auth.currentUser.uid);
+            metricsContainer.innerHTML = "<p>Loading metrics...</p>";
+            representativeDetailsContainer.innerHTML = "";
+
+            try {
+                const devicesRef = db.ref('devices');
+                const snapshot = await devicesRef.once('value');
+                const allDevicesData = snapshot.val();
+
+                if (allDevicesData) {
+                    console.log("Successfully fetched data from /devices node.");
+                    rawDataOutput.textContent = JSON.stringify(allDevicesData, null, 2);
+                    processDashboardMetrics(allDevicesData);
+                } else {
+                    rawDataOutput.textContent = 'No data found at /devices or access denied.';
+                    metricsContainer.innerHTML = '<p>No dashboard data found or access denied.</p>';
+                }
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                rawDataOutput.textContent = `Error fetching data: ${error.message}.`;
+                metricsContainer.innerHTML = `<p>Error loading dashboard data: ${error.message}</p>`;
+            }
+        }
+
+        function processDashboardMetrics(allDevicesData) {
+            let totalCalls = 0;
+            let totalEmails = 0;
+            const overallResponsesCount = {}; 
+            const repDataMap = new Map(); // Using a Map for easier rep data management
+            const uniqueParticipants = Object.keys(allDevicesData).length;
+
+            console.log("allMasterRepData for dashboard processing:", JSON.parse(JSON.stringify(allMasterRepData))); // Deep copy for logging
+
+            // Initialize repDataMap from allMasterRepData
+            allMasterRepData.forEach(masterRep => {
+                // console.log("Initializing repDataMap with masterRep:", masterRep); // Log each masterRep
+                if (!masterRep.party) {
+                    console.warn("Master rep missing party:", masterRep);
+                }
+                repDataMap.set(masterRep.id, {
+                    name: masterRep.name,
+                    district: masterRep.district,
+                    party: masterRep.party,
+                    listName: masterRep.list,
+                    calls: 0,
+                    emails: 0,
+                    responses: {} // e.g. { against: 1, for: 0 }
+                });
+            });
+
+            for (const deviceId in allDevicesData) {
+                const deviceLatestData = allDevicesData[deviceId].latest;
+                if (!deviceLatestData) continue;
+
+                const processListForDevice = (repsListFromDevice) => {
+                    if (!repsListFromDevice) return;
+                    repsListFromDevice.forEach(deviceRep => {
+                        if (!repDataMap.has(deviceRep.id)) {
+                            // This case should ideally not happen if all reps are in master lists
+                            // but as a fallback, create an entry
+                            const masterRepInfo = allMasterRepData.find(mr => mr.name === deviceRep.name && mr.district === deviceRep.district && mr.list === deviceRep.list);
+                            repDataMap.set(deviceRep.id, {
+                                name: deviceRep.name,
+                                district: deviceRep.district,
+                                party: masterRepInfo ? masterRepInfo.party : 'N/A',
+                                listName: deviceRep.list,
+                                calls: 0, emails: 0, responses: {}
+                            });
+                        }
+                        
+                        const repAggregatedData = repDataMap.get(deviceRep.id);
+
+                        if (deviceRep.called) {
+                            totalCalls++;
+                            repAggregatedData.calls++;
+                            if (deviceRep.response && deviceRep.response !== 'not_selected') {
+                                overallResponsesCount[deviceRep.response] = (overallResponsesCount[deviceRep.response] || 0) + 1;
+                                repAggregatedData.responses[deviceRep.response] = (repAggregatedData.responses[deviceRep.response] || 0) + 1;
+                            }
+                        }
+                        if (deviceRep.emailed) {
+                            totalEmails++;
+                            repAggregatedData.emails++;
+                        }
+                    });
+                };
+                processListForDevice(deviceLatestData.representativesYaeDems);
+                processListForDevice(deviceLatestData.representativesChairFlips);
+                processListForDevice(deviceLatestData.representativesNayVoters);
+            }
+            
+            // --- Display Metrics ---
+            metricsContainer.innerHTML = ''; // Clear "Loading..."
+
+            // Metric 6: Unique Participants
+            metricsContainer.innerHTML += `<div class="metric"><h3>Unique Participants</h3><p>${uniqueParticipants}</p></div>`;
+            
+            // Total Calls & Emails
+            metricsContainer.innerHTML += `<div class="metric"><h3>Total Calls Logged</h3><p>${totalCalls}</p></div>`;
+            metricsContainer.innerHTML += `<div class="metric"><h3>Total Emails Logged</h3><p>${totalEmails}</p></div>`;
+
+            // Metric 1: Overall "Against" Count
+            const totalAgainst = overallResponsesCount['against'] || 0;
+            metricsContainer.innerHTML += `<div class="metric"><h3>Overall "Against" Responses</h3><p>${totalAgainst}</p></div>`;
+
+            // Metric 7: Overall Response Breakdown
+            let overallResponsesHTML = '<ul>';
+            for (const responseType in overallResponsesCount) {
+                overallResponsesHTML += `<li>${responseType.replace(/_/g, ' ')}: ${overallResponsesCount[responseType]}</li>`;
+            }
+            overallResponsesHTML += '</ul>';
+            metricsContainer.innerHTML += `<div class="metric"><h3>Overall Response Summary</h3>${overallResponsesHTML}</div>`;
+
+            // Metric 3: Contact Volume for Target Lists
+            const listContactVolume = { yaeDems: {calls:0, emails:0, responses:{}}, chairFlips: {calls:0, emails:0, responses:{}}, nayVoters: {calls:0, emails:0, responses:{}} };
+            repDataMap.forEach(rep => {
+                if (listContactVolume[rep.listName]) {
+                    listContactVolume[rep.listName].calls += rep.calls;
+                    listContactVolume[rep.listName].emails += rep.emails;
+                    for(const respType in rep.responses) {
+                        listContactVolume[rep.listName].responses[respType] = (listContactVolume[rep.listName].responses[respType] || 0) + rep.responses[respType];
+                    }
+                }
+            });
+            let listVolumeHTML = '';
+            for(const listName in listContactVolume) {
+                listVolumeHTML += `<h4>${listName.replace(/([A-Z])/g, ' $1').trim()} List:</h4>`;
+                listVolumeHTML += `<p>Calls: ${listContactVolume[listName].calls}, Emails: ${listContactVolume[listName].emails}</p>`;
+                listVolumeHTML += '<ul>Response Details:';
+                for(const resp in listContactVolume[listName].responses) {
+                     listVolumeHTML += `<li>${resp.replace(/_/g, ' ')}: ${listContactVolume[listName].responses[resp]}</li>`;
+                }
+                listVolumeHTML += '</ul>';
+            }
+            metricsContainer.innerHTML += `<div class="metric"><h3>Contact Volume by List</h3>${listVolumeHTML}</div>`;
+            
+            // Representative Details Table (includes Metric 2, 4, 5)
+            representativeDetailsContainer.innerHTML = '<h2>Representative Details</h2>';
+            const repTable = document.createElement('table');
+            repTable.innerHTML = `<thead><tr><th>Representative</th><th>District</th><th>Party</th><th>List</th><th>Calls</th><th>Emails</th><th>"Against" Responses</th><th>"For" Responses</th><th>Against/For Ratio</th></tr></thead><tbody></tbody>`;
+            const repTableBody = repTable.getElementsByTagName('tbody')[0];
+
+            const sortedReps = Array.from(repDataMap.values()).sort((a,b) => (b.responses.against || 0) - (a.responses.against || 0)); 
+
+            sortedReps.forEach(detail => {
+                if (!detail.party) {
+                    console.warn("Detail missing party before rendering table:", detail);
+                }
+                const row = repTableBody.insertRow();
+                row.insertCell().textContent = detail.name;
+                row.insertCell().textContent = detail.district;
+                row.insertCell().textContent = detail.party;
+                row.insertCell().textContent = detail.listName.replace(/([A-Z])/g, ' $1').trim();
+                row.insertCell().textContent = detail.calls;
+                row.insertCell().textContent = detail.emails;
+                const againstResp = detail.responses.against || 0;
+                const forResp = detail.responses.for || 0;
+                row.insertCell().textContent = againstResp;
+                row.insertCell().textContent = forResp;
+                let ratio = 'N/A';
+                if (forResp > 0) ratio = (againstResp / forResp).toFixed(2);
+                else if (againstResp > 0) ratio = 'Infinity (all against)';
+                row.insertCell().textContent = ratio;
+            });
+            representativeDetailsContainer.appendChild(repTable);
+        }
+        // Load initial rep lists when script loads, so they are available for metric processing
+        loadInitialRepLists();
+    </script>
+</body>
+</html>
