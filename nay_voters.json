@@ -1,0 +1,520 @@
+[
+  {
+    "representative_name": "ALDERS, Daniel",
+    "phone_number": "(512) 463-0584",
+    "district": "6",
+    "party": "R",
+    "email": "daniel.alders@house.texas.gov"
+  },
+  {
+    "representative_name": "ASHBY, Trent",
+    "phone_number": "(512) 463-0508",
+    "district": "9",
+    "party": "R",
+    "email": "trent.ashby@house.texas.gov"
+  },
+  {
+    "representative_name": "BARRY, Jeff",
+    "phone_number": "(512) 463-0707",
+    "district": "29",
+    "party": "R",
+    "email": "jeff.barry@house.texas.gov"
+  },
+  {
+    "representative_name": "BELL, Cecil Jr.",
+    "phone_number": "(512) 463-0650",
+    "district": "3",
+    "party": "R",
+    "email": "cecil.bell@house.texas.gov"
+  },
+  {
+    "representative_name": "BELL, Keith",
+    "phone_number": "(512) 463-0458",
+    "district": "4",
+    "party": "R",
+    "email": "keith.bell@house.texas.gov"
+  },
+  {
+    "representative_name": "BONNEN, Greg",
+    "phone_number": "(512) 463-0729",
+    "district": "24",
+    "party": "R",
+    "email": "greg.bonnen@house.texas.gov"
+  },
+  {
+    "representative_name": "BUCKLEY, Brad",
+    "phone_number": "(512) 463-0684",
+    "district": "54",
+    "party": "R",
+    "email": "brad.buckley@house.texas.gov"
+  },
+  {
+    "representative_name": "BUMGARNER, Benjamin",
+    "phone_number": "(512) 463-0688",
+    "district": "63",
+    "party": "R",
+    "email": "ben.bumgarner@house.texas.gov"
+  },
+  {
+    "representative_name": "BUTTON, Angie Chen",
+    "phone_number": "(512) 463-0486",
+    "district": "112",
+    "party": "R",
+    "email": "angie.button@house.texas.gov"
+  },
+  {
+    "representative_name": "CAPRIGLIONE, Giovanni",
+    "phone_number": "(512) 463-0690",
+    "district": "98",
+    "party": "R",
+    "email": "giovanni.capriglione@house.texas.gov"
+  },
+  {
+    "representative_name": "COOK, David",
+    "phone_number": "(512) 463-0374",
+    "district": "96",
+    "party": "R",
+    "email": "david.cook@house.texas.gov"
+  },
+  {
+    "representative_name": "CRADDICK, Tom",
+    "phone_number": "(512) 463-0500",
+    "district": "82",
+    "party": "R",
+    "email": "tom.craddick@house.texas.gov"
+  },
+  {
+    "representative_name": "CURRY, Pat",
+    "phone_number": "(512) 463-0496",
+    "district": "26",
+    "party": "R",
+    "email": "pat.curry@house.texas.gov"
+  },
+  {
+    "representative_name": "DARBY, Drew",
+    "phone_number": "(512) 463-0331",
+    "district": "72",
+    "party": "R",
+    "email": "drew.darby@house.texas.gov"
+  },
+  {
+    "representative_name": "DEAN, Jay",
+    "phone_number": "(512) 463-0750",
+    "district": "7",
+    "party": "R",
+    "email": "jay.dean@house.texas.gov"
+  },
+  {
+    "representative_name": "DEAYALA, Mano",
+    "phone_number": "(512) 463-0664",
+    "district": "133",
+    "party": "R",
+    "email": "mano.deayala@house.texas.gov"
+  },
+  {
+    "representative_name": "DORAZIO, Mark",
+    "phone_number": "(512) 463-0646",
+    "district": "122",
+    "party": "R",
+    "email": "mark.dorazio@house.texas.gov"
+  },
+  {
+    "representative_name": "DYSON, Paul",
+    "phone_number": "(512) 463-0698",
+    "district": "14",
+    "party": "R",
+    "email": "paul.dyson@house.texas.gov"
+  },
+  {
+    "representative_name": "FAIRLY, Caroline",
+    "phone_number": "(512) 463-0470",
+    "district": "87",
+    "party": "R",
+    "email": "caroline.fairly@house.texas.gov"
+  },
+  {
+    "representative_name": "FRANK, James",
+    "phone_number": "(512) 463-0534",
+    "district": "69",
+    "party": "R",
+    "email": "james.frank@house.texas.gov"
+  },
+  {
+    "representative_name": "GATES, Gary",
+    "phone_number": "(512) 463-0657",
+    "district": "28",
+    "party": "R",
+    "email": "gary.gates@house.texas.gov"
+  },
+  {
+    "representative_name": "GERDES, Stan",
+    "phone_number": "(512) 463-0682",
+    "district": "17",
+    "party": "R",
+    "email": "stan.gerdes@house.texas.gov"
+  },
+  {
+    "representative_name": "GEREN, Charlie",
+    "phone_number": "(512) 463-0610",
+    "district": "99",
+    "party": "R",
+    "email": "charlie.geren@house.texas.gov"
+  },
+  {
+    "representative_name": "HARLESS, Sam",
+    "phone_number": "(512) 463-0496",
+    "district": "126",
+    "party": "R",
+    "email": "sam.harless@house.texas.gov"
+  },
+  {
+    "representative_name": "HARRIS, Cody",
+    "phone_number": "(512) 463-0730",
+    "district": "8",
+    "party": "R",
+    "email": "cody.harris@house.texas.gov"
+  },
+  {
+    "representative_name": "HARRIS DAVILA, Caroline",
+    "phone_number": "(512) 463-0516",
+    "district": "10",
+    "party": "R",
+    "email": "brian.harrison@house.texas.gov"
+  },
+  {
+    "representative_name": "HAYES, Richard",
+    "phone_number": "(512) 463-0556",
+    "district": "57",
+    "party": "R",
+    "email": "richard.hayes@house.texas.gov"
+  },
+  {
+    "representative_name": "HEFNER, Cole",
+    "phone_number": "(512) 463-0271",
+    "district": "5",
+    "party": "R",
+    "email": "cole.hefner@house.texas.gov"
+  },
+  {
+    "representative_name": "HICKLAND, Hillary",
+    "phone_number": "(512) 463-0630",
+    "district": "55",
+    "party": "R",
+    "email": "hillary.hickland@house.texas.gov"
+  },
+  {
+    "representative_name": "HOLT, Janis",
+    "phone_number": "(512) 463-0570",
+    "district": "18",
+    "party": "R",
+    "email": "janis.holt@house.texas.gov"
+  },
+  {
+    "representative_name": "HOPPER, Andy",
+    "phone_number": "(512) 463-0582",
+    "district": "64",
+    "party": "R",
+    "email": "andy.hopper@house.texas.gov"
+  },
+  {
+    "representative_name": "HULL, Lacey",
+    "phone_number": "(512) 463-0727",
+    "district": "138",
+    "party": "R",
+    "email": "lacey.hull@house.texas.gov"
+  },
+  {
+    "representative_name": "HUNTER, Todd",
+    "phone_number": "(512) 463-0672",
+    "district": "32",
+    "party": "R",
+    "email": "todd.hunter@house.texas.gov"
+  },
+  {
+    "representative_name": "KERWIN, Helen",
+    "phone_number": "(512) 463-0538",
+    "district": "58",
+    "party": "R",
+    "email": "helen.kerwin@house.texas.gov"
+  },
+  {
+    "representative_name": "LAHOOD, Marc",
+    "phone_number": "(512) 463-0686",
+    "district": "121",
+    "party": "R",
+    "email": "marc.lahood@house.texas.gov"
+  },
+  {
+    "representative_name": "LAMBERT, Stan",
+    "phone_number": "(512) 463-0718",
+    "district": "71",
+    "party": "R",
+    "email": "stan.lambert@house.texas.gov"
+  },
+  {
+    "representative_name": "LANDGRAF, Brooks",
+    "phone_number": "(512) 463-0546",
+    "district": "81",
+    "party": "R",
+    "email": "brooks.landgraf@house.texas.gov"
+  },
+  {
+    "representative_name": "LEACH, Jeff",
+    "phone_number": "(512) 463-0544",
+    "district": "67",
+    "party": "R",
+    "email": "jeff.leach@house.texas.gov"
+  },
+  {
+    "representative_name": "LEO WILSON, Terri",
+    "phone_number": "(512) 463-0608",
+    "district": "23",
+    "party": "R",
+    "email": "terri.leo-wilson@house.texas.gov"
+  },
+  {
+    "representative_name": "LITTLE, Mitch",
+    "phone_number": "(512) 463-0478",
+    "district": "65",
+    "party": "R",
+    "email": "mitch.little@house.texas.gov"
+  },
+  {
+    "representative_name": "LOPEZ, Janie",
+    "phone_number": "(512) 463-0468",
+    "district": "37",
+    "party": "R",
+    "email": "janie.lopez@house.texas.gov"
+  },
+  {
+    "representative_name": "LOUDERBACK, A.J.",
+    "phone_number": "(512) 463-0456",
+    "district": "30",
+    "party": "R",
+    "email": "aj.louderback@house.texas.gov"
+  },
+  {
+    "representative_name": "LOWE, David",
+    "phone_number": "(512) 463-0488",
+    "district": "91",
+    "party": "R",
+    "email": "david.lowe@house.texas.gov"
+  },
+  {
+    "representative_name": "LUJAN, John",
+    "phone_number": "(512) 463-0953",
+    "district": "118",
+    "party": "R",
+    "email": "john.lujan@house.texas.gov"
+  },
+  {
+    "representative_name": "LUTHER, Shelley",
+    "phone_number": "(512) 463-0297",
+    "district": "62",
+    "party": "R",
+    "email": "shelley.luther@house.texas.gov"
+  },
+  {
+    "representative_name": "MCLAUGHLIN JR., Don",
+    "phone_number": "(512) 463-0194",
+    "district": "80",
+    "party": "R",
+    "email": "don.mclaughlin@house.texas.gov"
+  },
+  {
+    "representative_name": "MCQUEENEY, John",
+    "phone_number": "(512) 463-0608",
+    "district": "97",
+    "party": "R",
+    "email": "john.mcqueeney@house.texas.gov"
+  },
+  {
+    "representative_name": "METCALF, Will",
+    "phone_number": "(512) 463-0726",
+    "district": "16",
+    "party": "R",
+    "email": "will.metcalf@house.texas.gov"
+  },
+  {
+    "representative_name": "MEYER, Morgan",
+    "phone_number": "(512) 463-0367",
+    "district": "108",
+    "party": "R",
+    "email": "morgan.meyer@house.texas.gov"
+  },
+  {
+    "representative_name": "MONEY, Brent",
+    "phone_number": "(512) 463-0880",
+    "district": "2",
+    "party": "R",
+    "email": "brent.money@house.texas.gov"
+  },
+  {
+    "representative_name": "MORGAN, Matt",
+    "phone_number": "(512) 463-0710",
+    "district": "26",
+    "party": "R",
+    "email": "matt.morgan@house.texas.gov"
+  },
+  {
+    "representative_name": "NOBLE, Candy",
+    "phone_number": "(512) 463-0186",
+    "district": "89",
+    "party": "R",
+    "email": "candy.noble@house.texas.gov"
+  },
+  {
+    "representative_name": "OLCOTT, Mike",
+    "phone_number": "(512) 463-0656",
+    "district": "60",
+    "party": "R",
+    "email": "mike.olcott@house.texas.gov"
+  },
+  {
+    "representative_name": "OLIVERSON, Tom",
+    "phone_number": "(512) 463-0661",
+    "district": "130",
+    "party": "R",
+    "email": "tom.oliverson@house.texas.gov"
+  },
+  {
+    "representative_name": "ORR, Angelia",
+    "phone_number": "(512) 463-0600",
+    "district": "13",
+    "party": "R",
+    "email": "angelia.orr@house.texas.gov"
+  },
+  {
+    "representative_name": "PATTERSON, Jared",
+    "phone_number": "(512) 463-0694",
+    "district": "106",
+    "party": "R",
+    "email": "jared.patterson@house.texas.gov"
+  },
+  {
+    "representative_name": "PAUL, Dennis",
+    "phone_number": "(512) 463-0734",
+    "district": "129",
+    "party": "R",
+    "email": "dennis.paul@house.texas.gov"
+  },
+  {
+    "representative_name": "PIERSON, Katrina",
+    "phone_number": "(512) 463-0484",
+    "district": "150",
+    "party": "R",
+    "email": "katrina.pierson@house.texas.gov"
+  },
+  {
+    "representative_name": "SCHATZLINE, Nate",
+    "phone_number": "(512) 463-0562",
+    "district": "93",
+    "party": "R",
+    "email": "nate.schatzline@house.texas.gov"
+  },
+  {
+    "representative_name": "SCHOFIELD, Mike",
+    "phone_number": "(512) 463-0528",
+    "district": "132",
+    "party": "R",
+    "email": "mike.schofield@house.texas.gov"
+  },
+  {
+    "representative_name": "SCHOOLCRAFT, Alan",
+    "phone_number": "(512) 463-0602",
+    "district": "44",
+    "party": "R",
+    "email": "alan.schoolcraft@house.texas.gov"
+  },
+  {
+    "representative_name": "SHAHEEN, Matt",
+    "phone_number": "(512) 463-0594",
+    "district": "66",
+    "party": "R",
+    "email": "matt.shaheen@house.texas.gov"
+  },
+  {
+    "representative_name": "SHOFNER, Joanne",
+    "phone_number": "(512) 463-0592",
+    "district": "11",
+    "party": "R",
+    "email": "joanne.shofner@house.texas.gov"
+  },
+  {
+    "representative_name": "SLAWSON, Shelby",
+    "phone_number": "(512) 463-0538",
+    "district": "59",
+    "party": "R",
+    "email": "shelby.slawson@house.texas.gov"
+  },
+  {
+    "representative_name": "SMITHEE, John",
+    "phone_number": "(512) 463-0702",
+    "district": "86",
+    "party": "R",
+    "email": "john.smithee@house.texas.gov"
+  },
+  {
+    "representative_name": "SPILLER, David",
+    "phone_number": "(512) 463-0526",
+    "district": "68",
+    "party": "R",
+    "email": "david.spiller@house.texas.gov"
+  },
+  {
+    "representative_name": "SWANSON, Valoree",
+    "phone_number": "(512) 463-0572",
+    "district": "150",
+    "party": "R",
+    "email": "valoree.swanson@house.texas.gov"
+  },
+  {
+    "representative_name": "TEPPER, Carl",
+    "phone_number": "(512) 463-0604",
+    "district": "84",
+    "party": "R",
+    "email": "carl.tepper@house.texas.gov"
+  },
+  {
+    "representative_name": "TINDERHOLT, Tony",
+    "phone_number": "(512) 463-0624",
+    "district": "94",
+    "party": "R",
+    "email": "tony.tinderholt@house.texas.gov"
+  },
+  {
+    "representative_name": "TOTH, Steve",
+    "phone_number": "(512) 463-0797",
+    "district": "15",
+    "party": "R",
+    "email": "steve.toth@house.texas.gov"
+  },
+  {
+    "representative_name": "TROXCLAIR, Ellen",
+    "phone_number": "(512) 463-0490",
+    "district": "19",
+    "party": "R",
+    "email": "ellen.troxclair@house.texas.gov"
+  },
+  {
+    "representative_name": "VANDEAVER, Gary",
+    "phone_number": "(512) 463-0692",
+    "district": "1",
+    "party": "R",
+    "email": "gary.vandeaver@house.texas.gov"
+  },
+  {
+    "representative_name": "VASUT, Cody",
+    "phone_number": "(512) 463-0564",
+    "district": "25",
+    "party": "R",
+    "email": "cody.vasut@house.texas.gov"
+  },
+  {
+    "representative_name": "VIRDELL, Wesley",
+    "phone_number": "(512) 463-0536",
+    "district": "53",
+    "party": "R",
+    "email": "wes.virdell@house.texas.gov"
+  }
+]

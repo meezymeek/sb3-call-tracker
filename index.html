@@ -162,13 +162,12 @@
 
         .table-container {
             overflow-x: auto; 
-            margin-bottom: 20px; /* Add some space between tables */
+            margin-bottom: 20px; 
         }
 
         table {
             width: 100%; 
             border-collapse: collapse;
-            /* margin-bottom removed to be controlled by table-container */
             table-layout: fixed; 
         }
 
@@ -491,6 +490,27 @@
                 </tbody>
             </table>
         </div>
+        
+        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">NAY Voters</h2>
+        <div class="table-container">
+            <table id="repsTableNayVoters">
+                <thead>
+                    <tr>
+                        <th>Called</th>
+                        <th>Emailed</th>
+                        <th>District</th>
+                        <th>Representative</th>
+                        <th>Party</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Response Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows for NAY Voters will be inserted here -->
+                </tbody>
+            </table>
+        </div>
 
          <div class="footer-actions">
             <button id="saveAllChanges" class="button-like">Save All Changes</button>
@@ -626,6 +646,8 @@
                 let representativesYaeDems = [];
                 let initialChairFlipsData = [];
                 let representativesChairFlips = [];
+                let initialNayVotersData = [];
+                let representativesNayVoters = [];
                 
                 let userFullName = '';    
                 let userLocation = '';
@@ -633,6 +655,7 @@
                 // --- DOM Element References ---
                 const yaeDemsTableBody = document.getElementById('repsTableYaeDems').getElementsByTagName('tbody')[0];
                 const chairFlipsTableBody = document.getElementById('repsTableChairFlips').getElementsByTagName('tbody')[0];
+                const nayVotersTableBody = document.getElementById('repsTableNayVoters').getElementsByTagName('tbody')[0];
                 const exportButton = document.getElementById('exportData');
                 const importFile = document.getElementById('importFile');
                 const resetButton = document.getElementById('resetData');
@@ -695,13 +718,13 @@
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
                         const jsonData = await response.json();
                         return jsonData.map((rep, index) => ({
-                            id: `${listIdentifier}-${index}-${rep.district}`, // Ensure unique IDs across lists
+                            id: `${listIdentifier}-${index}-${rep.district}`, 
                             district: rep.district,
                             name: rep.representative_name,
                             phone: rep.phone_number,
                             party: rep.party,
                             email: rep.email,
-                            list: listIdentifier // Store which list this rep belongs to
+                            list: listIdentifier 
                         }));
                     } catch (error) {
                         console.error(`Error fetching initial data for ${listIdentifier}:`, error);
@@ -731,12 +754,14 @@
 
                     representativesYaeDems = processStoredList('representativesYaeDemsCallData', initialYaeDemsData);
                     representativesChairFlips = processStoredList('representativesChairFlipsCallData', initialChairFlipsData);
+                    representativesNayVoters = processStoredList('representativesNayVotersCallData', initialNayVotersData);
                 }
 
                 function saveDataToLocalStorage() {
                     try {
                         localStorage.setItem('representativesYaeDemsCallData', JSON.stringify(representativesYaeDems));
                         localStorage.setItem('representativesChairFlipsCallData', JSON.stringify(representativesChairFlips));
+                        localStorage.setItem('representativesNayVotersCallData', JSON.stringify(representativesNayVoters));
                         localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
                         localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
                         console.log("Data for all lists saved.");
@@ -763,9 +788,8 @@
                     dataArray.forEach((rep) => {
                         const row = tableBodyElement.insertRow();
                         row.setAttribute('data-id', rep.id);
-                        row.setAttribute('data-list', listIdentifier); // Identify which list the row belongs to
+                        row.setAttribute('data-list', listIdentifier);
 
-                        // Called Checkbox
                         const cellCalled = row.insertCell();
                         const calledCheckbox = document.createElement('input');
                         calledCheckbox.type = 'checkbox';
@@ -775,7 +799,6 @@
                         calledCheckbox.addEventListener('change', handleCalledChange);
                         cellCalled.appendChild(calledCheckbox);
 
-                        // Emailed Checkbox
                         const cellEmailed = row.insertCell();
                         const emailedCheckbox = document.createElement('input');
                         emailedCheckbox.type = 'checkbox';
@@ -789,7 +812,6 @@
                         row.insertCell().textContent = rep.name;
                         row.insertCell().textContent = rep.party;
                         
-                        // Email Link
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
                         emailLink.href = "#"; 
@@ -802,14 +824,12 @@
                         emailLink.addEventListener('click', handleEmailClick);
                         cellEmail.appendChild(emailLink);
 
-                        // Phone Link
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
                         phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
                         phoneLink.textContent = rep.phone;
                         cellPhone.appendChild(phoneLink);
 
-                        // Response Summary
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
                         updateResponseSummaryCell(cellResponseSummary, rep);
@@ -831,7 +851,10 @@
                 }
                 
                 function getRepresentativeListByIdentifier(listIdentifier) {
-                    return listIdentifier === 'yaeDems' ? representativesYaeDems : representativesChairFlips;
+                    if (listIdentifier === 'yaeDems') return representativesYaeDems;
+                    if (listIdentifier === 'chairFlips') return representativesChairFlips;
+                    if (listIdentifier === 'nayVoters') return representativesNayVoters;
+                    return []; // Default to empty if identifier is unknown
                 }
 
                 function handleCalledChange(event) {
@@ -844,7 +867,7 @@
                     const rep = currentList[repIndex];
                     rep.called = event.target.checked;
 
-                    const row = event.target.closest('tr'); // More robust way to find the row
+                    const row = event.target.closest('tr'); 
                     const summaryCell = row ? row.cells[row.cells.length -1] : null; 
 
                     if (rep.called) { 
@@ -922,9 +945,15 @@
                     currentList[repIndex].response = modalResponseSelect.value;
                     currentList[repIndex].notes = modalNotesTextarea.value;
                     
-                    const tableBodyElement = listIdentifier === 'yaeDems' ? yaeDemsTableBody : chairFlipsTableBody;
-                    const row = tableBodyElement.querySelector(`tr[data-id="${repId}"]`);
-                    if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], currentList[repIndex]);
+                    let tableBodyElement;
+                    if (listIdentifier === 'yaeDems') tableBodyElement = yaeDemsTableBody;
+                    else if (listIdentifier === 'chairFlips') tableBodyElement = chairFlipsTableBody;
+                    else if (listIdentifier === 'nayVoters') tableBodyElement = nayVotersTableBody;
+                    
+                    if (tableBodyElement) {
+                        const row = tableBodyElement.querySelector(`tr[data-id="${repId}"]`);
+                        if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], currentList[repIndex]);
+                    }
                     
                     responseModal.style.display = 'none';
                     saveDataToLocalStorage();
@@ -945,6 +974,7 @@
                     const dataToExport = {
                         representativesYaeDems: representativesYaeDems,
                         representativesChairFlips: representativesChairFlips,
+                        representativesNayVoters: representativesNayVoters,
                         emailSubject: emailSubjectTemplateInput.value,
                         emailBody: emailBodyTemplateInput.value,
                         userFullName: userFullName,
@@ -969,25 +999,21 @@
                             try {
                                 const importedData = JSON.parse(e.target.result);
                                 
-                                // Process YAE Dems
-                                if (importedData.representativesYaeDems && Array.isArray(importedData.representativesYaeDems) && initialYaeDemsData.length > 0) {
-                                    representativesYaeDems = initialYaeDemsData.map(initialRep => {
-                                        const importedRepData = importedData.representativesYaeDems.find(ir => ir.id === initialRep.id);
-                                        return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
-                                    });
-                                } else if (initialYaeDemsData.length > 0) {
-                                     representativesYaeDems = initialYaeDemsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                }
+                                const processImportedList = (dataKey, initialDataArray, targetArray) => {
+                                    if (importedData[dataKey] && Array.isArray(importedData[dataKey]) && initialDataArray.length > 0) {
+                                        return initialDataArray.map(initialRep => {
+                                            const importedRepData = importedData[dataKey].find(ir => ir.id === initialRep.id || (ir.name === initialRep.name && ir.district === initialRep.district)); // Fallback to name/district if ID changed
+                                            return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
+                                        });
+                                    } else if (initialDataArray.length > 0) {
+                                         return initialDataArray.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                    }
+                                    return [];
+                                };
 
-                                // Process Chair Flips
-                                if (importedData.representativesChairFlips && Array.isArray(importedData.representativesChairFlips) && initialChairFlipsData.length > 0) {
-                                    representativesChairFlips = initialChairFlipsData.map(initialRep => {
-                                        const importedRepData = importedData.representativesChairFlips.find(ir => ir.id === initialRep.id);
-                                        return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
-                                    });
-                                } else if (initialChairFlipsData.length > 0) {
-                                    representativesChairFlips = initialChairFlipsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                }
+                                representativesYaeDems = processImportedList('representativesYaeDems', initialYaeDemsData, representativesYaeDems);
+                                representativesChairFlips = processImportedList('representativesChairFlips', initialChairFlipsData, representativesChairFlips);
+                                representativesNayVoters = processImportedList('representativesNayVoters', initialNayVotersData, representativesNayVoters);
 
                                 emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
                                 emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
@@ -1003,6 +1029,7 @@
                                 saveDataToLocalStorage(); 
                                 renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
                                 renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
+                                renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
                                 alert('Progress imported successfully!');
                             } catch (error) {
                                 console.error('Error importing data:', error);
@@ -1017,10 +1044,10 @@
                 resetButton.addEventListener('click', () => {
                     if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
                         localStorage.clear(); 
-                        // Re-initialize from fetched data, then load (which will effectively be empty)
-                        initialYaeDemsData = []; // Clear to re-fetch if needed, or rely on already fetched.
+                        initialYaeDemsData = []; 
                         initialChairFlipsData = [];
-                        initializeApp(); // This will re-fetch and then load empty storage
+                        initialNayVotersData = [];
+                        initializeApp(); 
                         alert('All data has been reset.');
                     }
                 });
@@ -1034,20 +1061,14 @@
                     console.log("Attempting to fetch initial data for all lists...");
                     initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
                     initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
+                    initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
                     
                     loadListsFromLocalStorage();
                     
-                    if (initialYaeDemsData.length > 0) {
-                        renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
-                    } else {
-                        yaeDemsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load YAE Dems data.</td></tr>';
-                    }
-
-                    if (initialChairFlipsData.length > 0) {
-                        renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
-                    } else {
-                        chairFlipsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load Chair Flips data.</td></tr>';
-                    }
+                    renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
+                    renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
+                    renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
+                    
                     console.log("Initial load and render process finished for all lists.");
                 }
 
