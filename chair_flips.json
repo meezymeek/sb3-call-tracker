@@ -33,5 +33,19 @@
     "district": "127",
     "party": "R",
     "email": "charles.cunningham@house.texas.gov"
+  },
+  {
+    "representative_name": "KITZMAN, Stan",
+    "phone_number": "(512) 463-0604",
+    "district": "85",
+    "party": "R",
+    "email": "stan.kitzman@house.texas.gov"
+  },
+  {
+    "representative_name": "WILSON, Terry M.",
+    "phone_number": "(512) 463-0309",
+    "district": "20",
+    "party": "R",
+    "email": "terry.wilson@house.texas.gov"
   }
 ]
