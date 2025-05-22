@@ -596,93 +596,8 @@
             document.addEventListener('DOMContentLoaded', function() {
                 console.log("DOMContentLoaded event fired.");
                 // --- DATA (Representative List) ---
-                const initialRepresentativesData_JSON = [
-                  {
-                    "representative_name": "ALLEN, Alma",
-                    "phone_number": "(512) 463-0744",
-                    "district": "131",
-                    "party": "D",
-                    "email": "alma.allen@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "CAMPOS, Liz",
-                    "phone_number": "(512) 463-0452",
-                    "district": "119",
-                    "party": "D",
-                    "email": "elizabeth.campos@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "CORTEZ, Philip",
-                    "phone_number": "(512) 463-0269",
-                    "district": "117",
-                    "party": "D",
-                    "email": "philip.cortez@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "JONES, Jolanda",
-                    "phone_number": "(512) 463-0524",
-                    "district": "147",
-                    "party": "D",
-                    "email": "jolanda.jones@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "LALANI, Suleman",
-                    "phone_number": "(512) 463-0596",
-                    "district": "76",
-                    "party": "D",
-                    "email": "suleman.lalani@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "LONGORIA, Oscar",
-                    "phone_number": "(512) 463-0645",
-                    "district": "35",
-                    "party": "D",
-                    "email": "oscar.longoria@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "MANUEL, Christian",
-                    "phone_number": "(512) 463-0662",
-                    "district": "22",
-                    "party": "D",
-                    "email": "christian.manuel@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "MARTINEZ, Armando",
-                    "phone_number": "(512) 463-0530",
-                    "district": "39",
-                    "party": "D",
-                    "email": "armando.martinez@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "MARTINEZ FISCHER, Trey",
-                    "phone_number": "(512) 463-0616",
-                    "district": "116",
-                    "party": "D",
-                    "email": "trey.martinez.fischer@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "ORDAZ, Claudia",
-                    "phone_number": "(512) 463-0622",
-                    "district": "79",
-                    "party": "D",
-                    "email": "claudia.ordaz@house.texas.gov"
-                  },
-                  {
-                    "representative_name": "TURNER, Chris",
-                    "phone_number": "(512) 463-0574",
-                    "district": "101",
-                    "party": "D",
-                    "email": "chris.turner@house.texas.gov"
-                  }
-                ];
-                const initialRepresentativesData = initialRepresentativesData_JSON.map((rep, index) => ({
-                    id: `rep-${index}-${rep.district}`,
-                    district: rep.district,
-                    name: rep.representative_name,
-                    phone: rep.phone_number,
-                    party: rep.party,
-                    email: rep.email
-                }));
+                // initialRepresentativesData_JSON is now fetched from an external file.
+                let initialRepresentativesData = []; // Will be populated after fetching
                 let representatives = []; // Holds the current state of representative data
                 let userFullName = '';    // User's name for email personalization
                 let userLocation = '';  // User's location for email personalization
@@ -778,10 +693,33 @@ Thank you,
                     }
                 };
 
+                // --- Data Fetching ---
+                async function fetchInitialData(filePath) {
+                    try {
+                        const response = await fetch(filePath);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const jsonData = await response.json();
+                        return jsonData.map((rep, index) => ({
+                            id: `rep-${index}-${rep.district}`,
+                            district: rep.district,
+                            name: rep.representative_name,
+                            phone: rep.phone_number,
+                            party: rep.party,
+                            email: rep.email
+                        }));
+                    } catch (error) {
+                        console.error("Error fetching initial representative data:", error);
+                        alert(`Error loading representative data from ${filePath}. Please check the file and console for details.`);
+                        return []; // Return empty array on error
+                    }
+                }
+
                 // --- Data Persistence (Local Storage) ---
-                function loadDataFromLocalStorage() {
+                function loadDataFromLocalStorage() { // Will be called AFTER initialData is fetched
                     console.log("loadDataFromLocalStorage called.");
-                    try { // localStorage availability test
+                    try { 
                         localStorage.setItem('__testLocalStorage', 'test');
                         localStorage.removeItem('__testLocalStorage');
                         console.log("localStorage appears to be available.");
@@ -793,7 +731,7 @@ Thank you,
                     loadUserInfo(); 
 
                     const storedData = localStorage.getItem('representativesCallData');
-                    if (storedData) {
+                    if (storedData && initialRepresentativesData.length > 0) { // Ensure initialData is populated
                         const parsedStoredData = JSON.parse(storedData);
                         representatives = initialRepresentativesData.map(initialRep => {
                             const storedRepData = parsedStoredData.find(s => s.id === initialRep.id);
@@ -802,12 +740,11 @@ Thank you,
                                 called: storedRepData?.called || false,
                                 emailed: storedRepData?.emailed || false, 
                                 response: storedRepData?.response || 'not_selected',
-                                notes: storedRepData?.notes || '',
-                                party: initialRep.party, // Ensure party from new data is used
-                                // email is already part of initialRep
+                                notes: storedRepData?.notes || ''
+                                // party and email are already part of initialRep from the fetched data
                             };
                         });
-                    } else {
+                    } else if (initialRepresentativesData.length > 0) { // If no stored data, use fetched initialData
                         representatives = initialRepresentativesData.map(rep => ({
                             ...rep,
                             called: false,
@@ -815,6 +752,10 @@ Thank you,
                             response: 'not_selected',
                             notes: ''
                         }));
+                    } else {
+                        // If initialRepresentativesData is still empty (fetch failed or not run yet),
+                        // representatives will remain empty. renderTable should handle this.
+                        representatives = [];
                     }
                     emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
                     emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
@@ -1096,12 +1037,36 @@ Thank you,
                 });
 
                 // --- Initial Load ---
+                async function initializeApp() {
+                    console.log("Attempting to fetch initial data...");
+                    initialRepresentativesData = await fetchInitialData('yae_dems.json'); // Load the specific JSON file
+                    
+                    if (initialRepresentativesData.length > 0) {
+                        console.log("Initial data fetched successfully. Proceeding with app initialization.");
+                        loadDataFromLocalStorage(); // Load saved progress against the fetched data
+                        renderTable(); // Render the table with the potentially merged data
+                    } else {
+                        console.error("App initialization failed: Could not load initial representative data.");
+                        // Optionally, render an empty table or an error message in the table
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load representative data.</td></tr>';
+                    }
+                    // Event listeners can be set up regardless of data loading success,
+                    // as they might be for UI elements not dependent on the table data (e.g., modals, import/export).
+                    // However, some might need to be rethought if data loading is critical for them.
+                    // For now, keeping it simple:
+                    // setupEventListeners(); // This was the original placement, might need adjustment if it depends on `representatives`
+                    console.log("Initial load and render process finished.");
+                }
+
                 console.log("Attempting initial load and render...");
                 try {
-                    loadDataFromLocalStorage(); 
-                    renderTable();
-                    console.log("Initial load and render successful.");
-                } catch (e) {
+                    // DOMContentLoaded ensures elements are available before this script runs.
+                    // Initialize app, which now includes fetching data.
+                    initializeApp().catch(e => { // Catch errors from async initializeApp
+                        alert("Error during app initialization: " + e.message + "\nSee console for details.");
+                        console.error("Error during app initialization:", e);
+                    });
+                } catch (e) { // Catch synchronous errors, though less likely now with async initializeApp
                     alert("Error during initial load/render: " + e.message + "\nSee console for details.");
                     console.error("Error during initial load/render:", e);
                 }
