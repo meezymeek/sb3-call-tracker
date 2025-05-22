@@ -59,8 +59,8 @@
             </div>
             <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
             
-            <h2>Raw Data (from /devices)</h2>
-            <pre id="rawDataOutput" style="background-color: #eee; padding:10px; border:1px solid #ccc; max-height: 300px; overflow-y: auto;"></pre>
+            <!-- Raw Data Section Removed -->
+            <!-- <pre id="rawDataOutput" style="background-color: #eee; padding:10px; border:1px solid #ccc; max-height: 300px; overflow-y: auto;"></pre> -->
         </div>
     </div>
 
@@ -88,7 +88,7 @@
         const logoutButton = document.getElementById('logoutButton');
         const adminUserEmailSpan = document.getElementById('adminUserEmail');
         const loginErrorP = document.getElementById('loginError');
-        const rawDataOutput = document.getElementById('rawDataOutput');
+        // const rawDataOutput = document.getElementById('rawDataOutput'); // Removed
         const metricsContainer = document.getElementById('metricsContainer');
         const representativeDetailsContainer = document.getElementById('representativeDetailsContainer');
         const refreshDataButton = document.getElementById('refreshDataButton');
@@ -140,6 +140,7 @@
                 console.log("User logged out.");
                 loginSection.classList.remove('hidden');
                 dashboardContent.classList.add('hidden');
+                // if (rawDataOutput) rawDataOutput.textContent = ''; // Clear raw data output on logout
             }
         });
 
@@ -162,7 +163,7 @@
                 console.log("Not logged in, cannot fetch dashboard data.");
                 metricsContainer.innerHTML = "<p>Please log in as admin to view data.</p>";
                 representativeDetailsContainer.innerHTML = "";
-                rawDataOutput.textContent = "";
+                // if (rawDataOutput) rawDataOutput.textContent = ""; // Clear raw data output
                 return;
             }
             console.log("Attempting to fetch dashboard data as user:", auth.currentUser.uid);
@@ -176,15 +177,15 @@
 
                 if (allDevicesData) {
                     console.log("Successfully fetched data from /devices node.");
-                    rawDataOutput.textContent = JSON.stringify(allDevicesData, null, 2);
+                    // rawDataOutput.textContent = JSON.stringify(allDevicesData, null, 2); // Removed
                     processDashboardMetrics(allDevicesData);
                 } else {
-                    rawDataOutput.textContent = 'No data found at /devices or access denied.';
+                    // if (rawDataOutput) rawDataOutput.textContent = 'No data found at /devices or access denied.'; // Removed
                     metricsContainer.innerHTML = '<p>No dashboard data found or access denied.</p>';
                 }
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
-                rawDataOutput.textContent = `Error fetching data: ${error.message}.`;
+                // if (rawDataOutput) rawDataOutput.textContent = `Error fetching data: ${error.message}.`; // Removed
                 metricsContainer.innerHTML = `<p>Error loading dashboard data: ${error.message}</p>`;
             }
         }
