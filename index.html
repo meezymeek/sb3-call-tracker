@@ -233,14 +233,17 @@
             margin-top: 30px;
             text-align: right;
         }
-         .footer-actions button {
+         .footer-actions button { /* Style for any button in footer, though only one might remain */
             margin-left: 10px;
-         }
-         .footer-actions button#saveAllChanges {
             background-color: var(--accent-green);
             color: white; 
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
          }
-         .footer-actions button#saveAllChanges:hover {
+         .footer-actions button:hover {
             background-color: var(--accent-green-darker);
          }
 
@@ -513,7 +516,7 @@
         </div>
 
          <div class="footer-actions">
-            <button id="saveAllChanges" class="button-like">Save All Changes</button>
+            <!-- <button id="saveAllChanges" class="button-like">Save All Changes</button> Removed for auto-save -->
         </div>
     </div>
 
@@ -575,10 +578,11 @@
             <ul>
                 <li>The tool has a pre-written email ready for you.</li>
                 <li>If you want to peek or change it, look for "Email Subject Template" and "Email Body Template" on the main screen. (Most people won't need to touch this).</li>
+                 <li>Changes to email templates are saved automatically as you type.</li>
             </ul>
 
             <h4>3. Contacting Lawmakers (The List):</h4>
-            <p>You'll see a list of lawmakers. Here's how to track your contacts:</p>
+            <p>You'll see lists of lawmakers. Here's how to track your contacts:</p>
             <ul>
                 <li><strong>To Call a Lawmaker:</strong>
                     <ul>
@@ -590,14 +594,14 @@
                                 <li><strong>Notes:</strong> You can type quick notes here (like "Spoke to Aide Sarah").</li>
                             </ul>
                         </li>
-                        <li>Tap "Save Response."</li>
+                        <li>Tap "Save Response." (This saves automatically).</li>
                     </ul>
                 </li>
                 <li><strong>To Email a Lawmaker:</strong>
                     <ul>
                         <li>Find their name and tap their <strong>Email Address</strong>. Your phone's email app should open with the email mostly written for you!</li>
                         <li>Just check it over and hit "Send" in your email app.</li>
-                        <li>The tool will automatically check the box in the <strong>"Emailed"</strong> column for you.</li>
+                        <li>The tool will automatically check the box in the <strong>"Emailed"</strong> column for you. (This saves automatically).</li>
                     </ul>
                 </li>
                 <li><strong>Keeping Track:</strong>
@@ -610,8 +614,7 @@
 
             <h4>4. Your Progress:</h4>
             <ul>
-                <li><strong>It Saves Automatically!</strong> When you check boxes or save call notes, the tool remembers.</li>
-                <li><strong>"Save All Changes" Button:</strong> If you <em>do</em> change the email templates, tap this green button at the bottom to save those specific changes.</li>
+                <li><strong>It Saves Automatically!</strong> When you check boxes, save call notes, or edit email templates, the tool remembers. The "Save All Changes" button has been removed.</li>
                 <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup.</li>
                 <li><strong>Import Progress:</strong> Lets you load a saved copy (an exported file) back into the tool.</li>
                 <li><strong>Reset All Data:</strong> Wipes everything clean and starts over. <strong>Be careful, it can't be undone!</strong></li>
@@ -659,7 +662,7 @@
                 const exportButton = document.getElementById('exportData');
                 const importFile = document.getElementById('importFile');
                 const resetButton = document.getElementById('resetData');
-                const saveAllButton = document.getElementById('saveAllChanges');
+                // const saveAllButton = document.getElementById('saveAllChanges'); // Button removed
                 const editMyInfoButton = document.getElementById('editMyInfo');
                 const showGuideButton = document.getElementById('showGuideBtn');
                 
@@ -707,6 +710,7 @@
                         localStorage.setItem('onboardingComplete', 'true');
                         onboardingModal.style.display = 'none';
                         alert('Your information has been saved.');
+                        saveDataToLocalStorage(); // Auto-save on user info change
                     } else {
                         alert('Please enter your full name for email personalization.');
                     }
@@ -764,10 +768,12 @@
                         localStorage.setItem('representativesNayVotersCallData', JSON.stringify(representativesNayVoters));
                         localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
                         localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                        console.log("Data for all lists saved.");
+                        localStorage.setItem('userFullName', userFullName); // Ensure user info is also saved here
+                        localStorage.setItem('userLocation', userLocation);
+                        console.log("Data for all lists saved (auto-save).");
                     } catch (e) {
                         console.error("Error saving data to localStorage:", e);
-                        alert("Could not save data.");
+                        // Avoid alerting for auto-saves to prevent spamming user, log to console instead.
                     }
                 }
                 
@@ -854,7 +860,7 @@
                     if (listIdentifier === 'yaeDems') return representativesYaeDems;
                     if (listIdentifier === 'chairFlips') return representativesChairFlips;
                     if (listIdentifier === 'nayVoters') return representativesNayVoters;
-                    return []; // Default to empty if identifier is unknown
+                    return []; 
                 }
 
                 function handleCalledChange(event) {
@@ -970,7 +976,7 @@
                 };
 
                 exportButton.addEventListener('click', () => {
-                    saveDataToLocalStorage(); 
+                    saveDataToLocalStorage(); // Ensure latest data is saved before export
                     const dataToExport = {
                         representativesYaeDems: representativesYaeDems,
                         representativesChairFlips: representativesChairFlips,
@@ -999,16 +1005,17 @@
                             try {
                                 const importedData = JSON.parse(e.target.result);
                                 
-                                const processImportedList = (dataKey, initialDataArray, targetArray) => {
+                                const processImportedList = (dataKey, initialDataArray, targetArrayRef) => {
+                                    let listToUpdate = [];
                                     if (importedData[dataKey] && Array.isArray(importedData[dataKey]) && initialDataArray.length > 0) {
-                                        return initialDataArray.map(initialRep => {
-                                            const importedRepData = importedData[dataKey].find(ir => ir.id === initialRep.id || (ir.name === initialRep.name && ir.district === initialRep.district)); // Fallback to name/district if ID changed
+                                        listToUpdate = initialDataArray.map(initialRep => {
+                                            const importedRepData = importedData[dataKey].find(ir => ir.id === initialRep.id || (ir.name === initialRep.name && ir.district === initialRep.district));
                                             return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
                                         });
                                     } else if (initialDataArray.length > 0) {
-                                         return initialDataArray.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                                         listToUpdate = initialDataArray.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
                                     }
-                                    return [];
+                                    return listToUpdate;
                                 };
 
                                 representativesYaeDems = processImportedList('representativesYaeDems', initialYaeDemsData, representativesYaeDems);
@@ -1052,10 +1059,16 @@
                     }
                 });
 
-                saveAllButton.addEventListener('click', () => {
-                    saveDataToLocalStorage();
-                    alert('All changes saved!');
-                });
+                // Remove manualSaveData function and its event listener
+                // saveAllButton.addEventListener('click', () => {
+                //     saveDataToLocalStorage();
+                //     alert('All changes saved!'); // This alert is no longer needed with auto-save
+                // });
+
+                // Add event listeners for auto-saving email templates
+                emailSubjectTemplateInput.addEventListener('input', saveDataToLocalStorage);
+                emailBodyTemplateInput.addEventListener('input', saveDataToLocalStorage);
+
 
                 async function initializeApp() {
                     console.log("Attempting to fetch initial data for all lists...");
