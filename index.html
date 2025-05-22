@@ -77,7 +77,7 @@
         }
 
 
-        .controls, .email-template-section {
+        .controls { /* Removed .email-template-section styling as it's gone */
             margin-bottom: 25px;
             padding: 15px;
             background-color: var(--dark-bg-tertiary);
@@ -88,41 +88,6 @@
             flex-wrap: wrap;
         }
         
-        .email-template-section {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .email-template-section label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--dark-text-primary);
-        }
-        
-        .email-template-section input[type="text"],
-        .email-template-section textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color-dark);
-            border-radius: 4px;
-            font-size: 0.95em;
-            background-color: var(--dark-bg-primary);
-            color: var(--dark-text-primary);
-        }
-        .email-template-section input[type="text"]:focus,
-        .email-template-section textarea:focus {
-            border-color: var(--accent-green);
-            outline: none;
-        }
-        
-        .email-template-section textarea {
-            min-height: 120px; 
-            resize: vertical;
-        }
-        .email-template-section small {
-            color: var(--dark-text-secondary);
-        }
-
         .controls button, .controls label.button-like {
             padding: 10px 15px;
             color: white;
@@ -136,7 +101,6 @@
             text-align: center;
             flex-grow: 1; 
         }
-        /* Primary Action Buttons */
         .controls button#exportData, 
         .controls label.button-like[for="importFile"] {
             background-color: var(--accent-green);
@@ -146,9 +110,8 @@
             background-color: var(--accent-green-darker);
         }
 
-        /* Utility/Secondary Buttons */
         .controls button#resetData,
-        .controls button#editMyInfo,
+        .controls button#editMyInfo, /* Kept for potential future use, though name/location less critical without email */
         .controls button#showGuideBtn {
             background-color: var(--utility-button-bg);
         }
@@ -182,7 +145,7 @@
             overflow-wrap: break-word;
         }
         
-        td a { 
+        td a { /* For phone links */
             word-break: break-all;
             overflow-wrap: break-word; 
         }
@@ -196,13 +159,13 @@
             z-index: 1;
         }
         
-        th:nth-child(1), td:nth-child(1) { width: 8%; }  
-        th:nth-child(2), td:nth-child(2) { width: 8%; }  
-        th:nth-child(3), td:nth-child(3) { width: 8%; }  
-        th:nth-child(4), td:nth-child(4) { width: 18%; } 
-        th:nth-child(5), td:nth-child(5) { width: 23%; } 
-        th:nth-child(6), td:nth-child(6) { width: 15%; } 
-        th:nth-child(7), td:nth-child(7) { width: 20%; } 
+        /* Adjusted column widths for 5 columns (Called, District, Representative, Phone, Response Summary) */
+        th:nth-child(1), td:nth-child(1) { width: 10%; }  /* Called */
+        th:nth-child(2), td:nth-child(2) { width: 10%; }  /* District */
+        th:nth-child(3), td:nth-child(3) { width: 30%; } /* Representative */
+        th:nth-child(4), td:nth-child(4) { width: 20%; } /* Phone */
+        th:nth-child(5), td:nth-child(5) { width: 30%; } /* Response Summary */
+
 
         tr:nth-child(even) {
             background-color: var(--dark-bg-tertiary); 
@@ -217,8 +180,6 @@
             margin-right: 3px; 
             cursor: pointer;
             vertical-align: middle;
-            /* Consider accent-color for better dark mode visibility, if supported widely */
-            /* accent-color: var(--accent-green); */
         }
         
         a { 
@@ -234,14 +195,12 @@
             margin-top: 30px;
             text-align: right;
         }
-         .footer-actions button {
+         .footer-actions button { /* Only saveAllChanges button remains, primarily for future-proofing if templates return */
             margin-left: 10px;
-         }
-         .footer-actions button#saveAllChanges {
             background-color: var(--accent-green);
-            color: white; /* Ensure text is white */
+            color: white; 
          }
-         .footer-actions button#saveAllChanges:hover {
+         .footer-actions button:hover {
             background-color: var(--accent-green-darker);
          }
 
@@ -326,7 +285,7 @@
             min-height: 100px;
             resize: vertical;
         }
-        .modal-content button { /* Applies to Save Onboarding, Save Response */
+        .modal-content button { 
             background-color: var(--accent-green);
             color: white;
             padding: 12px 20px;
@@ -340,7 +299,7 @@
         .modal-content button:hover {
             background-color: var(--accent-green-darker);
         }
-        .modal-content button.button-outline { /* Applies to Cancel, Dismiss Guide */
+        .modal-content button.button-outline { 
             background-color: transparent;
             color: var(--accent-green);
             border: 1px solid var(--accent-green);
@@ -388,13 +347,12 @@
             }
 
             th, td { padding: 8px 4px; font-size: 0.7em; } 
-            th:nth-child(1), td:nth-child(1) { width: 10%; } 
-            th:nth-child(2), td:nth-child(2) { width: 10%; } 
-            th:nth-child(3), td:nth-child(3) { width: 10%; } 
-            th:nth-child(4), td:nth-child(4) { width: 18%; } 
-            th:nth-child(5), td:nth-child(5) { width: 22%; } 
-            th:nth-child(6), td:nth-child(6) { width: 10%; } 
-            th:nth-child(7), td:nth-child(7) { width: 20%; } 
+            /* 5 columns, District visible */
+            th:nth-child(1), td:nth-child(1) { width: 12%; } /* Called */
+            th:nth-child(2), td:nth-child(2) { width: 12%; } /* District */
+            th:nth-child(3), td:nth-child(3) { width: 30%; } /* Rep */
+            th:nth-child(4), td:nth-child(4) { width: 16%; } /* Phone */
+            th:nth-child(5), td:nth-child(5) { width: 30%; } /* Summary */
 
             .modal-content { width: 90%; margin: 10% auto; padding: 20px; }
         }
@@ -405,13 +363,13 @@
 
             th, td { padding: 6px 3px; font-size: 0.65em; } 
 
-            th:nth-child(3), td:nth-child(3) { display: none; } 
-            th:nth-child(1), td:nth-child(1) { width: 12%; } 
-            th:nth-child(2), td:nth-child(2) { width: 12%; } 
-            th:nth-child(4), td:nth-child(4) { width: 22%; } 
-            th:nth-child(5), td:nth-child(5) { width: 26%; } 
-            th:nth-child(6), td:nth-child(6) { width: 8%; }  
-            th:nth-child(7), td:nth-child(7) { width: 20%; } 
+            th:nth-child(2), td:nth-child(2) { display: none; } /* Hide District */
+            /* 4 columns, District hidden */
+            th:nth-child(1), td:nth-child(1) { width: 15%; } /* Called */
+            /* Child 2 (District) is hidden */
+            th:nth-child(3), td:nth-child(3) { width: 35%; } /* Rep */
+            th:nth-child(4), td:nth-child(4) { width: 20%; } /* Phone */
+            th:nth-child(5), td:nth-child(5) { width: 30%; } /* Summary */
          }
     </style>
 </head>
@@ -420,7 +378,7 @@
         <header>
             <h1>SB3 Stakeholders Call Tracker</h1>
             <span class="version-number">v1.0</span>
-            <p>Track your calls and emails to representatives, their responses, and your notes.</p>
+            <p>Track your calls to representatives, their responses, and your notes.</p>
             <div class="report-problem-link">
                 <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.0">Report Problems</a>
             </div>
@@ -431,28 +389,19 @@
             <button id="exportData">Export Progress</button>
             <label for="importFile" class="button-like">Import Progress</label>
             <input type="file" id="importFile" accept=".json">
-            <button id="editMyInfo">Edit My Info</button>
+            <button id="editMyInfo">Edit My Info</button> <!-- Kept for now -->
             <button id="resetData">Reset All Data</button>
         </div>
 
-        <div class="email-template-section">
-            <label for="emailSubjectTemplate">Email Subject Template:</label>
-            <input type="text" id="emailSubjectTemplate">
-            
-            <label for="emailBodyTemplate" style="margin-top:10px;">Email Body Template:</label>
-            <textarea id="emailBodyTemplate"></textarea>
-            <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template.</em></small>
-        </div>
+        <!-- Email Template Section Removed -->
 
         <div class="table-container">
             <table id="repsTable">
                 <thead>
                     <tr>
                         <th>Called</th>
-                        <th>Emailed</th>
                         <th>District</th>
                         <th>Representative</th>
-                        <th>Email</th>
                         <th>Phone</th>
                         <th>Response Summary</th>
                     </tr>
@@ -463,21 +412,22 @@
             </table>
         </div>
          <div class="footer-actions">
-            <button id="saveAllChanges" class="button-like">Save All Changes</button>
+            <!-- Save All Changes button might be less critical now but kept for future proofing -->
+            <button id="saveAllChanges" class="button-like">Save Data Manually</button>
         </div>
     </div>
 
     <!-- Onboarding Modal -->
     <div id="onboardingModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeOnboardingModal">&times;</span>
-            <h2>Welcome! Let's Get You Set Up</h2>
-            <p>Please provide a few details to personalize your email templates. This information is stored locally in your browser.</p>
-            <label for="onboardingUserName">Your Full Name (for email signature):</label>
+            <span class="close-button" id="closeOnboardingModal">×</span>
+            <h2>Welcome! Quick Setup</h2>
+            <p>This info is stored locally and helps if email features are added later.</p>
+            <label for="onboardingUserName">Your Full Name (Optional):</label>
             <input type="text" id="onboardingUserName" placeholder="e.g., Jane Doe">
             
-            <label for="onboardingUserLocation">Your City/Town (e.g., "Austin resident"):</label>
-            <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX or concerned Texan">
+            <label for="onboardingUserLocation">Your City/Town (Optional):</label>
+            <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX">
             
             <button id="saveOnboardingInfo">Save and Continue</button>
         </div>
@@ -486,7 +436,7 @@
     <!-- Response Modal -->
     <div id="responseModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeResponseModal">&times;</span>
+            <span class="close-button" id="closeResponseModal">×</span>
             <h3 id="responseModalTitle">Log Call Response</h3>
             <input type="hidden" id="currentRepIdForModal">
 
@@ -503,30 +453,22 @@
         </div>
     </div>
 
-    <!-- User Guide Modal -->
+    <!-- User Guide Modal (Needs update to remove email references) -->
     <div id="guideModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeGuideModal">&times;</span>
+            <span class="close-button" id="closeGuideModal">×</span>
             <h2>SB3 Call Tracker - Easy Mobile Guide (v1.0)</h2>
             <p>This tool is like a digital checklist to help you contact lawmakers about SB3 using your phone. It remembers what you've done.</p>
 
-            <h4>1. First Time Opening? (Quick Setup):</h4>
+            <h4>1. First Time Opening? (Optional Setup):</h4>
             <ul>
-                <li>A "Welcome" box will pop up.</li>
-                <li>Type in your <strong>Full Name</strong> (so emails can have your signature).</li>
-                <li>Type in your <strong>City/Town</strong> (like "Austin resident" or just "Texas").</li>
-                <li>Tap "Save and Continue." That's it for setup!</li>
-                <li><em>Need to change your name/town later? Tap "Edit My Info."</em></li>
+                <li>A "Welcome" box may pop up. Filling in your Name and City/Town is optional as email features are currently disabled.</li>
+                <li>Tap "Save and Continue."</li>
+                <li><em>To change this info later, Tap "Edit My Info."</em></li>
             </ul>
 
-            <h4>2. Sending Emails (Easy Mode):</h4>
-            <ul>
-                <li>The tool has a pre-written email ready for you.</li>
-                <li>If you want to peek or change it, look for "Email Subject Template" and "Email Body Template" on the main screen. (Most people won't need to touch this).</li>
-            </ul>
-
-            <h4>3. Contacting Lawmakers (The List):</h4>
-            <p>You'll see a list of lawmakers. Here's how to track your contacts:</p>
+            <h4>2. Contacting Lawmakers (The List):</h4>
+            <p>You'll see a list of lawmakers. Here's how to track your calls:</p>
             <ul>
                 <li><strong>To Call a Lawmaker:</strong>
                     <ul>
@@ -541,26 +483,19 @@
                         <li>Tap "Save Response."</li>
                     </ul>
                 </li>
-                <li><strong>To Email a Lawmaker:</strong>
-                    <ul>
-                        <li>Find their name and tap their <strong>Email Address</strong>. Your phone's email app should open with the email mostly written for you!</li>
-                        <li>Just check it over and hit "Send" in your email app.</li>
-                        <li>The tool will automatically check the box in the <strong>"Emailed"</strong> column for you.</li>
-                    </ul>
-                </li>
                 <li><strong>Keeping Track:</strong>
                     <ul>
-                        <li>The <strong>"Called"</strong> and <strong>"Emailed"</strong> boxes show who you've contacted.</li>
+                        <li>The <strong>"Called"</strong> box shows who you've contacted.</li>
                         <li>The "Response Summary" column shows what happened on your calls.</li>
                     </ul>
                 </li>
             </ul>
 
-            <h4>4. Your Progress:</h4>
+            <h4>3. Your Progress:</h4>
             <ul>
-                <li><strong>It Saves Automatically!</strong> When you check boxes or save call notes, the tool remembers.</li>
-                <li><strong>"Save All Changes" Button:</strong> If you <em>do</em> change the email templates, tap this green button at the bottom to save those specific changes.</li>
-                <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup.</li>
+                <li><strong>It Saves Automatically!</strong> When you check boxes or save call notes, the tool remembers in your browser.</li>
+                <li><strong>"Save Data Manually" Button:</strong> Tap this green button at the bottom as an extra save, though most changes save as you make them.</li>
+                <li><strong>Export Progress:</strong> Think of this as "Save a Copy." It downloads a special file with all your work. Good if you want a backup or to share.</li>
                 <li><strong>Import Progress:</strong> Lets you load a saved copy (an exported file) back into the tool.</li>
                 <li><strong>Reset All Data:</strong> Wipes everything clean and starts over. <strong>Be careful, it can't be undone!</strong></li>
             </ul>
@@ -578,483 +513,494 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- DATA ---
-            const initialRepresentativesData = [
-                { id: '22', district: '22', name: 'Christian Manuel', email: 'christian.manuel@house.texas.gov', phone: '(512) 463-0508' },
-                { id: '27', district: '27', name: 'Ron Reynolds', email: 'ron.reynolds@house.texas.gov', phone: '(512) 463-0490' },
-                { id: '35', district: '35', name: 'Oscar Longoria', email: 'oscar.longoria@house.texas.gov', phone: '(512) 463-0645' },
-                { id: '36', district: '36', name: 'Sergio Muñoz Jr.', email: 'sergio.munoz@house.texas.gov', phone: '(512) 463-0704' },
-                { id: '37', district: '37', name: 'Janie Lopez', email: 'janie.lopez@house.texas.gov', phone: '(512) 463-0600' },
-                { id: '38', district: '38', name: 'Erin Gamez', email: 'erin.gamez@house.texas.gov', phone: '(512) 463-0426' },
-                { id: '41', district: '41', name: 'Bobby Guerra', email: 'bobby.guerra@house.texas.gov', phone: '(512) 463-0578' },
-                { id: '45', district: '45', name: 'Erin Zwiener', email: 'erin.zwiener@house.texas.gov', phone: '(512) 463-0647' },
-                { id: '46', district: '46', name: 'Sheryl Cole', email: 'sheryl.cole@house.texas.gov', phone: '(512) 463-0506' },
-                { id: '47', district: '47', name: 'Vikki Goodwin', email: 'vikki.goodwin@house.texas.gov', phone: '(512) 463-0652' },
-                { id: '49', district: '49', name: 'Gina Hinojosa', email: 'gina.hinojosa@house.texas.gov', phone: '(512) 463-0668' },
-                { id: '50', district: '50', name: 'James Talarico', email: 'james.talarico@house.texas.gov', phone: '(512) 463-0670' },
-                { id: '51', district: '51', name: 'Lulu Flores', email: 'lulu.flores@house.texas.gov', phone: '(512) 463-0660' },
-                { id: '76', district: '76', name: 'Claudia Ordaz', email: 'claudia.ordaz@house.texas.gov', phone: '(512) 463-0638' },
-                { id: '77', district: '77', name: 'Lina Ortega', email: 'lina.ortega@house.texas.gov', phone: '(512) 463-0638' },
-                { id: '78', district: '78', name: 'Joe Moody', email: 'joe.moody@house.texas.gov', phone: '(512) 463-0728' },
-                { id: '79', district: '79', name: 'Art Fierro', email: 'art.fierro@house.texas.gov', phone: '(512) 463-0596' },
-                { id: '80', district: '80', name: 'Tracy King', email: 'tracy.king@house.texas.gov', phone: '(512) 463-0194' },
-                { id: '90', district: '90', name: 'Ramon Romero Jr.', email: 'ramon.romero@house.texas.gov', phone: '(512) 463-0740' },
-                { id: '92', district: '92', name: 'Salman Bhojani', email: 'salman.bhojani@house.texas.gov', phone: '(512) 463-0506' },
-                { id: '95', district: '95', name: 'Nicole Collier', email: 'nicole.collier@house.texas.gov', phone: '(512) 463-0716' },
-                { id: '100', district: '100', name: 'Venton Jones', email: 'venton.jones@house.texas.gov', phone: '(512) 463-0586' },
-                { id: '103', district: '103', name: 'Rafael Anchía', email: 'rafael.ancha@house.texas.gov', phone: '(512) 463-0746' },
-                { id: '104', district: '104', name: 'Jessica González', email: 'jessica.gonzalez@house.texas.gov', phone: '(512) 463-0408' },
-                { id: '105', district: '105', name: 'Terry Meza', email: 'terry.meza@house.texas.gov', phone: '(512) 463-0641' },
-                { id: '107', district: '107', name: 'Victoria Neave Criado', email: 'victoria.neave@house.texas.gov', phone: '(512) 463-0244' },
-                { id: '116', district: '116', name: 'Trey Martinez Fischer', email: 'trey.martinezfischer@house.texas.gov', phone: '(512) 463-0616' },
-                { id: '117', district: '117', name: 'Philip Cortez', email: 'philip.cortez@house.texas.gov', phone: '(512) 463-0269' },
-                { id: '118', district: '118', name: 'John Lujan', email: 'john.lujan@house.texas.gov', phone: '(512) 463-0122' },
-                { id: '123', district: '123', name: 'Diego Bernal', email: 'diego.bernal@house.texas.gov', phone: '(512) 463-0532' },
-                { id: '124', district: '124', name: 'Josey Garcia', email: 'josey.garcia@house.texas.gov', phone: '(512) 463-0646' },
-                { id: '125', district: '125', name: 'Ray Lopez', email: 'ray.lopez@house.texas.gov', phone: '(512) 463-0669' }
-            ];
-            let representatives = [];
-            let userFullName = '';
-            let userLocation = '';
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            const errorDetails = `CRITICAL SCRIPT ERROR:\nMessage: ${message}\nSource: ${source}\nLine: ${lineno}\nColumn: ${colno}\nError: ${error ? JSON.stringify(error) : 'N/A'}`;
+            alert(errorDetails);
+            console.error("GLOBAL ERROR:", message, source, lineno, colno, error);
+            return true; 
+        };
 
-            // DOM Element References
-            const tableBody = document.getElementById('repsTable').getElementsByTagName('tbody')[0];
-            const exportButton = document.getElementById('exportData');
-            const importFile = document.getElementById('importFile');
-            const resetButton = document.getElementById('resetData');
-            const saveAllButton = document.getElementById('saveAllChanges');
-            const editMyInfoButton = document.getElementById('editMyInfo');
-            const showGuideButton = document.getElementById('showGuideBtn');
-            
-            const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
-            const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
+        try { 
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log("DOMContentLoaded event fired.");
+                // --- NEW DATA ---
+                const initialRepresentativesData_JSON = [
+                    {"representative_name": "ALDERS, Daniel", "phone_number": "(512) 463-0584", "district": "6"},
+                    {"representative_name": "ALLEN, Alma", "phone_number": "(512) 463-0744", "district": "131"},
+                    {"representative_name": "ANCHÍA, Rafael", "phone_number": "(512) 463-0746", "district": "103"},
+                    {"representative_name": "ASHBY, Trent", "phone_number": "(512) 463-0508", "district": "9"},
+                    {"representative_name": "BARRY, Jeff", "phone_number": "(512) 463-0707", "district": "29"},
+                    {"representative_name": "BELL JR., Cecil", "phone_number": "(512) 463-0650", "district": "3"},
+                    {"representative_name": "BELL, Keith", "phone_number": "(512) 463-0458", "district": "4"},
+                    {"representative_name": "BERNAL, Diego M.", "phone_number": "(512) 463-0532", "district": "123"},
+                    {"representative_name": "BHOJANI, Salman", "phone_number": "(512) 463-0522", "district": "92"},
+                    {"representative_name": "BONNEN, Greg", "phone_number": "(512) 463-0729", "district": "24"},
+                    {"representative_name": "BOWERS, Rhetta Andrews", "phone_number": "(512) 463-0464", "district": "113"},
+                    {"representative_name": "BRYANT, John", "phone_number": "(512) 463-0576", "district": "114"},
+                    {"representative_name": "BUCKLEY, Brad", "phone_number": "(512) 463-0684", "district": "54"},
+                    {"representative_name": "BUCY III, John H.", "phone_number": "(512) 463-0696", "district": "136"},
+                    {"representative_name": "BUMGARNER, Benjamin", "phone_number": "(512) 463-0688", "district": "63"},
+                    {"representative_name": "BURROWS, Dustin (Speaker)", "phone_number": "(512) 463-1000", "district": "83"},
+                    {"representative_name": "BUTTON, Angie Chen", "phone_number": "(512) 463-0486", "district": "112"},
+                    {"representative_name": "CAIN, Briscoe", "phone_number": "(512) 463-0733", "district": "128"},
+                    {"representative_name": "CAMPOS, Elizabeth \"Liz\"", "phone_number": "(512) 463-0452", "district": "119"},
+                    {"representative_name": "CANALES, Terry", "phone_number": "(512) 463-0426", "district": "40"},
+                    {"representative_name": "CAPRIGLIONE, Giovanni", "phone_number": "(512) 463-0690", "district": "98"},
+                    {"representative_name": "COLE, Sheryl", "phone_number": "(512) 463-0506", "district": "46"},
+                    {"representative_name": "COLLIER, Nicole", "phone_number": "(512) 463-0716", "district": "95"},
+                    {"representative_name": "COOK, David", "phone_number": "(512) 463-0374", "district": "96"},
+                    {"representative_name": "CORTEZ, Philip", "phone_number": "(512) 463-0269", "district": "117"},
+                    {"representative_name": "CRADDICK, Tom", "phone_number": "(512) 463-0500", "district": "82"},
+                    {"representative_name": "CUNNINGHAM, Charles", "phone_number": "(512) 463-0520", "district": "127"},
+                    {"representative_name": "CURRY, Pat", "phone_number": "(512) 463-0135", "district": "56"},
+                    {"representative_name": "DARBY, Drew", "phone_number": "(512) 463-0331", "district": "72"},
+                    {"representative_name": "DAVIS, Aicha", "phone_number": "(512) 463-0953", "district": "109"},
+                    {"representative_name": "DAVIS, Yvonne", "phone_number": "(512) 463-0598", "district": "111"},
+                    {"representative_name": "DEAN, James \"Jay\"", "phone_number": "(512) 463-0750", "district": "7"},
+                    {"representative_name": "DEAYALA, Mano", "phone_number": "(512) 463-0514", "district": "133"},
+                    {"representative_name": "DORAZIO, Mark", "phone_number": "(512) 463-0646", "district": "122"},
+                    {"representative_name": "DUTTON JR., Harold V.", "phone_number": "(512) 463-0510", "district": "142"},
+                    {"representative_name": "DYSON, Paul", "phone_number": "(512) 463-0698", "district": "14"},
+                    {"representative_name": "FAIRLY, Caroline", "phone_number": "(512) 463-0470", "district": "87"},
+                    {"representative_name": "FLORES, Lulu", "phone_number": "(512) 463-0674", "district": "51"},
+                    {"representative_name": "FRANK, James", "phone_number": "(512) 463-0534", "district": "69"},
+                    {"representative_name": "GÁMEZ, Erin Elizabeth", "phone_number": "(512) 463-0606", "district": "38"},
+                    {"representative_name": "GARCIA, Josey", "phone_number": "(512) 463-0634", "district": "124"},
+                    {"representative_name": "GARCIA, Linda", "phone_number": "(512) 463-0244", "district": "107"},
+                    {"representative_name": "GARCIA HERNANDEZ, Cassandra", "phone_number": "(512) 463-0468", "district": "115"},
+                    {"representative_name": "GATES, Gary", "phone_number": "(512) 463-0657", "district": "28"},
+                    {"representative_name": "GERDES, Stan", "phone_number": "(512) 463-0682", "district": "17"},
+                    {"representative_name": "GEREN, Charlie", "phone_number": "(512) 463-0610", "district": "99"},
+                    {"representative_name": "GERVIN-HAWKINS, Barbara", "phone_number": "(512) 463-0708", "district": "120"},
+                    {"representative_name": "GONZÁLEZ, Jessica", "phone_number": "(512) 463-0408", "district": "104"},
+                    {"representative_name": "GONZÁLEZ, Mary E.", "phone_number": "(512) 463-0613", "district": "75"},
+                    {"representative_name": "GOODWIN, Vikki", "phone_number": "(512) 463-0652", "district": "47"},
+                    {"representative_name": "GUERRA, R. D. \"Bobby\"", "phone_number": "(512) 463-0578", "district": "41"},
+                    {"representative_name": "GUILLEN, Ryan", "phone_number": "(512) 463-0416", "district": "31"},
+                    {"representative_name": "HARLESS, Sam", "phone_number": "(512) 463-0496", "district": "126"},
+                    {"representative_name": "HARRIS DAVILA, Caroline", "phone_number": "(512) 463-0670", "district": "52"},
+                    {"representative_name": "HARRIS, Cody", "phone_number": "(512) 463-0730", "district": "8"},
+                    {"representative_name": "HARRISON, Brian", "phone_number": "(512) 463-0516", "district": "10"},
+                    {"representative_name": "HAYES, Richard", "phone_number": "(512) 463-0556", "district": "57"},
+                    {"representative_name": "HEFNER, Cole", "phone_number": "(512) 463-0271", "district": "5"},
+                    {"representative_name": "HERNANDEZ, Ana", "phone_number": "(512) 463-0614", "district": "143"},
+                    {"representative_name": "HICKLAND, Hilary", "phone_number": "(512) 463-0630", "district": "55"},
+                    {"representative_name": "HINOJOSA, Gina", "phone_number": "(512) 463-0668", "district": "49"},
+                    {"representative_name": "HOLT, Janis", "phone_number": "(512) 463-0570", "district": "18"},
+                    {"representative_name": "HOPPER, Andy", "phone_number": "(512) 463-0582", "district": "64"},
+                    {"representative_name": "HOWARD, Donna", "phone_number": "(512) 463-0631", "district": "48"},
+                    {"representative_name": "HULL, Lacey", "phone_number": "(512) 463-0727", "district": "138"},
+                    {"representative_name": "HUNTER, Todd", "phone_number": "(512) 463-0672", "district": "32"},
+                    {"representative_name": "ISAAC, Carrie", "phone_number": "(512) 463-0325", "district": "73"},
+                    {"representative_name": "JOHNSON, Ann", "phone_number": "(512) 463-0389", "district": "134"},
+                    {"representative_name": "JONES, Jolanda \"Jo\"", "phone_number": "(512) 463-0524", "district": "147"},
+                    {"representative_name": "JONES, Venton", "phone_number": "(512) 463-0586", "district": "100"},
+                    {"representative_name": "KERWIN, Helen", "phone_number": "(512) 463-0538", "district": "58"},
+                    {"representative_name": "KING, Ken", "phone_number": "(512) 463-0736", "district": "88"},
+                    {"representative_name": "KITZMAN, Stan", "phone_number": "(512) 463-0604", "district": "85"},
+                    {"representative_name": "LAHOOD, Marc", "phone_number": "(512) 463-0686", "district": "121"},
+                    {"representative_name": "LALANI, Suleman", "phone_number": "(512) 463-0596", "district": "76"},
+                    {"representative_name": "LAMBERT, Stan", "phone_number": "(512) 463-0718", "district": "71"},
+                    {"representative_name": "LANDGRAF, Brooks", "phone_number": "(512) 463-0546", "district": "81"},
+                    {"representative_name": "LEACH, Jeff", "phone_number": "(512) 463-0544", "district": "67"},
+                    {"representative_name": "LEO-WILSON, Terri", "phone_number": "(512) 463-0502", "district": "23"},
+                    {"representative_name": "LITTLE, Mitch", "phone_number": "(512) 463-0478", "district": "65"},
+                    {"representative_name": "LONGORIA, Oscar", "phone_number": "(512) 463-0645", "district": "35"},
+                    {"representative_name": "LOPEZ, Janie", "phone_number": "(512) 463-0640", "district": "37"},
+                    {"representative_name": "LOPEZ, Ray", "phone_number": "(512) 463-0669", "district": "125"},
+                    {"representative_name": "LOUDERBACK, AJ", "phone_number": "(512) 463-0456", "district": "30"},
+                    {"representative_name": "LOWE, David", "phone_number": "(512) 463-0599", "district": "91"},
+                    {"representative_name": "LOZANO, J. M.", "phone_number": "(512) 463-0463", "district": "43"},
+                    {"representative_name": "LUJAN, John", "phone_number": "(512) 463-0714", "district": "118"},
+                    {"representative_name": "LUTHER, Shelly", "phone_number": "(512) 463-0297", "district": "62"},
+                    {"representative_name": "MANUEL, Christian", "phone_number": "(512) 463-0662", "district": "22"},
+                    {"representative_name": "MARTINEZ, Armando \"Mando\"", "phone_number": "(512) 463-0530", "district": "39"},
+                    {"representative_name": "MARTINEZ FISCHER, Trey", "phone_number": "(512) 463-0616", "district": "116"},
+                    {"representative_name": "MCLAUGHLIN, Don", "phone_number": "(512) 463-0194", "district": "80"},
+                    {"representative_name": "MCQUEENEY, John", "phone_number": "(512) 463-0608", "district": "97"},
+                    {"representative_name": "METCALF, Will", "phone_number": "(512) 463-0726", "district": "16"},
+                    {"representative_name": "MEYER, Morgan", "phone_number": "(512) 463-0367", "district": "108"},
+                    {"representative_name": "MEZA, Thresa \"Terry\"", "phone_number": "(512) 463-0641", "district": "105"},
+                    {"representative_name": "MONEY, Brent", "phone_number": "(512) 463-0880", "district": "2"},
+                    {"representative_name": "MOODY, Joe", "phone_number": "(512) 463-0728", "district": "78"},
+                    {"representative_name": "MORALES, Christina", "phone_number": "(512) 463-0732", "district": "145"},
+                    {"representative_name": "MORALES JR., Eddie", "phone_number": "(512) 463-0566", "district": "74"},
+                    {"representative_name": "MORALES SHAW, Penny", "phone_number": "(512) 463-0620", "district": "148"},
+                    {"representative_name": "MORGAN, Matt", "phone_number": "(512) 463-0710", "district": "26"},
+                    {"representative_name": "MUÑOZ, Sergio Jr.", "phone_number": "(512) 463-0704", "district": "36"},
+                    {"representative_name": "NOBLE, Candy", "phone_number": "(512) 463-0186", "district": "89"},
+                    {"representative_name": "OLCOTT, Mike", "phone_number": "(512) 463-0656", "district": "60"},
+                    {"representative_name": "OLIVERSON, Tom", "phone_number": "(512) 463-0661", "district": "130"},
+                    {"representative_name": "ORDAZ, Claudia", "phone_number": "(512) 463-0622", "district": "79"},
+                    {"representative_name": "ORR, Angelia", "phone_number": "(512) 463-0600", "district": "13"},
+                    {"representative_name": "PATTERSON, Jared", "phone_number": "(512) 463-0694", "district": "106"},
+                    {"representative_name": "PAUL, Dennis", "phone_number": "(512) 463-0734", "district": "129"},
+                    {"representative_name": "PEREZ, Mary Ann", "phone_number": "(512) 463-0460", "district": "144"},
+                    {"representative_name": "PEREZ, Vincent", "phone_number": "(512) 463-0638", "district": "77"},
+                    {"representative_name": "PHELAN, Dade", "phone_number": "(512) 463-0706", "district": "21"},
+                    {"representative_name": "PIERSON, Katrina", "phone_number": "(512) 463-0484", "district": "33"},
+                    {"representative_name": "PLESA, Mihaela", "phone_number": "(512) 463-0356", "district": "70"},
+                    {"representative_name": "RAYMOND, Richard Peña", "phone_number": "(512) 463-0558", "district": "42"},
+                    {"representative_name": "REYNOLDS, Ron", "phone_number": "(512) 463-0494", "district": "27"},
+                    {"representative_name": "RICHARDSON, Keresa", "phone_number": "(512) 463-0738", "district": "61"},
+                    {"representative_name": "RODRÍGUEZ RAMOS, Ana-María", "phone_number": "(512) 463-0454", "district": "102"},
+                    {"representative_name": "ROMERO, Ramon Jr.", "phone_number": "(512) 463-0740", "district": "90"},
+                    {"representative_name": "ROSE, Toni", "phone_number": "(512) 463-0664", "district": "110"},
+                    {"representative_name": "ROSENTHAL, Jon", "phone_number": "(512) 463-0722", "district": "135"},
+                    {"representative_name": "SCHATZLINE, Nate", "phone_number": "(512) 463-0562", "district": "93"},
+                    {"representative_name": "SCHOFIELD, Mike", "phone_number": "(512) 463-0528", "district": "132"},
+                    {"representative_name": "SCHOOLCRAFT, Alan", "phone_number": "(512) 463-0602", "district": "44"},
+                    {"representative_name": "SHAHEEN, Matt", "phone_number": "(512) 463-0594", "district": "66"},
+                    {"representative_name": "SHOFNER, Joanne", "phone_number": "(512) 463-0592", "district": "11"},
+                    {"representative_name": "SIMMONS, Lauren Ashley", "phone_number": "(512) 463-0518", "district": "146"},
+                    {"representative_name": "SLAWSON, Shelby", "phone_number": "(512) 463-0628", "district": "59"},
+                    {"representative_name": "SMITHEE, John T.", "phone_number": "(512) 463-0702", "district": "86"},
+                    {"representative_name": "SPILLER, David", "phone_number": "(512) 463-0526", "district": "68"},
+                    {"representative_name": "SWANSON, Valoree", "phone_number": "(512) 463-0572", "district": "150"},
+                    {"representative_name": "TALARICO, James", "phone_number": "(512) 463-0821", "district": "50"},
+                    {"representative_name": "TEPPER, Carl H.", "phone_number": "(512) 463-0676", "district": "84"},
+                    {"representative_name": "THOMPSON, Senfronia", "phone_number": "(512) 463-0720", "district": "141"},
+                    {"representative_name": "TINDERHOLT, Tony", "phone_number": "(512) 463-0624", "district": "94"},
+                    {"representative_name": "TOTH, Steve", "phone_number": "(512) 463-0797", "district": "15"},
+                    {"representative_name": "TROXCLAIR, Ellen", "phone_number": "(512) 463-0490", "district": "19"},
+                    {"representative_name": "TURNER, Chris", "phone_number": "(512) 463-0574", "district": "101"},
+                    {"representative_name": "VANDEAVER, Gary", "phone_number": "(512) 463-0692", "district": "1"},
+                    {"representative_name": "VASUT, Cody", "phone_number": "(512) 463-0564", "district": "25"},
+                    {"representative_name": "VILLALOBOS, Denise", "phone_number": "(512) 463-0462", "district": "34"},
+                    {"representative_name": "VIRDELL, Wes", "phone_number": "(512) 463-0536", "district": "53"},
+                    {"representative_name": "VO, Hubert", "phone_number": "(512) 463-0568", "district": "149"},
+                    {"representative_name": "WALLE, Armando", "phone_number": "(512) 463-0924", "district": "140"},
+                    {"representative_name": "WARD JOHNSON, Charlene", "phone_number": "(512) 463-0554", "district": "139"},
+                    {"representative_name": "WHARTON, Trey", "phone_number": "(512) 463-0412", "district": "12"},
+                    {"representative_name": "WILSON, Terry", "phone_number": "(512) 463-0309", "district": "20"},
+                    {"representative_name": "WU, Gene", "phone_number": "(512) 463-0492", "district": "137"},
+                    {"representative_name": "ZWIENER, Erin", "phone_number": "(512) 463-0647", "district": "45"}
+                ];
 
-            const onboardingModal = document.getElementById('onboardingModal');
-            const closeOnboardingModalBtn = document.getElementById('closeOnboardingModal');
-            const onboardingUserNameInput = document.getElementById('onboardingUserName');
-            const onboardingUserLocationInput = document.getElementById('onboardingUserLocation');
-            const saveOnboardingInfoBtn = document.getElementById('saveOnboardingInfo');
+                // Transform new data into the structure the tool expects
+                const initialRepresentativesData = initialRepresentativesData_JSON.map((rep, index) => ({
+                    id: `rep-${index}-${rep.district}`, // Create a unique ID
+                    district: rep.district,
+                    name: rep.representative_name,
+                    phone: rep.phone_number
+                    // No 'email' property anymore
+                }));
 
-            const responseModal = document.getElementById('responseModal');
-            const closeResponseModalBtn = document.getElementById('closeResponseModal');
-            const responseModalTitle = document.getElementById('responseModalTitle');
-            const currentRepIdForModalInput = document.getElementById('currentRepIdForModal');
-            const modalResponseSelect = document.getElementById('modalResponseSelect');
-            const modalNotesTextarea = document.getElementById('modalNotesTextarea');
-            const saveResponseModalBtn = document.getElementById('saveResponseModal');
-            const cancelResponseModalBtn = document.getElementById('cancelResponseModal');
+                let representatives = []; 
+                let userFullName = '';    
+                let userLocation = '';  
 
-            const guideModal = document.getElementById('guideModal');
-            const closeGuideModalBtn = document.getElementById('closeGuideModal');
-            const dismissGuideModalBtn = document.getElementById('dismissGuideModal');
+                const tableBody = document.getElementById('repsTable').getElementsByTagName('tbody')[0];
+                const exportButton = document.getElementById('exportData');
+                const importFile = document.getElementById('importFile');
+                const resetButton = document.getElementById('resetData');
+                const saveAllButton = document.getElementById('saveAllChanges');
+                const editMyInfoButton = document.getElementById('editMyInfo');
+                const showGuideButton = document.getElementById('showGuideBtn');
+                
+                // Email template inputs are no longer present in HTML, so references can be removed
+                // const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
+                // const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
 
-            // Default Email Content
-            const defaultEmailSubject = "Regarding CSSB 3 & SB 3 - A Message from a Constituent";
-            const defaultEmailBody = `Dear {RepName},
+                const onboardingModal = document.getElementById('onboardingModal');
+                const closeOnboardingModalBtn = document.getElementById('closeOnboardingModal');
+                const onboardingUserNameInput = document.getElementById('onboardingUserName');
+                const onboardingUserLocationInput = document.getElementById('onboardingUserLocation');
+                const saveOnboardingInfoBtn = document.getElementById('saveOnboardingInfo');
 
-I’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.
+                const responseModal = document.getElementById('responseModal');
+                const closeResponseModalBtn = document.getElementById('closeResponseModal');
+                const responseModalTitle = document.getElementById('responseModalTitle');
+                const currentRepIdForModalInput = document.getElementById('currentRepIdForModal');
+                const modalResponseSelect = document.getElementById('modalResponseSelect');
+                const modalNotesTextarea = document.getElementById('modalNotesTextarea');
+                const saveResponseModalBtn = document.getElementById('saveResponseModal');
+                const cancelResponseModalBtn = document.getElementById('cancelResponseModal');
 
-These bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.
+                const guideModal = document.getElementById('guideModal');
+                const closeGuideModalBtn = document.getElementById('closeGuideModal');
+                const dismissGuideModalBtn = document.getElementById('dismissGuideModal');
 
-This is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.
+                // --- User Info & Onboarding Logic (Kept, but less critical without email) ---
+                function loadUserInfo() {
+                    userFullName = localStorage.getItem('userFullName') || '';
+                    userLocation = localStorage.getItem('userLocation') || '';
+                    const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
 
-Driving them to unregulated, illegal markets will only increase public health risks.
-
-If the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:
-
-* Restricting sales to adults age 21 and older
-* Requiring child-resistant packaging
-* Establishing retail buffer zones around schools
-
-Every $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.
-
-Thank you,
-{UserName}
-{UserLocation}`;
-
-            // --- User Info & Onboarding ---
-            function loadUserInfo() {
-                userFullName = localStorage.getItem('userFullName') || '';
-                userLocation = localStorage.getItem('userLocation') || '';
-                const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-
-                if (!onboardingComplete) {
-                    onboardingModal.style.display = 'block';
+                    // Onboarding is less critical now, but we can keep the mechanism
+                    if (!onboardingComplete) {
+                        // onboardingModal.style.display = 'block'; // Optionally disable auto-popup
+                    }
+                    onboardingUserNameInput.value = userFullName;
+                    onboardingUserLocationInput.value = userLocation;
                 }
-                onboardingUserNameInput.value = userFullName;
-                onboardingUserLocationInput.value = userLocation;
-            }
-
-            closeOnboardingModalBtn.onclick = () => onboardingModal.style.display = 'none';
-            editMyInfoButton.onclick = () => {
-                onboardingUserNameInput.value = userFullName; 
-                onboardingUserLocationInput.value = userLocation;
-                onboardingModal.style.display = 'block';
-            }
-
-            saveOnboardingInfoBtn.onclick = function() {
-                userFullName = onboardingUserNameInput.value.trim();
-                userLocation = onboardingUserLocationInput.value.trim();
-
-                if (userFullName) { 
+                closeOnboardingModalBtn.onclick = () => onboardingModal.style.display = 'none';
+                editMyInfoButton.onclick = () => {
+                    onboardingUserNameInput.value = userFullName; 
+                    onboardingUserLocationInput.value = userLocation;
+                    onboardingModal.style.display = 'block';
+                };
+                saveOnboardingInfoBtn.onclick = function() {
+                    userFullName = onboardingUserNameInput.value.trim();
+                    userLocation = onboardingUserLocationInput.value.trim();
+                    // No need to check if userFullName is present if it's optional
                     localStorage.setItem('userFullName', userFullName);
                     localStorage.setItem('userLocation', userLocation);
                     localStorage.setItem('onboardingComplete', 'true');
                     onboardingModal.style.display = 'none';
-                    alert('Your information has been saved.');
-                } else {
-                    alert('Please enter your full name.');
+                    alert('Your information has been saved (optional).');
+                };
+
+                // --- Data Persistence (Local Storage) ---
+                function loadDataFromLocalStorage() {
+                    console.log("loadDataFromLocalStorage called.");
+                    try { 
+                        localStorage.setItem('__testLocalStorage', 'test');
+                        localStorage.removeItem('__testLocalStorage');
+                        console.log("localStorage appears to be available.");
+                    } catch (e) {
+                        alert("localStorage is not available or access is restricted. Progress will not be saved. Error: " + e.message);
+                        console.error("localStorage test failed:", e);
+                    }
+                    loadUserInfo(); 
+                    const storedData = localStorage.getItem('representativesCallData');
+                    if (storedData) {
+                        const parsedStoredData = JSON.parse(storedData);
+                        representatives = initialRepresentativesData.map(initialRep => {
+                            const storedRep = parsedStoredData.find(s => s.id === initialRep.id);
+                            return {
+                                ...initialRep, 
+                                called: storedRep?.called || false,
+                                // emailed: storedRep?.emailed || false, // Removed
+                                response: storedRep?.response || 'not_selected',
+                                notes: storedRep?.notes || ''
+                            };
+                        });
+                    } else {
+                        representatives = initialRepresentativesData.map(rep => ({
+                            ...rep,
+                            called: false,
+                            // emailed: false, // Removed
+                            response: 'not_selected',
+                            notes: ''
+                        }));
+                    }
+                    // Email template loading removed
                 }
-            }
 
-            // --- Data Persistence (Local Storage) ---
-            function loadDataFromLocalStorage() {
-                loadUserInfo(); // Load user details first
-
-                const storedData = localStorage.getItem('representativesCallData');
-                if (storedData) {
-                    const parsedStoredData = JSON.parse(storedData);
-                    // Merge initial data with stored data, ensuring all reps are present
-                    // and new properties like 'emailed' are added if missing from old storage
-                    representatives = initialRepresentativesData.map(initialRep => {
-                        const storedRep = parsedStoredData.find(s => s.id === initialRep.id);
-                        return {
-                            ...initialRep, // Start with defaults from initialRepresentativesData
-                            called: false, // Default called status
-                            emailed: false, // Default emailed status
-                            response: 'not_selected', // Default response
-                            notes: '', // Default notes
-                            ...(storedRep || {}) // Override with stored values if they exist
-                        };
-                    });
-                } else {
-                    // If no stored data, initialize from initialRepresentativesData with tracking fields
-                    representatives = initialRepresentativesData.map(rep => ({
-                        ...rep,
-                        called: false,
-                        emailed: false, 
-                        response: 'not_selected',
-                        notes: ''
-                    }));
+                function saveDataToLocalStorage() {
+                    try {
+                        localStorage.setItem('representativesCallData', JSON.stringify(representatives));
+                        // Email template saving removed
+                        console.log("Data saved to local storage.");
+                    } catch (e) {
+                        console.error("Error saving data to localStorage:", e);
+                        alert("Could not save data. Your browser's local storage might be full or disabled.");
+                    }
                 }
-                emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
-                emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
-            }
-
-            function saveDataToLocalStorage() {
-                localStorage.setItem('representativesCallData', JSON.stringify(representatives));
-                localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
-                localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                // User info is saved separately by its own functions
-                console.log("Data saved to local storage.");
-            }
-            
-            // --- UI Rendering & Event Handlers ---
-            const responseOptions = ['', 'For', 'Against', 'Not Advised/Neutral', 'No Stance Yet', 'Left Voicemail', 'Other'];
-            responseOptions.forEach(val => {
-                const option = document.createElement('option');
-                option.value = val.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected');
-                option.textContent = val || 'Select Response...';
-                modalResponseSelect.appendChild(option);
-            });
-
-            function renderTable() {
-                tableBody.innerHTML = ''; 
-                representatives.forEach((rep) => {
-                    const row = tableBody.insertRow();
-                    row.setAttribute('data-id', rep.id);
-
-                    // Called Checkbox
-                    const cellCalled = row.insertCell();
-                    const calledCheckbox = document.createElement('input');
-                    calledCheckbox.type = 'checkbox';
-                    calledCheckbox.checked = rep.called;
-                    calledCheckbox.dataset.repId = rep.id;
-                    calledCheckbox.addEventListener('change', handleCalledChange);
-                    cellCalled.appendChild(calledCheckbox);
-
-                    // Emailed Checkbox
-                    const cellEmailed = row.insertCell();
-                    const emailedCheckbox = document.createElement('input');
-                    emailedCheckbox.type = 'checkbox';
-                    emailedCheckbox.checked = rep.emailed;
-                    emailedCheckbox.dataset.repId = rep.id;
-                    emailedCheckbox.addEventListener('change', handleEmailedChange);
-                    cellEmailed.appendChild(emailedCheckbox);
-
-                    // District, Name
-                    row.insertCell().textContent = rep.district;
-                    row.insertCell().textContent = rep.name;
-                    
-                    // Email Link
-                    const cellEmail = row.insertCell();
-                    const emailLink = document.createElement('a');
-                    emailLink.href = "#"; 
-                    emailLink.textContent = rep.email;
-                    emailLink.dataset.email = rep.email;
-                    emailLink.dataset.repName = rep.name;
-                    emailLink.dataset.repId = rep.id; 
-                    emailLink.classList.add('email-link');
-                    emailLink.addEventListener('click', handleEmailClick);
-                    cellEmail.appendChild(emailLink);
-
-                    // Phone Link
-                    const cellPhone = row.insertCell();
-                    const phoneLink = document.createElement('a');
-                    phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
-                    phoneLink.textContent = rep.phone;
-                    cellPhone.appendChild(phoneLink);
-
-                    // Response Summary Cell
-                    const cellResponseSummary = row.insertCell();
-                    cellResponseSummary.classList.add('response-summary-cell');
-                    updateResponseSummaryCell(cellResponseSummary, rep);
+                
+                const responseOptions = ['', 'For', 'Against', 'Not Advised/Neutral', 'No Stance Yet', 'Left Voicemail', 'Other'];
+                responseOptions.forEach(val => {
+                    const option = document.createElement('option');
+                    option.value = val.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected');
+                    option.textContent = val || 'Select Response...';
+                    modalResponseSelect.appendChild(option);
                 });
-            }
 
-            function updateResponseSummaryCell(cell, rep) {
-                if (rep.called) { 
-                    let summaryText = 'N/A';
-                    const selectedOptionText = responseOptions.find(opt => opt.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected') === rep.response);
-                    summaryText = selectedOptionText || (rep.response !== 'not_selected' ? rep.response.replace(/_/g, ' ') : 'No response logged');
-                    
-                    let summary = `Response: ${summaryText}`;
-                    if (rep.notes) {
-                        summary += `<br>Notes: ${rep.notes.substring(0, 35)}${rep.notes.length > 35 ? '...' : ''}`;
+                function renderTable() {
+                    console.log("renderTable called.");
+                    if (!tableBody) {
+                        console.error("Table body not found! Cannot render table.");
+                        alert("Error: Table structure missing in the HTML. Cannot display representatives.");
+                        return;
                     }
-                    cell.innerHTML = summary;
-                } else {
-                    cell.innerHTML = '<i>Not called yet</i>';
-                }
-            }
+                    tableBody.innerHTML = ''; 
+                    representatives.forEach((rep) => {
+                        const row = tableBody.insertRow();
+                        row.setAttribute('data-id', rep.id);
 
-            function handleCalledChange(event) {
-                const repId = event.target.dataset.repId;
-                const repIndex = representatives.findIndex(r => r.id === repId);
-                if (repIndex === -1) return;
+                        const cellCalled = row.insertCell();
+                        const calledCheckbox = document.createElement('input');
+                        calledCheckbox.type = 'checkbox';
+                        calledCheckbox.checked = !!rep.called; 
+                        calledCheckbox.dataset.repId = rep.id;
+                        calledCheckbox.addEventListener('change', handleCalledChange);
+                        cellCalled.appendChild(calledCheckbox);
 
-                const rep = representatives[repIndex];
-                const isChecked = event.target.checked;
-                rep.called = isChecked;
+                        // Emailed Checkbox cell removed
 
-                const row = document.querySelector(`tr[data-id="${repId}"]`);
-                const summaryCell = row ? row.cells[row.cells.length -1] : null; 
+                        row.insertCell().textContent = rep.district;
+                        row.insertCell().textContent = rep.name; // Name is now directly from transformed data
+                        
+                        // Email Link cell removed
 
-                if (isChecked) { // If "Called" is checked, show response modal
-                    currentRepIdForModalInput.value = rep.id;
-                    responseModalTitle.textContent = `Log Response: ${rep.name}`;
-                    modalResponseSelect.value = rep.response || 'not_selected';
-                    modalNotesTextarea.value = rep.notes || '';
-                    responseModal.style.display = 'block';
-                } else { // If "Called" is unchecked, clear response and notes
-                    rep.response = 'not_selected';
-                    rep.notes = '';
-                    if (summaryCell) updateResponseSummaryCell(summaryCell, rep);
-                }
-                saveDataToLocalStorage();
-            }
+                        const cellPhone = row.insertCell();
+                        const phoneLink = document.createElement('a');
+                        phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
+                        phoneLink.textContent = rep.phone;
+                        cellPhone.appendChild(phoneLink);
 
-            function handleEmailedChange(event) {
-                const repId = event.target.dataset.repId;
-                const repIndex = representatives.findIndex(r => r.id === repId);
-                if (repIndex === -1) return;
-
-                representatives[repIndex].emailed = event.target.checked;
-                saveDataToLocalStorage();
-            }
-            
-            function handleEmailClick(event) {
-                console.log("handleEmailClick triggered.");
-                event.preventDefault(); 
-
-                const targetLink = event.currentTarget; 
-                const recipientEmail = targetLink.dataset.email;
-                const repName = targetLink.dataset.repName;
-                const repId = targetLink.dataset.repId; 
-
-                console.log("Recipient Email:", recipientEmail, "Representative Name:", repName, "Rep ID:", repId);
-
-                if (!recipientEmail) { 
-                    console.error("CRITICAL: Could not get recipient's email from data attributes.");
-                    alert("Error: Could not get representative's email.");
-                    return;
+                        const cellResponseSummary = row.insertCell();
+                        cellResponseSummary.classList.add('response-summary-cell');
+                        updateResponseSummaryCell(cellResponseSummary, rep);
+                    });
+                    console.log("Table rendered with " + representatives.length + " rows.");
                 }
 
-                if (!emailSubjectTemplateInput || !emailBodyTemplateInput) {
-                    console.error("CRITICAL: Email template input fields not found.");
-                    alert("Error: Email template fields missing.");
-                    return;
-                }
-
-                let subject = emailSubjectTemplateInput.value;
-                let body = emailBodyTemplateInput.value;
-                
-                if (typeof subject !== 'string') subject = "";
-                if (typeof body !== 'string') body = "";
-                
-                const repNameStr = repName || ""; 
-                const userNameStr = userFullName || "[Your Name]";
-                const userLocationStr = userLocation || "[Your Location]";
-
-                try {
-                    subject = subject.replace(/{RepName}/g, repNameStr)
-                                   .replace(/{UserName}/g, userNameStr)
-                                   .replace(/{UserLocation}/g, userLocationStr);
-                    body = body.replace(/{RepName}/g, repNameStr)
-                               .replace(/{UserName}/g, userNameStr)
-                               .replace(/{UserLocation}/g, userLocationStr);
-                } catch (e) {
-                    console.error("Error during placeholder replacement:", e);
-                    alert("Error preparing email template.");
-                    return;
-                }
-                
-                const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                console.log("Final mailtoLink:", mailtoLink);
-                
-                try {
-                    window.location.href = mailtoLink; // Attempt to open email client
-                    // If successful and repId is valid, mark as emailed
-                    if (repId) {
-                        const repIndex = representatives.findIndex(r => r.id === repId);
-                        if (repIndex !== -1 && !representatives[repIndex].emailed) {
-                            representatives[repIndex].emailed = true;
-                            const emailedCheckboxInRow = document.querySelector(`tr[data-id="${repId}"] td:nth-child(2) input[type="checkbox"]`);
-                            if (emailedCheckboxInRow) {
-                                emailedCheckboxInRow.checked = true;
-                            }
-                            saveDataToLocalStorage(); // Save change immediately
+                function updateResponseSummaryCell(cell, rep) {
+                    if (rep.called) { 
+                        let summaryText = 'N/A';
+                        const selectedOptionText = responseOptions.find(opt => opt.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected') === rep.response);
+                        summaryText = selectedOptionText || (rep.response !== 'not_selected' ? String(rep.response).replace(/_/g, ' ') : 'No response logged');
+                        let summary = `Response: ${summaryText}`;
+                        if (rep.notes) {
+                            summary += `<br>Notes: ${String(rep.notes).substring(0, 35)}${String(rep.notes).length > 35 ? '...' : ''}`;
                         }
+                        cell.innerHTML = summary;
+                    } else {
+                        cell.innerHTML = '<i>Not called yet</i>';
                     }
-                    console.log("Attempted to navigate to mailto link. Marked as emailed if successful and ID found.");
-                } catch (e) {
-                    console.error("Error trying to open mailto link:", e);
-                    alert("Could not open email client.");
                 }
-            }
 
-            // --- Modal Control ---
-            closeResponseModalBtn.onclick = () => responseModal.style.display = 'none';
-            cancelResponseModalBtn.onclick = () => responseModal.style.display = 'none';
-
-            saveResponseModalBtn.onclick = function() {
-                const repId = currentRepIdForModalInput.value;
-                if (!repId) return;
-                const repIndex = representatives.findIndex(r => r.id === repId);
-                if (repIndex === -1) return;
-
-                representatives[repIndex].response = modalResponseSelect.value;
-                representatives[repIndex].notes = modalNotesTextarea.value;
-                
-                const row = document.querySelector(`tr[data-id="${repId}"]`);
-                if (row) {
-                    const summaryCell = row.cells[row.cells.length -1]; 
-                    updateResponseSummaryCell(summaryCell, representatives[repIndex]);
+                function handleCalledChange(event) {
+                    const repId = event.target.dataset.repId;
+                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    if (repIndex === -1) return;
+                    const rep = representatives[repIndex];
+                    rep.called = event.target.checked;
+                    const row = document.querySelector(`tr[data-id="${repId}"]`);
+                    const summaryCell = row ? row.cells[row.cells.length -1] : null; 
+                    if (rep.called) { 
+                        currentRepIdForModalInput.value = rep.id;
+                        responseModalTitle.textContent = `Log Response: ${rep.name}`;
+                        modalResponseSelect.value = rep.response || 'not_selected';
+                        modalNotesTextarea.value = rep.notes || '';
+                        responseModal.style.display = 'block';
+                    } else { 
+                        rep.response = 'not_selected';
+                        rep.notes = '';
+                        if (summaryCell) updateResponseSummaryCell(summaryCell, rep);
+                    }
+                    saveDataToLocalStorage();
                 }
-                responseModal.style.display = 'none';
-                saveDataToLocalStorage();
-            };
-            
-            showGuideButton.onclick = () => guideModal.style.display = 'block';
-            closeGuideModalBtn.onclick = () => guideModal.style.display = 'none';
-            dismissGuideModalBtn.onclick = () => guideModal.style.display = 'none';
 
-            // Close modals if clicking outside their content
-            window.onclick = function(event) {
-                if (event.target == responseModal) responseModal.style.display = 'none';
-                if (event.target == onboardingModal) onboardingModal.style.display = 'none';
-                if (event.target == guideModal) guideModal.style.display = 'none';
-            }
+                // handleEmailedChange and handleEmailClick functions removed
 
-            // --- Data Management Buttons ---
-            exportButton.addEventListener('click', () => {
-                saveDataToLocalStorage(); // Ensure latest data is captured
-                const dataStr = JSON.stringify({
-                    representatives: representatives,
-                    emailSubject: emailSubjectTemplateInput.value,
-                    emailBody: emailBodyTemplateInput.value,
-                    userFullName: userFullName,
-                    userLocation: userLocation,
-                    onboardingComplete: localStorage.getItem('onboardingComplete') === 'true'
-                }, null, 2); // null, 2 for pretty printing JSON
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                const exportFileDefaultName = 'sb3_call_tracker_progress.json';
+                closeResponseModalBtn.onclick = () => responseModal.style.display = 'none';
+                cancelResponseModalBtn.onclick = () => responseModal.style.display = 'none';
+                saveResponseModalBtn.onclick = function() {
+                    const repId = currentRepIdForModalInput.value;
+                    if (!repId) return;
+                    const repIndex = representatives.findIndex(r => r.id === repId);
+                    if (repIndex === -1) return;
+                    representatives[repIndex].response = modalResponseSelect.value;
+                    representatives[repIndex].notes = modalNotesTextarea.value;
+                    const row = document.querySelector(`tr[data-id="${repId}"]`);
+                    if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], representatives[repIndex]);
+                    responseModal.style.display = 'none';
+                    saveDataToLocalStorage();
+                };
                 
-                let linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-                linkElement.remove();
-            });
+                showGuideButton.onclick = () => guideModal.style.display = 'block';
+                closeGuideModalBtn.onclick = () => guideModal.style.display = 'none';
+                dismissGuideModalBtn.onclick = () => guideModal.style.display = 'none';
 
-            importFile.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        try {
-                            const importedData = JSON.parse(e.target.result);
-                            if (importedData.representatives && Array.isArray(importedData.representatives)) {
-                                // Merge imported data, prioritizing the structure from initialRepresentativesData
-                                // but taking values from importedData
-                                representatives = initialRepresentativesData.map(initialRep => {
-                                    const importedRepData = importedData.representatives.find(ir => ir.id === initialRep.id);
-                                    return {
-                                        ...initialRep, // Base structure and contact info
-                                        called: importedRepData?.called || false,
-                                        emailed: importedRepData?.emailed || false,
-                                        response: importedRepData?.response || 'not_selected',
-                                        notes: importedRepData?.notes || ''
-                                    };
-                                });
-                                
-                                emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
-                                emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
-                                userFullName = importedData.userFullName || '';
-                                userLocation = importedData.userLocation || '';
-                                onboardingUserNameInput.value = userFullName; 
-                                onboardingUserLocationInput.value = userLocation;
-                                localStorage.setItem('userFullName', userFullName);
-                                localStorage.setItem('userLocation', userLocation);
-                                if(importedData.onboardingComplete !== undefined) { // Check for undefined explicitly
-                                   localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
-                                }
-                                saveDataToLocalStorage(); 
-                                renderTable(); 
-                                alert('Progress imported successfully!');
-                            } else {
-                                alert('Error: Invalid file format. Ensure it contains a "representatives" array.');
-                            }
-                        } catch (error) {
-                            console.error('Error importing data:', error);
-                            alert('Error importing file. It might be corrupted or not a valid JSON.');
-                        }
-                        importFile.value = ''; // Reset file input
+                window.onclick = function(event) {
+                    if (event.target == responseModal) responseModal.style.display = 'none';
+                    if (event.target == onboardingModal) onboardingModal.style.display = 'none';
+                    if (event.target == guideModal) guideModal.style.display = 'none';
+                };
+
+                exportButton.addEventListener('click', () => {
+                    saveDataToLocalStorage(); 
+                    const dataToExport = { // Only export relevant data
+                        representatives: representatives,
+                        userFullName: userFullName, // Kept for potential future use
+                        userLocation: userLocation,
+                        onboardingComplete: localStorage.getItem('onboardingComplete') === 'true'
                     };
-                    reader.readAsText(file);
-                }
-            });
-            
-            resetButton.addEventListener('click', () => {
-                if (confirm('Are you sure you want to reset all data? This includes your progress, notes, and personal info. This cannot be undone.')) {
-                    localStorage.clear(); // Clears all local storage for this domain
-                    // Re-initialize data and UI
-                    loadDataFromLocalStorage(); // This will trigger onboarding if needed
+                    const dataStr = JSON.stringify(dataToExport, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    const exportFileDefaultName = 'sb3_call_tracker_progress.json';
+                    let linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                    linkElement.remove();
+                });
+
+                importFile.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const importedData = JSON.parse(e.target.result);
+                                if (importedData.representatives && Array.isArray(importedData.representatives)) {
+                                    representatives = initialRepresentativesData.map(initialRep => {
+                                        const importedRepData = importedData.representatives.find(ir => ir.id === initialRep.id);
+                                        return {
+                                            ...initialRep,
+                                            called: importedRepData?.called || false,
+                                            // emailed: false, // No longer importing 'emailed'
+                                            response: importedRepData?.response || 'not_selected',
+                                            notes: importedRepData?.notes || ''
+                                        };
+                                    });
+                                    userFullName = importedData.userFullName || '';
+                                    userLocation = importedData.userLocation || '';
+                                    onboardingUserNameInput.value = userFullName; 
+                                    onboardingUserLocationInput.value = userLocation;
+                                    localStorage.setItem('userFullName', userFullName);
+                                    localStorage.setItem('userLocation', userLocation);
+                                    if(importedData.onboardingComplete !== undefined) {
+                                       localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
+                                    }
+                                    saveDataToLocalStorage(); 
+                                    renderTable(); 
+                                    alert('Progress imported successfully!');
+                                } else {
+                                    alert('Error: Invalid file format.');
+                                }
+                            } catch (error) {
+                                console.error('Error importing data:', error);
+                                alert('Error importing file.');
+                            }
+                            importFile.value = ''; 
+                        };
+                        reader.readAsText(file);
+                    }
+                });
+                
+                resetButton.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                        localStorage.clear(); 
+                        loadDataFromLocalStorage(); 
+                        renderTable();
+                        alert('All data has been reset.');
+                    }
+                });
+
+                saveAllButton.addEventListener('click', () => {
+                    saveDataToLocalStorage(); // Now this primarily serves as an explicit save button
+                    alert('Data saved manually!');
+                });
+
+                console.log("Attempting initial load and render...");
+                try {
+                    loadDataFromLocalStorage(); 
                     renderTable();
-                    alert('All data has been reset.');
+                    console.log("Initial load and render successful.");
+                } catch (e) {
+                    alert("Error during initial load/render: " + e.message + "\nSee console for details.");
+                    console.error("Error during initial load/render:", e);
                 }
             });
-
-            saveAllButton.addEventListener('click', () => {
-                saveDataToLocalStorage(); // Primarily saves email template edits, other data is saved on interaction
-                alert('All changes (including email templates) have been saved!');
-            });
-
-            // --- Initial Load ---
-            loadDataFromLocalStorage(); 
-            renderTable();
-        });
+        } catch (e) {
+            alert("CRITICAL ERROR SETTING UP DOMContentLoaded: " + e.message);
+            console.error("CRITICAL ERROR SETTING UP DOMContentLoaded:", e);
+        }
     </script>
 </body>
 </html>
