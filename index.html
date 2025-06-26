@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
     <style>
         :root {
             --dark-bg-primary: #1e1e1e;
@@ -47,12 +48,13 @@
         }
 
         header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid var(--accent-green);
         }
-
         header h1 {
             color: var(--accent-green);
             margin: 0 0 5px 0;
@@ -128,6 +130,133 @@
             color: var(--dark-text-secondary);
         }
 
+        /* Toggle Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .toggle-label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hamburger Menu & Sidenav */
+        .sidenav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1001;
+            top: 0;
+            left: 0;
+            background-color: var(--dark-bg-secondary);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        .sidenav a, .sidenav .toggle-container, .sidenav .sidenav-link {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 1.1em;
+            color: var(--dark-text-primary);
+            display: block;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .sidenav a:hover, .sidenav .sidenav-link:hover {
+            color: var(--accent-green);
+        }
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        .hamburger-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark-text-primary);
+            background-color: var(--utility-button-bg);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+        .hamburger-btn:hover {
+            background-color: var(--utility-button-hover-bg);
+        }
+        .floating-hamburger-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+        /* Scroll-to-top button */
+        #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: var(--accent-green);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 18px;
+            width: 50px;
+            height: 50px;
+        }
+        #scrollTopBtn:hover {
+            background-color: var(--accent-green-darker);
+        }
+
+
         .controls button, .controls label.button-like {
             padding: 10px 15px;
             color: white;
@@ -139,32 +268,8 @@
             text-decoration: none;
             display: inline-block;
             text-align: center;
-            flex-grow: 1; 
-        }
-        .controls button#exportData, 
-        .controls label.button-like[for="importFile"] {
-            background-color: var(--accent-green);
-        }
-        .controls button#exportData:hover, 
-        .controls label.button-like[for="importFile"]:hover {
-            background-color: var(--accent-green-darker);
-        }
-
-        .controls button#resetData,
-        .controls button#editMyInfo,
-        .controls button#showGuideBtn {
-            background-color: var(--utility-button-bg);
-        }
-        .controls button#resetData:hover,
-        .controls button#editMyInfo:hover,
-        .controls button#showGuideBtn:hover {
-            background-color: var(--utility-button-hover-bg);
         }
         
-        .controls input[type="file"] {
-            display: none;
-        }
-
         .table-container {
             overflow-x: auto; 
             margin-bottom: 20px; 
@@ -372,6 +477,68 @@
             top: 10px;
             right: 20px;
         }
+        
+        /* New styles for multi-step modal */
+        .modal-step { display: none; }
+        .modal-step.active { display: block; }
+        .modal-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-navigation button {
+            padding: 10px 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color-dark);
+            background-color: var(--dark-bg-primary);
+            color: var(--dark-text-primary);
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .radio-group label,
+        .checkbox-group label {
+            font-weight: normal;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .radio-group input,
+        .checkbox-group input {
+            margin-right: 10px;
+        }
+        .caveat-section {
+            margin-left: 25px;
+            margin-top: 5px;
+        }
+        .caveat-section input {
+            width: calc(100% - 80px);
+            display: inline-block;
+        }
+        .add-caveat-btn {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            margin-left: 10px;
+            background-color: var(--utility-button-bg);
+            display: none; /* Hidden by default */
+        }
+        .hidden {
+            display: none;
+        }
         .close-button:hover,
         .close-button:focus {
             color: var(--dark-text-primary);
@@ -425,106 +592,141 @@
     </style>
 </head>
 <body>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" id="closeNavBtn">×</a>
+        <a href="#" id="sideNavGuide">User Guide</a>
+        <a href="#" id="sideNavExport">Export Progress</a>
+        <label for="sideNavImportFile" class="sidenav-link">Import Progress</label>
+        <input type="file" id="sideNavImportFile" accept=".json" style="display: none;">
+        <a href="#" id="sideNavEditInfo">Edit My Info</a>
+        <a href="#" id="sideNavReset">Reset All Data</a>
+        <div class="toggle-container">
+            <span class="toggle-label">AI Email Writing Assistance</span>
+            <label class="switch">
+                <input type="checkbox" id="llmToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <button class="hamburger-btn floating-hamburger-btn" id="floatingNavBtn">☰</button>
+
     <div class="container">
         <header>
-            <h1>SB3 Stakeholders Call Tracker</h1>
-            <span class="version-number">v1.1 (Firebase Beta)</span>
-            <p>Track your calls and emails to representatives, their responses, and your notes. Progress is saved automatically to your device and backed up to a secure cloud database.</p>
-            <div class="report-problem-link">
-                <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
+            <div>
+                <h1>SB3 Stakeholders Call Tracker</h1>
+                <span class="version-number">v1.1 (Firebase Beta)</span>
+                <p>Track your calls and emails to representatives, their responses, and your notes. Progress is saved automatically to your device and backed up to a secure cloud database.</p>
+                <div class="report-problem-link">
+                    <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
+                </div>
             </div>
+            <button class="hamburger-btn" id="openNavBtn">☰</button>
         </header>
 
         <div class="controls">
-            <button id="showGuideBtn">User Guide</button> 
-            <button id="exportData">Export Progress</button>
-            <label for="importFile" class="button-like">Import Progress</label>
-            <input type="file" id="importFile" accept=".json">
-            <button id="editMyInfo">Edit My Info</button>
-            <button id="resetData">Reset All Data</button>
         </div>
 
-        <div class="email-template-section">
-            <label for="emailSubjectTemplate">Email Subject Template:</label>
+        <div class="email-template-section hidden" id="emailTemplateSection">
+            <label for="emailSubjectTemplate">Template Subject:</label>
             <input type="text" id="emailSubjectTemplate">
-            
-            <label for="emailBodyTemplate" style="margin-top:10px;">Email Body Template:</label>
+            <label for="emailBodyTemplate">Template Body:</label>
             <textarea id="emailBodyTemplate"></textarea>
-            <small><em>Placeholders: {RepName}, {UserName}, {UserLocation}. Click an email in the table to use this template. Changes save automatically.</em></small>
+            <small>Use placeholders: {repName}, {userName}, {userLocation}</small>
         </div>
 
-        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">YAE Dems List</h2>
-        <div class="table-container">
-            <table id="repsTableYaeDems">
-                <thead>
-                    <tr>
-                        <th>Called</th>
-                        <th>Emailed</th>
-                        <th>District</th>
-                        <th>Representative</th>
-                        <th>Party</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Response Summary</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Potential Flips</h2>
-        <div class="table-container">
-            <table id="repsTableChairFlips">
-                <thead>
-                    <tr>
-                        <th>Called</th>
-                        <th>Emailed</th>
-                        <th>District</th>
-                        <th>Representative</th>
-                        <th>Party</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Response Summary</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">NAY Voters</h2>
-        <div class="table-container">
-            <table id="repsTableNayVoters">
-                <thead>
-                    <tr>
-                        <th>Called</th>
-                        <th>Emailed</th>
-                        <th>District</th>
-                        <th>Representative</th>
-                        <th>Party</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Response Summary</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        <div id="dynamic-tables-container"></div>
 
          <div class="footer-actions">
             <!-- Save All Changes button removed due to auto-save implementation -->
         </div>
     </div>
 
+    <button id="scrollTopBtn" title="Go to top">↑</button>
+
     <div id="onboardingModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <span class="close-button" id="closeOnboardingModal">×</span>
-            <h2>Welcome! Let's Get You Set Up</h2>
-            <p>Please provide a few details to personalize your email templates. This information is stored locally in your browser and backed up.</p>
-            <label for="onboardingUserName">Your Full Name (for email signature):</label>
-            <input type="text" id="onboardingUserName" placeholder="e.g., Jane Doe">
-            <label for="onboardingUserLocation">Your City/Town (e.g., "Austin resident"):</label>
-            <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX or concerned Texan">
-            <button id="saveOnboardingInfo">Save and Continue</button>
+            <h2>Create Your Communications Profile</h2>
+            <p>This optional info helps generate more personalized, effective messages. Your answers are saved to your device and backed up securely.</p>
+
+            <!-- Step 1: Basic Info -->
+            <div id="modalStep1" class="modal-step active">
+                <h3>Step 1: About You</h3>
+                <div class="form-group">
+                    <label for="onboardingUserName">Your Full Name (for email signature):</label>
+                    <input type="text" id="onboardingUserName" placeholder="e.g., Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label for="onboardingUserLocation">Your City/Town (e.g., "Austin resident"):</label>
+                    <input type="text" id="onboardingUserLocation" placeholder="e.g., Austin, TX or concerned Texan">
+                </div>
+                <div class="form-group">
+                    <label for="onboardingZipCode">What is your Zip Code?</label>
+                    <input type="text" id="onboardingZipCode" placeholder="e.g., 78701">
+                </div>
+                <div class="form-group">
+                    <label>Do you work in the Hemp Industry?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="hempIndustry" value="yes"> Yes</label>
+                        <label><input type="radio" name="hempIndustry" value="no" checked> No</label>
+                    </div>
+                </div>
+                <div class="form-group hidden" id="occupationGroup">
+                    <label for="onboardingOccupation">What do you do?</label>
+                    <input type="text" id="onboardingOccupation" placeholder="e.g., Teacher, Engineer, etc.">
+                </div>
+            </div>
+
+            <!-- Step 2: Tone & Personality -->
+            <div id="modalStep2" class="modal-step">
+                <h3>Step 2: Your Voice</h3>
+                <div class="form-group">
+                    <label for="primaryToneSelect">Select your Primary Tone:</label>
+                    <select id="primaryToneSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Select up to two supporting Personality Elements:</label>
+                    <div id="personalityElementsContainer" class="checkbox-group"></div>
+                </div>
+            </div>
+
+            <!-- Step 3: Personal Impact -->
+            <div id="modalStep3" class="modal-step">
+                <h3>Step 3: Your Story</h3>
+                <div class="form-group">
+                    <label for="banImpactStatement">What specifically would a THC ban mean to you?</label>
+                    <textarea id="banImpactStatement" placeholder="Share your personal story or perspective."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="additionalComments">Do you have any personal points or comments you would like to ensure are conveyed?</label>
+                    <textarea id="additionalComments" placeholder="Add any other key points."></textarea>
+                </div>
+            </div>
+
+            <!-- Step 4: Regulations SUPPORT -->
+            <div id="modalStep4" class="modal-step">
+                <h3>Step 4: Regulation Preferences (SUPPORT)</h3>
+                <div class="form-group">
+                    <label>Select which regulations you SUPPORT:</label>
+                    <div id="supportedRegulationsContainer" class="checkbox-group"></div>
+                </div>
+            </div>
+
+            <!-- Step 5: Regulations OPPOSE -->
+            <div id="modalStep5" class="modal-step">
+                <h3>Step 5: Regulation Preferences (OPPOSE)</h3>
+                <div class="form-group">
+                    <label>Select which regulations you would NOT want to see:</label>
+                    <div id="opposedRegulationsContainer" class="checkbox-group"></div>
+                </div>
+            </div>
+
+            <div class="modal-navigation">
+                <button id="modalPrevBtn" class="button-outline">Previous</button>
+                <button id="modalNextBtn">Next</button>
+                <button id="saveOnboardingInfo" class="hidden">Save Profile</button>
+            </div>
         </div>
     </div>
 
@@ -540,6 +742,31 @@
             <textarea id="modalNotesTextarea" placeholder="Enter notes here..."></textarea>
             <button id="saveResponseModal">Save Response</button>
             <button id="cancelResponseModal" class="button-outline">Cancel</button>
+        </div>
+    </div>
+
+    <div id="emailGenerationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeEmailGenerationModal">×</span>
+            <h3 id="emailGenModalTitle">Your Personalized Email Draft</h3>
+            <div id="emailGenSpinner" class="hidden">
+                <p>Generating your personalized draft...</p>
+                <!-- Add a cool spinner CSS animation here if you want -->
+            </div>
+            <div id="emailGenContent" class="hidden">
+                <div class="form-group">
+                    <label for="generatedSubject">Subject:</label>
+                    <input type="text" id="generatedSubject">
+                </div>
+                <div class="form-group">
+                    <label for="generatedBody">Body:</label>
+                    <textarea id="generatedBody" style="min-height: 250px;"></textarea>
+                </div>
+                <div class="modal-navigation">
+                    <button id="approveAndSendEmail" class="button-primary">Approve & Send</button>
+                    <button id="cancelEmailGeneration" class="button-outline">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -582,223 +809,450 @@
             const errorDetails = `CRITICAL SCRIPT ERROR:\nMessage: ${message}\nSource: ${source}\nLine: ${lineno}\nColumn: ${colno}\nError: ${error ? JSON.stringify(error) : 'N/A'}`;
             alert(errorDetails);
             console.error("GLOBAL ERROR:", message, source, lineno, colno, error);
-            return true; 
+            return true;
         };
 
-        try { 
+        try {
             document.addEventListener('DOMContentLoaded', function() {
                 console.log("DOMContentLoaded event fired.");
 
-                // Firebase Configuration
+                // --- Constants and Config ---
                 const firebaseConfig = {
                     apiKey: "AIzaSyAm-QMDte5ytPN7Z8Cz7VaDe7hUVGsTE-8",
                     authDomain: "sb3calltool.firebaseapp.com",
                     projectId: "sb3calltool",
-                    storageBucket: "sb3calltool.firebasestorage.app", // Corrected from .app
+                    storageBucket: "sb3calltool.firebasestorage.app",
                     messagingSenderId: "834566220861",
                     appId: "1:834566220861:web:6475e1ddf50c00e54b0e54",
                     measurementId: "G-BC4Z144B00",
-                    databaseURL: "https://sb3calltool-default-rtdb.firebaseio.com" // Added databaseURL
+                    databaseURL: "https://sb3calltool-default-rtdb.firebaseio.com"
                 };
 
-                // Initialize Firebase
+                const TONE_AND_PERSONALITY_DATA = {
+                  "primary_tones": [{"code":"PROF_FORMAL","name":"Professional‑Formal","how_it_feels":"Polite, businesslike, courteous","best_for":"First contact; complex policy issues"}, {"code":"FRIEND_PRO","name":"Friendly‑Professional","how_it_feels":"Warm but business‑appropriate","best_for":"Community matters; local projects"}, {"code":"POLICY_ANALYTICAL","name":"Policy‑Analytical","how_it_feels":"Data‑driven, objective","best_for":"Budget, economic, or technical topics"}, {"code":"PERSONAL_NARR","name":"Personal Narrative","how_it_feels":"Brief personal story, heartfelt","best_for":"Health, education, human‑impact issues"}, {"code":"SOLUTION_ORIENT","name":"Solution‑Oriented","how_it_feels":"Constructive, next‑step focused","best_for":"Suggesting specific legislation or amendments"}, {"code":"CIVIC_PATRIOTIC","name":"Civic Duty / Patriotic","how_it_feels":"Shared values and service","best_for":"Voting rights, veterans’ issues"}, {"code":"INSPIRATIONAL","name":"Inspirational / Hopeful","how_it_feels":"Uplifting, forward‑looking","best_for":"Climate, youth, visionary initiatives"}, {"code":"URGENT_RESPECT","name":"Urgent‑Yet‑Respectful","how_it_feels":"Time‑sensitive without aggression","best_for":"Imminent votes; impending deadlines"}, {"code":"BIPARTISAN","name":"Bipartisan‑Bridge‑Building","how_it_feels":"Common‑ground, non‑partisan","best_for":"Cross‑aisle support"}],
+                  "personality_elements": [{"code":"EMPATHETIC","name":"Empathetic","short_descriptor":"Expresses understanding","adds":"Human connection"}, {"code":"CONCISE","name":"Concise","short_descriptor":"Brief, no tangents","adds":"Clarity & time respect"}, {"code":"DETAILED","name":"Detailed / Source‑Citing","short_descriptor":"References bills or data","adds":"Credibility"}, {"code":"STORY_DRIVEN","name":"Story‑Driven","short_descriptor":"Uses one vivid anecdote","adds":"Emotional resonance"}, {"code":"CONFIDENT","name":"Confident","short_descriptor":"Steady conviction","adds":"Persuasiveness"}, {"code":"HUMBLE","name":"Humble / Collaborative","short_descriptor":"Acknowledges limits","adds":"Approachability"}, {"code":"OPTIMISTIC","name":"Optimistic","short_descriptor":"Highlights gains","adds":"Positive framing"}, {"code":"CONCERNED","name":"Concerned / Cautious","short_descriptor":"Polite worry or risk","adds":"Gravity"}, {"code":"FORWARD_THINK","name":"Forward‑Thinking","short_descriptor":"Long‑term benefits","adds":"Strategic view"}, {"code":"GRATITUDE","name":"Gratitude‑Focused","short_descriptor":"Thanks legislator","adds":"Goodwill"}, {"code":"COMMUNITY_VOICE","name":"Constituent‑Community Voice","short_descriptor":"Inclusive “we”, local refs","adds":"Grass‑roots solidarity"}, {"code":"DATA_SAVVY","name":"Data‑Savvy","short_descriptor":"Links to charts or facts","adds":"Depth for evidence‑minded"}, {"code":"SOLUTION_SEEK","name":"Solution‑Seeking","short_descriptor":"Invites feedback","adds":"Two‑way dialogue"}]
+                };
+
+                const REGULATION_OPTIONS = ["Age & Access Control – No sales to minors; retail areas must be 21+ only and display clear danger/warning signs.", "Location Limits – Stores or kiosks may not operate near schools, churches, parks, playgrounds, or similar child‑focused venues.", "Packaging & Marketing – Containers must be child‑resistant, tamper‑evident, resealable, and not designed to appeal to children.", "Product Purity – THC items cannot be combined with other psychoactive substances (alcohol, tobacco, kratom, etc.).", "Testing & Tracking – Mandatory testing at every production stage; seed‑to‑sale manifests/lab reports must be accurate (forgery is a felony).", "Facility & Operator Permits – Growers, processors, and retailers need state permits, follow food‑safety rules, and pay fees that fund enforcement by TABC and partner agencies.", "Local Control – Cities and counties may ban or restrict THC retail outlets.", "Sales Window & Quantity Caps – Transactions allowed only 10 a.m.–9 p.m., never on Sundays; per‑product THC limits and purchase limits per customer apply.", "Labeling – Packages must show a surgeon‑general–style warning, full ingredient list, THC content, and a scannable QR/barcode linking to test results.", "Public‑Use Ban – Public consumption, use on retail premises, and open containers in vehicles are criminal offenses.", "Enforcement Powers – Attorney General, DAs, and county attorneys may pursue violations under the Deceptive Trade Practices Act.", "Taxes & Funding – Excise taxes plus dedicated state funds must cover oversight, with extra resources earmarked for law‑enforcement operations."];
+
+                // --- Firebase Initialization ---
                 firebase.initializeApp(firebaseConfig);
-                firebase.analytics(); // Initialize Analytics
+                firebase.analytics();
                 const auth = firebase.auth();
                 const db = firebase.database();
+                const functions = firebase.functions();
+                
+                // Connect to emulators
+                if (window.location.hostname === "127.0.0.1") {
+                    console.log("Connecting to local emulators.");
+                    db.useEmulator("127.0.0.1", 9000);
+                    functions.useEmulator("127.0.0.1", 5001);
+                }
+
                 let currentUser = null;
                 let deviceId = localStorage.getItem('sb3CallToolDeviceId');
-
                 if (!deviceId) {
                     deviceId = 'device-' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
                     localStorage.setItem('sb3CallToolDeviceId', deviceId);
                 }
-                
-                let initialYaeDemsData = [];
-                let representativesYaeDems = [];
-                let initialChairFlipsData = [];
-                let representativesChairFlips = [];
-                let initialNayVotersData = [];
-                let representativesNayVoters = [];
-                
-                let userFullName = '';    
-                let userLocation = '';
 
-                const yaeDemsTableBody = document.getElementById('repsTableYaeDems').getElementsByTagName('tbody')[0];
-                const chairFlipsTableBody = document.getElementById('repsTableChairFlips').getElementsByTagName('tbody')[0];
-                const nayVotersTableBody = document.getElementById('repsTableNayVoters').getElementsByTagName('tbody')[0];
-                const exportButton = document.getElementById('exportData');
-                const importFile = document.getElementById('importFile');
-                const resetButton = document.getElementById('resetData');
-                const editMyInfoButton = document.getElementById('editMyInfo');
-                const showGuideButton = document.getElementById('showGuideBtn');
-                
-                const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
-                const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
+                // --- State Variables ---
+                let contactLists = new Map();
+                let userProfile = {};
+                let currentModalStep = 1;
 
+                // --- DOM Element Caching ---
+                const dynamicTablesContainer = document.getElementById('dynamic-tables-container');
+                
+                // Sidenav & Controls
+                const openNavBtn = document.getElementById('openNavBtn');
+                const floatingNavBtn = document.getElementById('floatingNavBtn');
+                const closeNavBtn = document.getElementById('closeNavBtn');
+                const sideNavGuideBtn = document.getElementById('sideNavGuide');
+                const sideNavExportBtn = document.getElementById('sideNavExport');
+                const sideNavImportInput = document.getElementById('sideNavImportFile');
+                const sideNavEditInfoBtn = document.getElementById('sideNavEditInfo');
+                const sideNavResetBtn = document.getElementById('sideNavReset');
+                const llmToggle = document.getElementById('llmToggle');
+                const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+                // Onboarding Modal Elements
                 const onboardingModal = document.getElementById('onboardingModal');
                 const closeOnboardingModalBtn = document.getElementById('closeOnboardingModal');
+                const emailTemplateSection = document.getElementById('emailTemplateSection');
+                const emailSubjectTemplateInput = document.getElementById('emailSubjectTemplate');
+                const emailBodyTemplateInput = document.getElementById('emailBodyTemplate');
                 const onboardingUserNameInput = document.getElementById('onboardingUserName');
                 const onboardingUserLocationInput = document.getElementById('onboardingUserLocation');
+                const onboardingZipCodeInput = document.getElementById('onboardingZipCode');
+                const occupationGroup = document.getElementById('occupationGroup');
+                const onboardingOccupationInput = document.getElementById('onboardingOccupation');
+                const primaryToneSelect = document.getElementById('primaryToneSelect');
+                const personalityElementsContainer = document.getElementById('personalityElementsContainer');
+                const banImpactStatementInput = document.getElementById('banImpactStatement');
+                const additionalCommentsInput = document.getElementById('additionalComments');
+                const supportedRegulationsContainer = document.getElementById('supportedRegulationsContainer');
+                const opposedRegulationsContainer = document.getElementById('opposedRegulationsContainer');
+                const modalPrevBtn = document.getElementById('modalPrevBtn');
+                const modalNextBtn = document.getElementById('modalNextBtn');
                 const saveOnboardingInfoBtn = document.getElementById('saveOnboardingInfo');
 
+                // Other Modals
                 const responseModal = document.getElementById('responseModal');
-                const closeResponseModalBtn = document.getElementById('closeResponseModal');
-                const responseModalTitle = document.getElementById('responseModalTitle');
-                const currentRepIdForModalInput = document.getElementById('currentRepIdForModal');
-                const currentListIdentifierForModalInput = document.getElementById('currentListIdentifierForModal');
-                const modalResponseSelect = document.getElementById('modalResponseSelect');
-                const modalNotesTextarea = document.getElementById('modalNotesTextarea');
-                const saveResponseModalBtn = document.getElementById('saveResponseModal');
-                const cancelResponseModalBtn = document.getElementById('cancelResponseModal');
-
                 const guideModal = document.getElementById('guideModal');
-                const closeGuideModalBtn = document.getElementById('closeGuideModal');
-                const dismissGuideModalBtn = document.getElementById('dismissGuideModal');
 
-                const defaultEmailSubject = "Regarding CSSB 3 & SB 3 - A Message from a Constituent";
-                const defaultEmailBody = `Dear {RepName},\n\nI’m writing as a concerned constituent to urge you to oppose CSSB 3 and SB 3. While SB 3 represents a near-total ban on hemp-derived THC products, CSSB 3 is being framed as a compromise — but in reality, it imposes restrictions so severe that it would still dismantle the industry.\n\nThese bills are a clear example of government overreach. They threaten more than 50,000 Texas jobs, risk over $8 billion in annual economic impact, and would eliminate access to wellness products that millions of Texans rely on.\n\nThis is not conservative policy — it’s a rollback of personal freedom and economic opportunity. Hemp-derived products are already legal and regulated under both federal and Texas law, with existing safety and testing requirements in place. Texans, including veterans, parents, and people managing chronic pain, use these products responsibly.\n\nDriving them to unregulated, illegal markets will only increase public health risks.\n\nIf the true goal is to protect minors, I support responsible regulation — not prohibition. Reasonable safeguards could include:\n\n* Restricting sales to adults age 21 and older\n* Requiring child-resistant packaging\n* Establishing retail buffer zones around schools\n\nEvery $1 spent on hemp generates $2.80 for the local economy. This industry supports Texas farmers, retailers, processors, and thousands of small business owners.\n\nThank you,\n{UserName}\n{UserLocation}`;
+                // --- Main Logic ---
+                
+                function initializeApp() {
+                    populateToneAndPersonality();
+                    populateRegulations();
+                    setupModalListeners();
+                    loadEmailTemplate();
+                    
+                    auth.onAuthStateChanged(async user => {
+                        if (user) {
+                            currentUser = user;
+                            if (deviceId !== user.uid) {
+                                deviceId = user.uid;
+                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                            }
+                        } else {
+                            try {
+                                const userCredential = await auth.signInAnonymously();
+                                currentUser = userCredential.user;
+                                deviceId = currentUser.uid;
+                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                            } catch (error) {
+                                console.error("Error signing in anonymously:", error);
+                                alert("Could not connect to the database for backup. Progress will only be saved locally.");
+                            }
+                        }
+                        
+                        await loadContactLists();
+                        await loadDataFromAllSources();
+                        renderAllTables();
+                    });
+                }
 
-                function loadUserInfoFromLocal() { // Renamed to avoid conflict
-                    userFullName = localStorage.getItem('userFullName') || '';
-                    userLocation = localStorage.getItem('userLocation') || '';
-                    const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-                    // Show onboarding if not complete, regardless of Firebase auth state for this specific modal.
-                    // Firebase auth will handle data sync once info is entered.
-                    if (!onboardingComplete) { 
-                         onboardingModal.style.display = 'block';
+                function setupModalListeners() {
+                    sideNavEditInfoBtn.addEventListener('click', () => {
+                        populateOnboardingForm();
+                        onboardingModal.style.display = 'block';
+                        currentModalStep = 1;
+                        updateModalStepVisibility();
+                        closeNav();
+                    });
+
+                    sideNavGuideBtn.addEventListener('click', () => {
+                        guideModal.style.display = 'block';
+                        closeNav();
+                    });
+
+                    closeOnboardingModalBtn.onclick = () => onboardingModal.style.display = 'none';
+                    
+                    document.querySelectorAll('input[name="hempIndustry"]').forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            occupationGroup.classList.toggle('hidden', e.target.value !== 'no');
+                        });
+                    });
+
+                    modalNextBtn.addEventListener('click', () => navigateModal(1));
+                    modalPrevBtn.addEventListener('click', () => navigateModal(-1));
+                    saveOnboardingInfoBtn.addEventListener('click', saveAndCloseOnboarding);
+
+                    llmToggle.addEventListener('change', () => {
+                        emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
+                    });
+
+                    // Sidenav listeners
+                    openNavBtn.addEventListener('click', openNav);
+                    floatingNavBtn.addEventListener('click', openNav);
+                    closeNavBtn.addEventListener('click', closeNav);
+
+                    // Scroll-to-top listener
+                    window.onscroll = function() {scrollFunction()};
+                    scrollTopBtn.addEventListener('click', topFunction);
+
+                    // Wire up sidenav buttons to original functions
+                    sideNavExportBtn.addEventListener('click', exportDataHandler);
+                    sideNavImportInput.addEventListener('change', importDataHandler);
+                    sideNavResetBtn.addEventListener('click', resetDataHandler);
+                }
+
+                function openNav() {
+                    document.getElementById("mySidenav").style.width = "250px";
+                }
+
+                function closeNav() {
+                    document.getElementById("mySidenav").style.width = "0";
+                }
+
+                function scrollFunction() {
+                    const shouldShow = document.body.scrollTop > 20 || document.documentElement.scrollTop > 20;
+                    scrollTopBtn.style.display = shouldShow ? "block" : "none";
+                    floatingNavBtn.style.display = shouldShow ? "block" : "none";
+                }
+
+                function topFunction() {
+                    document.body.scrollTop = 0; // For Safari
+                    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+                }
+
+                async function loadEmailTemplate() {
+                    try {
+                        const response = await fetch('email_template.json');
+                        const template = await response.json();
+                        emailSubjectTemplateInput.value = template.subject;
+                        emailBodyTemplateInput.value = template.body;
+                    } catch (error) {
+                        console.error("Error loading email template:", error);
+                        emailSubjectTemplateInput.value = "Regarding THC Regulation";
+                        emailBodyTemplateInput.value = "Dear Representative {repName},\n\n...";
                     }
-                    onboardingUserNameInput.value = userFullName;
-                    onboardingUserLocationInput.value = userLocation;
+                }
+
+                function navigateModal(direction) {
+                    currentModalStep += direction;
+                    updateModalStepVisibility();
+                }
+
+                function updateModalStepVisibility() {
+                    document.querySelectorAll('.modal-step').forEach((step, index) => {
+                        step.classList.toggle('active', (index + 1) === currentModalStep);
+                    });
+                    modalPrevBtn.classList.toggle('hidden', currentModalStep === 1);
+                    modalNextBtn.classList.toggle('hidden', currentModalStep === 5);
+                    saveOnboardingInfoBtn.classList.toggle('hidden', currentModalStep !== 5);
+                }
+
+                function saveAndCloseOnboarding() {
+                    // Gather data from form
+                    const supportedRegulations = [];
+                    document.querySelectorAll('#supportedRegulationsContainer input[type="checkbox"]:checked').forEach(cb => {
+                        const caveatInput = document.getElementById(`caveat-sup-${cb.dataset.index}`);
+                        supportedRegulations.push({
+                            regulation: cb.value,
+                            caveat: caveatInput ? caveatInput.value.trim() : ''
+                        });
+                    });
+
+                    const opposedRegulations = [];
+                    document.querySelectorAll('#opposedRegulationsContainer input[type="checkbox"]:checked').forEach(cb => {
+                        const caveatInput = document.getElementById(`caveat-opp-${cb.dataset.index}`);
+                        opposedRegulations.push({
+                            regulation: cb.value,
+                            caveat: caveatInput ? caveatInput.value.trim() : ''
+                        });
+                    });
+
+                    const selectedPersonalityElements = Array.from(document.querySelectorAll('#personalityElementsContainer input[type="checkbox"]:checked')).map(cb => cb.value);
+
+                    userProfile.userFullName = onboardingUserNameInput.value.trim();
+                    userProfile.userLocation = onboardingUserLocationInput.value.trim();
+                    userProfile.zipCode = onboardingZipCodeInput.value.trim();
+                    userProfile.onboardingComplete = true;
+                    userProfile.intelligentDraftingProfile = {
+                        worksInHempIndustry: document.querySelector('input[name="hempIndustry"]:checked').value === 'yes',
+                        occupation: document.querySelector('input[name="hempIndustry"]:checked').value === 'no' ? onboardingOccupationInput.value.trim() : null,
+                        banImpactStatement: banImpactStatementInput.value.trim(),
+                        additionalComments: additionalCommentsInput.value.trim(),
+                        communicationTone: {
+                            primaryTone: primaryToneSelect.value,
+                            personalityElements: selectedPersonalityElements
+                        },
+                        supportedRegulations: supportedRegulations,
+                        opposedRegulations: opposedRegulations
+                    };
+                    
+                    onboardingModal.style.display = 'none';
+                    alert('Your Communications Profile has been saved.');
+                    saveDataToAllStorages();
+                }
+
+                function populateOnboardingForm() {
+                    const profile = userProfile.intelligentDraftingProfile || {};
+                    const tone = profile.communicationTone || {};
+
+                    onboardingUserNameInput.value = userProfile.userFullName || '';
+                    onboardingUserLocationInput.value = userProfile.userLocation || '';
+                    onboardingZipCodeInput.value = userProfile.zipCode || '';
+                    
+                    const worksInHemp = profile.worksInHempIndustry;
+                    document.querySelector(`input[name="hempIndustry"][value="${worksInHemp ? 'yes' : 'no'}"]`).checked = true;
+                    occupationGroup.classList.toggle('hidden', worksInHemp !== false);
+                    onboardingOccupationInput.value = profile.occupation || '';
+
+                    primaryToneSelect.value = tone.primaryTone || 'PROF_FORMAL';
+                    document.querySelectorAll('#personalityElementsContainer input[type="checkbox"]').forEach(cb => {
+                        cb.checked = (tone.personalityElements || []).includes(cb.value);
+                    });
+
+                    banImpactStatementInput.value = profile.banImpactStatement || '';
+                    additionalCommentsInput.value = profile.additionalComments || '';
+
+                    populateRegulationCheckboxes(supportedRegulationsContainer, profile.supportedRegulations || [], 'sup');
+                    populateRegulationCheckboxes(opposedRegulationsContainer, profile.opposedRegulations || [], 'opp');
                 }
                 
-                saveOnboardingInfoBtn.onclick = function() {
-                    userFullName = onboardingUserNameInput.value.trim();
-                    userLocation = onboardingUserLocationInput.value.trim();
-                    if (userFullName) { 
-                        localStorage.setItem('userFullName', userFullName);
-                        localStorage.setItem('userLocation', userLocation);
-                        localStorage.setItem('onboardingComplete', 'true');
-                        onboardingModal.style.display = 'none';
-                        alert('Your information has been saved.');
-                        saveDataToAllStorages(); 
-                    } else {
-                        alert('Please enter your full name for email personalization.');
-                    }
-                };
-                
-                async function fetchAndProcessData(filePath, listIdentifier) {
+                function populateRegulationCheckboxes(container, savedData, prefix) {
+                    container.querySelectorAll('input[type="checkbox"][data-prefix]').forEach(cb => {
+                        const savedReg = savedData.find(r => r.regulation === cb.value);
+                        const index = cb.dataset.index;
+                        const caveatBtn = document.querySelector(`.add-caveat-btn[data-index="${index}"][data-prefix="${prefix}"]`);
+                        const caveatSection = document.getElementById(`caveat-section-${prefix}-${index}`);
+                        const caveatInput = document.getElementById(`caveat-${prefix}-${index}`);
+
+                        cb.checked = !!savedReg;
+
+                        if (cb.checked) {
+                            caveatBtn.style.display = 'inline-block';
+                        } else {
+                            caveatBtn.style.display = 'none';
+                        }
+
+                        if (savedReg && savedReg.caveat) {
+                            caveatSection.classList.remove('hidden');
+                            caveatInput.value = savedReg.caveat;
+                        } else {
+                            caveatSection.classList.add('hidden');
+                            caveatInput.value = '';
+                        }
+                    });
+                }
+
+                function populateToneAndPersonality() {
+                    TONE_AND_PERSONALITY_DATA.primary_tones.forEach(tone => {
+                        const option = document.createElement('option');
+                        option.value = tone.code;
+                        option.textContent = `${tone.name} (${tone.how_it_feels})`;
+                        primaryToneSelect.appendChild(option);
+                    });
+
+                    personalityElementsContainer.innerHTML = '';
+                    TONE_AND_PERSONALITY_DATA.personality_elements.forEach(p => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `<input type="checkbox" value="${p.code}"> ${p.name} - <i>${p.short_descriptor}</i>`;
+                        personalityElementsContainer.appendChild(label);
+                    });
+                }
+
+                function populateRegulations() {
+                    const createRegulationHTML = (container, prefix) => {
+                        container.innerHTML = '';
+                        REGULATION_OPTIONS.forEach((reg, index) => {
+                            const div = document.createElement('div');
+                            div.innerHTML = `
+                                <label>
+                                    <input type="checkbox" value="${reg}" data-index="${index}" data-prefix="${prefix}"> ${reg}
+                                    <button type="button" class="add-caveat-btn" data-prefix="${prefix}" data-index="${index}">Add Caveat</button>
+                                </label>
+                                <div class="caveat-section hidden" id="caveat-section-${prefix}-${index}">
+                                    <input type="text" id="caveat-${prefix}-${index}" placeholder="Your modification...">
+                                </div>
+                            `;
+                            container.appendChild(div);
+                        });
+                    };
+                    createRegulationHTML(supportedRegulationsContainer, 'sup');
+                    createRegulationHTML(opposedRegulationsContainer, 'opp');
+                    
+                    // Add event listeners for showing/hiding caveat buttons and sections
+                    document.querySelectorAll('.checkbox-group input[type="checkbox"][data-prefix]').forEach(checkbox => {
+                        const index = checkbox.dataset.index;
+                        const prefix = checkbox.dataset.prefix;
+                        const caveatBtn = document.querySelector(`.add-caveat-btn[data-index="${index}"][data-prefix="${prefix}"]`);
+                        const caveatSection = document.getElementById(`caveat-section-${prefix}-${index}`);
+                        const caveatInput = document.getElementById(`caveat-${prefix}-${index}`);
+
+                        checkbox.addEventListener('change', (e) => {
+                            if (e.target.checked) {
+                                caveatBtn.style.display = 'inline-block';
+                            } else {
+                                caveatBtn.style.display = 'none';
+                                caveatSection.classList.add('hidden');
+                                caveatInput.value = '';
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.add-caveat-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const section = document.getElementById(`caveat-section-${e.target.dataset.prefix}-${e.target.dataset.index}`);
+                            section.classList.toggle('hidden');
+                        });
+                    });
+                }
+
+                async function loadContactLists() {
                     try {
-                        const response = await fetch(filePath);
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
-                        const jsonData = await response.json();
-                        return jsonData.map((rep, index) => ({
-                            id: `${listIdentifier}-${index}-${rep.district}`, 
-                            district: rep.district,
-                            name: rep.representative_name,
-                            phone: rep.phone_number,
-                            party: rep.party,
-                            email: rep.email,
-                            list: listIdentifier 
-                        }));
+                        const response = await fetch('contacts/manifest.json');
+                        const manifest = await response.json();
+                        for (const filename of manifest.contact_lists) {
+                            const match = filename.match(/^(\d+)_(.+)\.json$/);
+                            if (match) {
+                                const priority = parseInt(match[1], 10);
+                                const title = match[2].replace(/_/g, ' ');
+                                const listIdentifier = match[2].toLowerCase();
+                                const reps = await fetchAndProcessData(`contacts/${filename}`, listIdentifier);
+                                contactLists.set(listIdentifier, { priority, title, reps });
+                            }
+                        }
+                        // Sort the map by priority
+                        contactLists = new Map([...contactLists.entries()].sort((a, b) => a[1].priority - b[1].priority));
                     } catch (error) {
-                        console.error(`Error fetching initial data for ${listIdentifier}:`, error);
-                        alert(`Error loading data from ${filePath}.`);
-                        return [];
+                        console.error("Error loading contact lists:", error);
                     }
                 }
 
                 async function loadDataFromAllSources() {
-                    loadUserInfoFromLocal(); // Load user info from local first
-                    emailSubjectTemplateInput.value = localStorage.getItem('emailSubjectTemplate') || defaultEmailSubject;
-                    emailBodyTemplateInput.value = localStorage.getItem('emailBodyTemplate') || defaultEmailBody;
-
                     if (currentUser) {
-                        const userDeviceRef = db.ref(`devices/${deviceId}/latest`);
-                        try {
-                            const snapshot = await userDeviceRef.once('value');
-                            const firebaseData = snapshot.val();
-                            if (firebaseData) {
-                                console.log("Loading data from Firebase for device:", deviceId);
-                                representativesYaeDems = firebaseData.representativesYaeDems || initialYaeDemsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                representativesChairFlips = firebaseData.representativesChairFlips || initialChairFlipsData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                representativesNayVoters = firebaseData.representativesNayVoters || initialNayVotersData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                emailSubjectTemplateInput.value = firebaseData.emailSubject || defaultEmailSubject;
-                                emailBodyTemplateInput.value = firebaseData.emailBody || defaultEmailBody;
-                                userFullName = firebaseData.userFullName || userFullName; // Prioritize Firebase if exists
-                                userLocation = firebaseData.userLocation || userLocation;
-                                onboardingUserNameInput.value = userFullName;
-                                onboardingUserLocationInput.value = userLocation;
-                                localStorage.setItem('userFullName', userFullName); // Sync local
-                                localStorage.setItem('userLocation', userLocation);
-                                localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
-                                localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                                return; // Data loaded from Firebase, skip local list processing
-                            }
-                        } catch (error) {
-                            console.error("Error loading data from Firebase:", error);
+                        const snapshot = await db.ref(`devices/${deviceId}/latest`).once('value');
+                        const firebaseData = snapshot.val();
+                        if (firebaseData) {
+                            console.log("Loading data from Firebase.");
+                            userProfile = firebaseData.userProfile || {};
+                            contactLists.forEach((list, key) => {
+                                list.reps = firebaseData.contactLists?.[key]?.reps || list.reps.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                            });
+                            localStorage.setItem('sb3UserData', JSON.stringify(firebaseData));
+                            return;
                         }
                     }
                     
-                    // Fallback to local storage if no Firebase data or not signed in
                     console.log("Loading data from Local Storage.");
-                    const processStoredList = (storageKey, initialData) => {
-                        const storedData = localStorage.getItem(storageKey);
-                        if (storedData && initialData.length > 0) {
-                            const parsedStoredData = JSON.parse(storedData);
-                            return initialData.map(initialRep => {
-                                const storedRepData = parsedStoredData.find(s => s.id === initialRep.id);
-                                return { ...initialRep, called: storedRepData?.called || false, emailed: storedRepData?.emailed || false, response: storedRepData?.response || 'not_selected', notes: storedRepData?.notes || '' };
-                            });
-                        } else if (initialData.length > 0) {
-                            return initialData.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                        }
-                        return [];
-                    };
-                    representativesYaeDems = processStoredList('representativesYaeDemsCallData', initialYaeDemsData);
-                    representativesChairFlips = processStoredList('representativesChairFlipsCallData', initialChairFlipsData);
-                    representativesNayVoters = processStoredList('representativesNayVotersCallData', initialNayVotersData);
+                    const localData = JSON.parse(localStorage.getItem('sb3UserData') || '{}');
+                    userProfile = localData.userProfile || { onboardingComplete: false };
+                    contactLists.forEach((list, key) => {
+                        list.reps = localData.contactLists?.[key]?.reps || list.reps.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
+                    });
+
+                    if (!userProfile.onboardingComplete) {
+                        onboardingModal.style.display = 'block';
+                        updateModalStepVisibility();
+                    }
                 }
 
                 function saveDataToAllStorages() {
-                    // Save to Local Storage (as primary quick access)
-                    try {
-                        localStorage.setItem('representativesYaeDemsCallData', JSON.stringify(representativesYaeDems));
-                        localStorage.setItem('representativesChairFlipsCallData', JSON.stringify(representativesChairFlips));
-                        localStorage.setItem('representativesNayVotersCallData', JSON.stringify(representativesNayVoters));
-                        localStorage.setItem('emailSubjectTemplate', emailSubjectTemplateInput.value);
-                        localStorage.setItem('emailBodyTemplate', emailBodyTemplateInput.value);
-                        localStorage.setItem('userFullName', userFullName);
-                        localStorage.setItem('userLocation', userLocation);
-                        console.log("Data saved to Local Storage.");
-                    } catch (e) {
-                        console.error("Error saving data to localStorage:", e);
-                    }
+                    const dataToSave = {
+                        userProfile: userProfile,
+                        contactLists: Object.fromEntries(contactLists),
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
 
-                    // Save to Firebase
+                    localStorage.setItem('sb3UserData', JSON.stringify(dataToSave));
+                    console.log("Data saved to Local Storage.");
+
                     if (currentUser && deviceId) {
-                        const dataToSave = {
-                            timestamp: firebase.database.ServerValue.TIMESTAMP,
-                            representativesYaeDems: representativesYaeDems,
-                            representativesChairFlips: representativesChairFlips,
-                            representativesNayVoters: representativesNayVoters,
-                            emailSubject: emailSubjectTemplateInput.value,
-                            emailBody: emailBodyTemplateInput.value,
-                            userFullName: userFullName,
-                            userLocation: userLocation
-                        };
-                        // Save to a 'latest' node and also push to a historical log
                         db.ref(`devices/${deviceId}/latest`).set(dataToSave)
                             .then(() => console.log("Data saved to Firebase (latest)."))
                             .catch(error => console.error("Error saving 'latest' data to Firebase:", error));
-                        
-                        db.ref(`devices/${deviceId}/history`).push(dataToSave)
-                            .then(() => console.log("Data pushed to Firebase history."))
-                            .catch(error => console.error("Error pushing data to Firebase history:", error));
+                        db.ref(`devices/${deviceId}/history`).push(dataToSave);
                     }
                 }
                 
                 const responseOptions = ['', 'For', 'Against', 'Not Advised/Neutral', 'No Stance Yet', 'Left Voicemail', 'Other'];
+                const modalResponseSelect = document.getElementById('modalResponseSelect');
                 responseOptions.forEach(val => {
                     const option = document.createElement('option');
                     option.value = val.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected');
@@ -806,11 +1260,135 @@
                     modalResponseSelect.appendChild(option);
                 });
 
-                function renderTable(tableBodyElement, dataArray, listIdentifier) {
-                    if (!tableBodyElement) {
-                        console.error(`Table body for ${listIdentifier} not found!`);
-                        return;
+                // --- Event Listeners for Modals and Buttons ---
+                document.getElementById('closeResponseModal').onclick = () => responseModal.style.display = 'none';
+                document.getElementById('cancelResponseModal').onclick = () => responseModal.style.display = 'none';
+                document.getElementById('saveResponseModal').onclick = function() {
+                    const repId = document.getElementById('currentRepIdForModal').value;
+                    const listIdentifier = document.getElementById('currentListIdentifierForModal').value;
+                    if (!repId || !listIdentifier) return;
+                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                    const repIndex = currentList.findIndex(r => r.id === repId);
+                    if (repIndex === -1) return;
+                    currentList[repIndex].response = modalResponseSelect.value;
+                    currentList[repIndex].notes = document.getElementById('modalNotesTextarea').value;
+                    const tableBody = document.getElementById(`repsTable${listIdentifier.charAt(0).toUpperCase() + listIdentifier.slice(1)}`).getElementsByTagName('tbody')[0];
+                    if (tableBody) {
+                        const row = tableBody.querySelector(`tr[data-id="${repId}"]`);
+                        if (row) updateResponseSummaryCell(row.cells[row.cells.length - 1], currentList[repIndex]);
                     }
+                    responseModal.style.display = 'none';
+                    saveDataToAllStorages();
+                };
+
+                document.getElementById('closeGuideModal').onclick = () => guideModal.style.display = 'none';
+                document.getElementById('dismissGuideModal').onclick = () => guideModal.style.display = 'none';
+
+                window.onclick = function(event) {
+                    if (event.target == responseModal) responseModal.style.display = 'none';
+                    if (event.target == onboardingModal) onboardingModal.style.display = 'none';
+                    if (event.target == guideModal) guideModal.style.display = 'none';
+                };
+
+                function exportDataHandler() {
+                    saveDataToAllStorages(); 
+                    const dataStr = JSON.stringify({
+                        userProfile,
+                        contactLists: Object.fromEntries(contactLists),
+                        emailSubject: emailSubjectTemplateInput.value,
+                        emailBody: emailBodyTemplateInput.value
+                    }, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', 'sb3_call_tracker_progress.json');
+                    linkElement.click();
+                    linkElement.remove();
+                    closeNav();
+                }
+
+                function importDataHandler(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            userProfile = importedData.userProfile || { onboardingComplete: false };
+                            
+                            // Re-hydrate the map from the imported object
+                            if (importedData.contactLists) {
+                                for (const key in importedData.contactLists) {
+                                    if (contactLists.has(key)) {
+                                        const existingList = contactLists.get(key);
+                                        existingList.reps = importedData.contactLists[key].reps;
+                                    }
+                                }
+                            }
+
+                            emailSubjectTemplateInput.value = importedData.emailSubject || "";
+                            emailBodyTemplateInput.value = importedData.emailBody || "";
+                            
+                            saveDataToAllStorages();
+                            renderAllTables();
+                            populateOnboardingForm();
+                            alert('Progress imported successfully!');
+                        } catch (error) {
+                            alert('Error importing file.');
+                            console.error('Import Error:', error);
+                        }
+                        sideNavImportInput.value = '';
+                    };
+                    reader.readAsText(file);
+                    closeNav();
+                }
+
+                function resetDataHandler() {
+                    if (confirm('Are you sure you want to reset all data? This will clear local storage and attempt to clear Firebase data for this device. This cannot be undone.')) {
+                        localStorage.clear();
+                        if (currentUser && deviceId) {
+                            db.ref(`devices/${deviceId}`).remove();
+                        }
+                        deviceId = null;
+                        localStorage.removeItem('sb3CallToolDeviceId');
+                        window.location.reload();
+                    }
+                    closeNav();
+                }
+
+                function renderAllTables() {
+                    dynamicTablesContainer.innerHTML = '';
+                    contactLists.forEach((list, listIdentifier) => {
+                        const tableContainer = document.createElement('div');
+                        tableContainer.className = 'table-container';
+                        tableContainer.innerHTML = `
+                            <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">${list.title}</h2>
+                            <div class="table-container">
+                                <table id="repsTable-${listIdentifier}">
+                                    <thead>
+                                        <tr>
+                                            <th>Called</th>
+                                            <th>Emailed</th>
+                                            <th>District</th>
+                                            <th>Representative</th>
+                                            <th>Party</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Response Summary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        `;
+                        dynamicTablesContainer.appendChild(tableContainer);
+                        const tableBody = tableContainer.querySelector('tbody');
+                        renderTable(tableBody, list.reps, listIdentifier);
+                    });
+                }
+
+                function renderTable(tableBodyElement, dataArray, listIdentifier) {
+                    if (!tableBodyElement) return;
                     tableBodyElement.innerHTML = ''; 
                     dataArray.forEach((rep) => {
                         const row = tableBodyElement.insertRow();
@@ -871,10 +1449,7 @@
                 }
                 
                 function getRepresentativeListByIdentifier(listIdentifier) {
-                    if (listIdentifier === 'yaeDems') return representativesYaeDems;
-                    if (listIdentifier === 'chairFlips') return representativesChairFlips;
-                    if (listIdentifier === 'nayVoters') return representativesNayVoters;
-                    return []; 
+                    return contactLists.get(listIdentifier)?.reps || [];
                 }
 
                 function handleCalledChange(event) {
@@ -888,11 +1463,11 @@
                     const row = event.target.closest('tr'); 
                     const summaryCell = row ? row.cells[row.cells.length -1] : null; 
                     if (rep.called) { 
-                        currentRepIdForModalInput.value = rep.id;
-                        currentListIdentifierForModalInput.value = listIdentifier;
-                        responseModalTitle.textContent = `Log Response: ${rep.name}`;
+                        document.getElementById('currentRepIdForModal').value = rep.id;
+                        document.getElementById('currentListIdentifierForModal').value = listIdentifier;
+                        document.getElementById('responseModalTitle').textContent = `Log Response: ${rep.name}`;
                         modalResponseSelect.value = rep.response || 'not_selected';
-                        modalNotesTextarea.value = rep.notes || '';
+                        document.getElementById('modalNotesTextarea').value = rep.notes || '';
                         responseModal.style.display = 'block';
                     } else { 
                         rep.response = 'not_selected';
@@ -907,218 +1482,136 @@
                     const listIdentifier = event.target.dataset.list;
                     const currentList = getRepresentativeListByIdentifier(listIdentifier);
                     const repIndex = currentList.findIndex(r => r.id === repId);
-                    if (repIndex === -1) return;
-                    currentList[repIndex].emailed = event.target.checked;
-                    saveDataToAllStorages();
+                    if (repIndex !== -1) {
+                        currentList[repIndex].emailed = event.target.checked;
+                        saveDataToAllStorages();
+                    }
                 }
                 
-                function handleEmailClick(event) {
-                    event.preventDefault(); 
-                    const targetLink = event.currentTarget; 
-                    const recipientEmail = targetLink.dataset.email;
-                    const repName = targetLink.dataset.repName;
-                    const repId = targetLink.dataset.repId; 
+                async function handleEmailClick(event) {
+                    event.preventDefault();
+                    const targetLink = event.currentTarget;
+                    const repId = targetLink.dataset.repId;
                     const listIdentifier = targetLink.dataset.list;
-                    if (!userFullName) {
-                        alert("Please set your name in 'Edit My Info' before sending emails.");
-                        onboardingModal.style.display = 'block';
-                        onboardingUserNameInput.focus();
+                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
+                    const rep = currentList.find(r => r.id === repId);
+
+                    if (!userProfile.onboardingComplete) {
+                        alert("Please complete your Communications Profile from 'Edit My Info' before generating emails.");
+                        editMyInfoButton.click();
                         return;
                     }
-                    if (!recipientEmail) { alert("Error: Rep email missing."); return; }
-                    let subject = emailSubjectTemplateInput.value || "";
-                    let body = emailBodyTemplateInput.value || "";
-                    subject = subject.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
-                    body = body.replace(/{RepName}/g, repName || "").replace(/{UserName}/g, userFullName).replace(/{UserLocation}/g, userLocation);
-                    window.location.href = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    if (repId) {
-                        const currentList = getRepresentativeListByIdentifier(listIdentifier);
-                        const repIndex = currentList.findIndex(r => r.id === repId);
-                        if (repIndex !== -1 && !currentList[repIndex].emailed) {
-                            currentList[repIndex].emailed = true;
-                            const row = targetLink.closest('tr');
-                            const emailedCheckboxInRow = row ? row.querySelector('td:nth-child(2) input[type="checkbox"]') : null;
-                            if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
-                            saveDataToAllStorages();
-                        }
-                    }
-                }
 
-                closeResponseModalBtn.onclick = () => responseModal.style.display = 'none';
-                cancelResponseModalBtn.onclick = () => responseModal.style.display = 'none';
-                saveResponseModalBtn.onclick = function() {
-                    const repId = currentRepIdForModalInput.value;
-                    const listIdentifier = currentListIdentifierForModalInput.value;
-                    if (!repId || !listIdentifier) return;
-                    const currentList = getRepresentativeListByIdentifier(listIdentifier);
-                    const repIndex = currentList.findIndex(r => r.id === repId);
-                    if (repIndex === -1) return;
-                    currentList[repIndex].response = modalResponseSelect.value;
-                    currentList[repIndex].notes = modalNotesTextarea.value;
-                    let tableBodyElement;
-                    if (listIdentifier === 'yaeDems') tableBodyElement = yaeDemsTableBody;
-                    else if (listIdentifier === 'chairFlips') tableBodyElement = chairFlipsTableBody;
-                    else if (listIdentifier === 'nayVoters') tableBodyElement = nayVotersTableBody;
-                    if (tableBodyElement) {
-                        const row = tableBodyElement.querySelector(`tr[data-id="${repId}"]`);
-                        if (row) updateResponseSummaryCell(row.cells[row.cells.length -1], currentList[repIndex]);
-                    }
-                    responseModal.style.display = 'none';
-                    saveDataToAllStorages();
-                };
-                
-                showGuideButton.onclick = () => guideModal.style.display = 'block';
-                closeGuideModalBtn.onclick = () => guideModal.style.display = 'none';
-                dismissGuideModalBtn.onclick = () => guideModal.style.display = 'none';
-                window.onclick = function(event) {
-                    if (event.target == responseModal) responseModal.style.display = 'none';
-                    if (event.target == onboardingModal) onboardingModal.style.display = 'none';
-                    if (event.target == guideModal) guideModal.style.display = 'none';
-                };
-
-                exportButton.addEventListener('click', () => {
-                    saveDataToAllStorages(); 
-                    const dataToExport = {
-                        deviceId: deviceId, // Include deviceId for potential re-import on same device context
-                        representativesYaeDems: representativesYaeDems,
-                        representativesChairFlips: representativesChairFlips,
-                        representativesNayVoters: representativesNayVoters,
-                        emailSubject: emailSubjectTemplateInput.value,
-                        emailBody: emailBodyTemplateInput.value,
-                        userFullName: userFullName,
-                        userLocation: userLocation,
-                        onboardingComplete: localStorage.getItem('onboardingComplete') === 'true'
-                    };
-                    const dataStr = JSON.stringify(dataToExport, null, 2);
-                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                    const exportFileDefaultName = 'sb3_call_tracker_progress.json';
-                    let linkElement = document.createElement('a');
-                    linkElement.setAttribute('href', dataUri);
-                    linkElement.setAttribute('download', exportFileDefaultName);
-                    linkElement.click();
-                    linkElement.remove();
-                });
-
-                importFile.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            try {
-                                const importedData = JSON.parse(e.target.result);
-                                const processImportedList = (dataKey, initialDataArray) => {
-                                    let listToUpdate = [];
-                                    if (importedData[dataKey] && Array.isArray(importedData[dataKey]) && initialDataArray.length > 0) {
-                                        listToUpdate = initialDataArray.map(initialRep => {
-                                            const importedRepData = importedData[dataKey].find(ir => ir.id === initialRep.id || (ir.name === initialRep.name && ir.district === initialRep.district));
-                                            return { ...initialRep, called: importedRepData?.called || false, emailed: importedRepData?.emailed || false, response: importedRepData?.response || 'not_selected', notes: importedRepData?.notes || '' };
-                                        });
-                                    } else if (initialDataArray.length > 0) {
-                                         listToUpdate = initialDataArray.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                                    }
-                                    return listToUpdate;
-                                };
-                                representativesYaeDems = processImportedList('representativesYaeDems', initialYaeDemsData);
-                                representativesChairFlips = processImportedList('representativesChairFlips', initialChairFlipsData);
-                                representativesNayVoters = processImportedList('representativesNayVoters', initialNayVotersData);
-
-                                emailSubjectTemplateInput.value = importedData.emailSubject || defaultEmailSubject;
-                                emailBodyTemplateInput.value = importedData.emailBody || defaultEmailBody;
-                                userFullName = importedData.userFullName || '';
-                                userLocation = importedData.userLocation || '';
-                                onboardingUserNameInput.value = userFullName; 
-                                onboardingUserLocationInput.value = userLocation;
-                                if(importedData.onboardingComplete !== undefined) {
-                                   localStorage.setItem('onboardingComplete', importedData.onboardingComplete.toString());
-                                }
-                                // If imported data contains a deviceId, prefer it for consistency if user is importing their own data.
-                                // However, for a fresh import on a new device, we'd use the new device's generated ID.
-                                // For now, we'll stick to the current deviceId.
-                                saveDataToAllStorages(); 
-                                renderAllTables();
-                                alert('Progress imported successfully!');
-                            } catch (error) {
-                                console.error('Error importing data:', error);
-                                alert('Error importing file.');
-                            }
-                            importFile.value = ''; 
-                        };
-                        reader.readAsText(file);
-                    }
-                });
-                
-                resetButton.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset all data? This will clear local storage and attempt to clear Firebase data for this device. This cannot be undone.')) {
-                        localStorage.clear(); 
-                        // Clear Firebase data for this device
-                        if (currentUser && deviceId) {
-                            db.ref(`devices/${deviceId}`).remove()
-                                .then(() => console.log("Firebase data for device cleared."))
-                                .catch(error => console.error("Error clearing Firebase data:", error));
-                        }
-                        // Regenerate deviceId for a fresh start if needed, or keep it to re-associate if user logs back in.
-                        // For now, we'll keep it simple and just clear local. A new deviceId will be generated if not found.
-                        deviceId = null; // Force re-generation or re-association on next load
-                        localStorage.removeItem('sb3CallToolDeviceId');
-
-
-                        initialYaeDemsData = []; 
-                        initialChairFlipsData = [];
-                        initialNayVotersData = [];
-                        initializeApp(); 
-                        alert('All data has been reset.');
-                    }
-                });
-
-                emailSubjectTemplateInput.addEventListener('input', saveDataToAllStorages);
-                emailBodyTemplateInput.addEventListener('input', saveDataToAllStorages);
-
-                function renderAllTables() {
-                    renderTable(yaeDemsTableBody, representativesYaeDems, 'yaeDems');
-                    renderTable(chairFlipsTableBody, representativesChairFlips, 'chairFlips');
-                    renderTable(nayVotersTableBody, representativesNayVoters, 'nayVoters');
-                }
-
-                async function initializeApp() {
-                    console.log("Attempting to fetch initial data for all lists...");
-                    initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
-                    initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
-                    initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
+                    const emailGenModal = document.getElementById('emailGenerationModal');
+                    const spinner = document.getElementById('emailGenSpinner');
+                    const content = document.getElementById('emailGenContent');
                     
-                    auth.onAuthStateChanged(async user => {
-                        if (user) {
-                            console.log("User signed in anonymously:", user.uid);
-                            currentUser = user;
-                            // If the anonymous UID is different from stored deviceId, update deviceId to user.uid
-                            // This makes the Firebase path based on the auth UID.
-                            if (deviceId !== user.uid) {
-                                console.log(`Device ID changing from ${deviceId} to auth UID ${user.uid}`);
-                                deviceId = user.uid;
-                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
-                            }
-                        } else {
-                            console.log("User is signed out. Signing in anonymously...");
-                            currentUser = null;
-                            try {
-                                const userCredential = await auth.signInAnonymously();
-                                currentUser = userCredential.user;
-                                console.log("Signed in anonymously:", currentUser.uid);
-                                deviceId = currentUser.uid; // Use auth UID as deviceId
-                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
-                            } catch (error) {
-                                console.error("Error signing in anonymously:", error);
-                                alert("Could not connect to the database for backup. Progress will only be saved locally. Error: " + error.message);
-                            }
+                    emailGenModal.style.display = 'block';
+                    spinner.classList.remove('hidden');
+                    content.classList.add('hidden');
+
+                    if (llmToggle.checked) {
+                        try {
+                            const generateEmail = functions.httpsCallable('generateEmail');
+                            const result = await generateEmail({ userProfile, representative: rep });
+                            
+                            document.getElementById('generatedSubject').value = result.data.subject;
+                            document.getElementById('generatedBody').value = result.data.body;
+
+                            spinner.classList.add('hidden');
+                            content.classList.remove('hidden');
+
+                            document.getElementById('approveAndSendEmail').onclick = () => {
+                                const finalSubject = document.getElementById('generatedSubject').value;
+                                const finalBody = document.getElementById('generatedBody').value;
+
+                                if (!userProfile.approvedEmails) {
+                                    userProfile.approvedEmails = [];
+                                }
+                                userProfile.approvedEmails.push({
+                                    repName: rep.name,
+                                    subject: finalSubject,
+                                    body: finalBody,
+                                    timestamp: new Date().toISOString()
+                                });
+
+                                const repIndex = currentList.findIndex(r => r.id === repId);
+                                if (repIndex !== -1) {
+                                    currentList[repIndex].emailed = true;
+                                    const row = targetLink.closest('tr');
+                                    const emailedCheckboxInRow = row ? row.querySelector('td:nth-child(2) input[type="checkbox"]') : null;
+                                    if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
+                                }
+                                
+                                saveDataToAllStorages();
+                                
+                                window.location.href = `mailto:${rep.email}?subject=${encodeURIComponent(finalSubject)}&body=${encodeURIComponent(finalBody)}`;
+                                emailGenModal.style.display = 'none';
+                            };
+
+                        } catch (error) {
+                            console.error("Error calling generateEmail function:", error);
+                            alert("Failed to generate email. Please try again later.");
+                            emailGenModal.style.display = 'none';
                         }
-                        await loadDataFromAllSources();
-                        renderAllTables();
-                        console.log("Initial load and render process finished for all lists.");
-                    });
+                    } else {
+                        // Use the template
+                        let subject = emailSubjectTemplateInput.value;
+                        let body = emailBodyTemplateInput.value;
+
+                        subject = subject.replace(/{repName}/g, rep.name)
+                                       .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
+                                       .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
+
+                        body = body.replace(/{repName}/g, rep.name)
+                                   .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
+                                   .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
+
+                        document.getElementById('generatedSubject').value = subject;
+                        document.getElementById('generatedBody').value = body;
+
+                        spinner.classList.add('hidden');
+                        content.classList.remove('hidden');
+
+                        document.getElementById('approveAndSendEmail').onclick = () => {
+                            const finalSubject = document.getElementById('generatedSubject').value;
+                            const finalBody = document.getElementById('generatedBody').value;
+
+                            const repIndex = currentList.findIndex(r => r.id === repId);
+                            if (repIndex !== -1) {
+                                currentList[repIndex].emailed = true;
+                                const row = targetLink.closest('tr');
+                                const emailedCheckboxInRow = row ? row.querySelector('td:nth-child(2) input[type="checkbox"]') : null;
+                                if (emailedCheckboxInRow) emailedCheckboxInRow.checked = true;
+                            }
+                            
+                            saveDataToAllStorages();
+                            
+                            window.location.href = `mailto:${rep.email}?subject=${encodeURIComponent(finalSubject)}&body=${encodeURIComponent(finalBody)}`;
+                            emailGenModal.style.display = 'none';
+                        };
+                    }
+                }
+                
+                async function fetchAndProcessData(filePath, listIdentifier) {
+                    try {
+                        const response = await fetch(filePath);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
+                        const jsonData = await response.json();
+                        return jsonData.map((rep, index) => ({
+                            id: `${listIdentifier}-${index}-${rep.district}`, 
+                            district: rep.district, name: rep.representative_name, phone: rep.phone_number,
+                            party: rep.party, email: rep.email, list: listIdentifier 
+                        }));
+                    } catch (error) {
+                        console.error(`Error fetching initial data for ${listIdentifier}:`, error);
+                        return [];
+                    }
                 }
 
                 initializeApp().catch(e => {
-                    alert("Error during app initialization: " + e.message + "\nSee console for details.");
-                    console.error("Error during app initialization:", e);
+                    alert("CRITICAL ERROR during app initialization: " + e.message);
+                    console.error("CRITICAL ERROR during app initialization:", e);
                 });
             });
         } catch (e) {
