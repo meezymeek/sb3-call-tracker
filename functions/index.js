@@ -1,6 +1,10 @@
 const {onCall, HttpsError} = require("firebase-functions/v2/https");
+const {onObjectFinalized} = require("firebase-functions/v2/storage");
 const {defineSecret} = require("firebase-functions/params");
 const {OpenAI} = require("openai");
+const admin = require("firebase-admin");
+
+admin.initializeApp();
 
 // Define the secret for the OpenAI API key
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
@@ -76,5 +80,69 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
     throw new HttpsError("internal", "Failed to generate email.", error);
+  }
+});
+
+exports.updateContactListManifest = onObjectFinalized({bucket: "sb3calltool.appspot.com"}, async (event) => {
+  const file = event.data;
+  const filePath = file.name; // e.g., 'contacts/new_list.json'
+  const fileName = filePath.split("/").pop();
+
+  // Exit if the file is not in the 'contacts' directory, or is the manifest itself
+  if (!filePath.startsWith("contacts/") || fileName === "manifest.json") {
+    console.log(`Ignoring file: ${filePath}`);
+    return null;
+  }
+
+  // Exit if the file is not a JSON file
+  if (!fileName.endsWith(".json")) {
+    console.log(`Ignoring non-JSON file: ${filePath}`);
+    return null;
+  }
+
+  const bucket = admin.storage().bucket(file.bucket);
+  const manifestFile = bucket.file("contacts/manifest.json");
+
+  try {
+    // Download and parse the existing manifest
+    const manifestContents = await manifestFile.download();
+    const manifest = JSON.parse(manifestContents.toString());
+
+    // Add the new file to the list if it's not already there
+    if (!manifest.contact_lists.includes(fileName)) {
+      console.log(`Adding ${fileName} to manifest.json`);
+      manifest.contact_lists.push(fileName);
+
+      // Sort the lists based on the numeric prefix
+      manifest.contact_lists.sort((a, b) => {
+        const numA = parseInt(a.split("_")[0], 10);
+        const numB = parseInt(b.split("_")[0], 10);
+        return numA - numB;
+      });
+
+      // Upload the updated manifest
+      await manifestFile.save(JSON.stringify(manifest, null, 2), {
+        contentType: "application/json",
+      });
+      console.log("manifest.json updated successfully.");
+    } else {
+      console.log(`${fileName} already exists in manifest.json. No update needed.`);
+    }
+    return null;
+  } catch (error) {
+    // If manifest.json doesn't exist, create it with the new file
+    if (error.code === 404) {
+      console.log("manifest.json not found. Creating a new one.");
+      const newManifest = {
+        contact_lists: [fileName],
+      };
+      await manifestFile.save(JSON.stringify(newManifest, null, 2), {
+        contentType: "application/json",
+      });
+      console.log("New manifest.json created successfully.");
+      return null;
+    }
+    console.error("Error updating manifest.json:", error);
+    throw error; // Re-throw the error to signal failure
   }
 });

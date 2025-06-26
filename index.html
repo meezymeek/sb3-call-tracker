@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SB3 Stakeholders Call Tracker</title>
+    <title>SB3 Call Tool</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -589,9 +589,38 @@
             th:nth-child(7), td:nth-child(7) { width: 20%; } 
             th:nth-child(8), td:nth-child(8) { width: 20%; } 
          }
+
+        /* Loader Styles */
+        #loader {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            z-index: 1001;
+            width: 120px;
+            height: 120px;
+            margin: -76px 0 0 -76px;
+            border: 16px solid var(--dark-bg-tertiary);
+            border-radius: 50%;
+            border-top: 16px solid var(--accent-green);
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <div id="loader"></div>
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" id="closeNavBtn">×</a>
         <a href="#" id="sideNavGuide">User Guide</a>
@@ -614,8 +643,8 @@
     <div class="container">
         <header>
             <div>
-                <h1>SB3 Stakeholders Call Tracker</h1>
-                <span class="version-number">v1.1 (Firebase Beta)</span>
+                <h1>SB3 Call Tool</h1>
+                <span class="version-number">v2.0 (IntelliDraft)</span>
                 <p>Track your calls and emails to representatives, their responses, and your notes. Progress is saved automatically to your device and backed up to a secure cloud database.</p>
                 <div class="report-problem-link">
                     <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
@@ -931,6 +960,7 @@
                         await loadContactLists();
                         await loadDataFromAllSources();
                         renderAllTables();
+                        document.getElementById('loader').style.display = 'none';
                     });
                 }
 
@@ -1186,7 +1216,8 @@
 
                 async function loadContactLists() {
                     try {
-                        const response = await fetch('contacts/manifest.json');
+                        const manifestUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/contacts%2Fmanifest.json?alt=media`;
+                        const response = await fetch(manifestUrl);
                         const manifest = await response.json();
                         for (const filename of manifest.contact_lists) {
                             const match = filename.match(/^(\d+)_(.+)\.json$/);
@@ -1194,14 +1225,17 @@
                                 const priority = parseInt(match[1], 10);
                                 const title = match[2].replace(/_/g, ' ');
                                 const listIdentifier = match[2].toLowerCase();
-                                const reps = await fetchAndProcessData(`contacts/${filename}`, listIdentifier);
+                                const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/contacts%2F${encodeURIComponent(filename)}?alt=media`;
+                                const reps = await fetchAndProcessData(fileUrl, listIdentifier);
                                 contactLists.set(listIdentifier, { priority, title, reps });
                             }
                         }
                         // Sort the map by priority
                         contactLists = new Map([...contactLists.entries()].sort((a, b) => a[1].priority - b[1].priority));
                     } catch (error) {
-                        console.error("Error loading contact lists:", error);
+                        console.error("Error loading contact lists from Firebase Storage:", error);
+                        alert("Failed to load contact lists from the cloud. Please check your internet connection and refresh.");
+                        document.getElementById('loader').style.display = 'none';
                     }
                 }
 
@@ -1593,10 +1627,10 @@
                     }
                 }
                 
-                async function fetchAndProcessData(filePath, listIdentifier) {
+                async function fetchAndProcessData(fileUrl, listIdentifier) {
                     try {
-                        const response = await fetch(filePath);
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
+                        const response = await fetch(fileUrl);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${fileUrl}`);
                         const jsonData = await response.json();
                         return jsonData.map((rep, index) => ({
                             id: `${listIdentifier}-${index}-${rep.district}`, 
@@ -1604,7 +1638,7 @@
                             party: rep.party, email: rep.email, list: listIdentifier 
                         }));
                     } catch (error) {
-                        console.error(`Error fetching initial data for ${listIdentifier}:`, error);
+                        console.error(`Error fetching initial data for ${listIdentifier} from ${fileUrl}:`, error);
                         return [];
                     }
                 }

@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read access to all files in the contacts folder
+    match /contacts/{allPaths=**} {
+      allow read;
+    }
+    // Allow authenticated users (admins) to write to the manifest file
+    match /contacts/manifest.json {
+      allow write: if request.auth != null;
+    }
+  }
+}

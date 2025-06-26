@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -210,6 +211,16 @@
                 </div>
             </div>
 
+            <div class="collapsible-section">
+                <button class="collapsible-toggle">Manage Contact Lists</button>
+                <div class="collapsible-content">
+                    <h3>Upload New Contact List</h3>
+                    <input type="file" id="contactListUpload" accept=".json">
+                    <button id="uploadButton">Upload and Update Manifest</button>
+                    <p id="uploadStatus"></p>
+                </div>
+            </div>
+
             <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
         </div>
     </div>
@@ -229,6 +240,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        const storage = firebase.storage();
 
         const loginSection = document.getElementById('loginSection');
         const dashboardContent = document.getElementById('dashboardContent');
@@ -243,6 +255,9 @@
         const refreshDataButton = document.getElementById('refreshDataButton');
         const overallResponsesChartCtx = document.getElementById('overallResponsesChart')?.getContext('2d');
         const listVolumeChartCtx = document.getElementById('listVolumeChart')?.getContext('2d');
+        const contactListUploadInput = document.getElementById('contactListUpload');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadStatusP = document.getElementById('uploadStatus');
         let overallResponsesChartInstance = null;
         let listVolumeChartInstance = null;
 
@@ -305,6 +320,59 @@
 
         logoutButton.addEventListener('click', () => auth.signOut());
         refreshDataButton.addEventListener('click', fetchAndDisplayDashboardData);
+        uploadButton.addEventListener('click', handleUpload);
+
+        async function handleUpload() {
+            const file = contactListUploadInput.files[0];
+            if (!file) {
+                uploadStatusP.textContent = 'Please select a file to upload.';
+                uploadStatusP.style.color = 'orange';
+                return;
+            }
+
+            uploadStatusP.textContent = `Uploading ${file.name}...`;
+            uploadStatusP.style.color = 'var(--dark-text-secondary)';
+
+            const contactsRef = storage.ref('contacts');
+            const fileRef = contactsRef.child(file.name);
+
+            try {
+                // 1. Upload the new contact list file
+                await fileRef.put(file);
+                uploadStatusP.textContent = 'File uploaded successfully. Now updating manifest...';
+
+                // 2. Download the existing manifest
+                const manifestRef = contactsRef.child('manifest.json');
+                const manifestUrl = await manifestRef.getDownloadURL();
+                const manifestResponse = await fetch(manifestUrl);
+                const manifestData = await manifestResponse.json();
+
+                // 3. Update the manifest data
+                if (!manifestData.contact_lists.includes(file.name)) {
+                    manifestData.contact_lists.push(file.name);
+                    // Sort the lists based on the numeric prefix
+                    manifestData.contact_lists.sort((a, b) => {
+                        const numA = parseInt(a.split('_')[0], 10);
+                        const numB = parseInt(b.split('_')[0], 10);
+                        if (isNaN(numA) || isNaN(numB)) return 0;
+                        return numA - numB;
+                    });
+                }
+
+                // 4. Upload the new manifest
+                const updatedManifestStr = JSON.stringify(manifestData, null, 2);
+                await manifestRef.putString(updatedManifestStr, 'raw', { contentType: 'application/json' });
+
+                uploadStatusP.textContent = 'Upload and manifest update complete!';
+                uploadStatusP.style.color = 'var(--accent-green)';
+                contactListUploadInput.value = ''; // Clear the input
+
+            } catch (error) {
+                console.error("Upload and manifest update failed:", error);
+                uploadStatusP.textContent = `An error occurred: ${error.message}`;
+                uploadStatusP.style.color = 'red';
+            }
+        }
 
         async function fetchAndDisplayDashboardData() {
             if (!auth.currentUser) {
