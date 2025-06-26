@@ -313,9 +313,9 @@
 
         async function loadInitialRepLists() {
             if (allMasterRepData.length > 0 && initialYaeDemsData.length > 0) return; 
-            initialYaeDemsData = await fetchAndProcessData('yae_dems.json', 'yaeDems');
-            initialChairFlipsData = await fetchAndProcessData('chair_flips.json', 'chairFlips');
-            initialNayVotersData = await fetchAndProcessData('nay_voters.json', 'nayVoters');
+            initialYaeDemsData = await fetchAndProcessData('contacts/0_YAY_Dems.json', 'yaeDems');
+            initialChairFlipsData = await fetchAndProcessData('contacts/1_Potential_Flips.json', 'chairFlips');
+            initialNayVotersData = await fetchAndProcessData('contacts/2_NAY_Voters.json', 'nayVoters');
             console.log("Fetched list lengths:", initialYaeDemsData.length, initialChairFlipsData.length, initialNayVotersData.length);
             allMasterRepData = [...initialYaeDemsData, ...initialChairFlipsData, ...initialNayVotersData];
             console.log("Initial representative lists loaded for dashboard reference. Total master reps:", allMasterRepData.length);
@@ -666,7 +666,7 @@
                     ]}, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }});
             }
         }
-        loadInitialRepLists();
+        loadInitialRepLists().catch(error => console.error("Failed to pre-load initial lists on dashboard load:", error));
 
         document.querySelectorAll('.collapsible-toggle').forEach(button => {
             button.addEventListener('click', function() {

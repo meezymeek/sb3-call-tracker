@@ -932,35 +932,50 @@
 
                 // --- Main Logic ---
                 
-                function initializeApp() {
+                async function initializeApp() {
+                    // Synchronous setup parts
                     populateToneAndPersonality();
                     populateRegulations();
                     setupModalListeners();
-                    loadEmailTemplate();
-                    
-                    auth.onAuthStateChanged(async user => {
-                        if (user) {
-                            currentUser = user;
-                            if (deviceId !== user.uid) {
-                                deviceId = user.uid;
-                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
-                            }
-                        } else {
+                    // Asynchronous part that should be awaited
+                    await loadEmailTemplate();
+
+                    // The main async logic wrapped in a promise
+                    return new Promise((resolve, reject) => {
+                        // Use onAuthStateChanged, but only for the initial check.
+                        const unsubscribe = auth.onAuthStateChanged(async user => {
+                            unsubscribe(); // Unsubscribe to avoid re-running this on auth changes.
                             try {
-                                const userCredential = await auth.signInAnonymously();
-                                currentUser = userCredential.user;
-                                deviceId = currentUser.uid;
-                                localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                                if (user) {
+                                    currentUser = user;
+                                } else {
+                                    // If no user, sign in anonymously.
+                                    const userCredential = await auth.signInAnonymously();
+                                    currentUser = userCredential.user;
+                                }
+
+                                // Now that we have a user, ensure deviceId is correct.
+                                if (deviceId !== currentUser.uid) {
+                                    deviceId = currentUser.uid;
+                                    localStorage.setItem('sb3CallToolDeviceId', deviceId);
+                                }
+
+                                // Load all necessary data.
+                                await loadContactLists();
+                                await loadDataFromAllSources();
+
+                                // Render the UI.
+                                renderAllTables();
+                                document.getElementById('loader').style.display = 'none';
+
+                                resolve(); // Signal that initialization is complete.
                             } catch (error) {
-                                console.error("Error signing in anonymously:", error);
-                                alert("Could not connect to the database for backup. Progress will only be saved locally.");
+                                // If anything fails, reject the promise.
+                                console.error("Error during app initialization:", error);
+                                alert("A critical error occurred during startup. Please refresh the page.");
+                                reject(error);
                             }
-                        }
-                        
-                        await loadContactLists();
-                        await loadDataFromAllSources();
-                        renderAllTables();
-                        document.getElementById('loader').style.display = 'none';
+                        });
                     });
                 }
 
