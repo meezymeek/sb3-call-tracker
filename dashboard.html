@@ -83,6 +83,7 @@
         #logoutButton { background-color: var(--utility-button-bg); }
         #logoutButton:hover { background-color: var(--utility-button-hover-bg); }
 
+        #dashboardContent { display: none; }
         .hidden { display: none; }
 
         .metrics-grid { 
@@ -164,7 +165,8 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">Loading...</div>
+    <div class="container" style="display: none;">
         <h1>Admin Dashboard - SB3 Call Tracker</h1>
 
         <div id="loginSection">
@@ -221,6 +223,26 @@
                 </div>
             </div>
 
+            <div class="collapsible-section">
+                <button class="collapsible-toggle">Data Management</button>
+                <div class="collapsible-content">
+                    <h3>Export All User Data</h3>
+                    <button id="exportDataButton">Export Data</button>
+                    <p id="exportStatus"></p>
+                    <hr style="margin: 20px 0;">
+                    <h3>Import User Data</h3>
+                    <p><strong>Warning:</strong> This will overwrite all existing user data.</p>
+                    <input type="file" id="importDataInput" accept=".json">
+                    <button id="importDataButton">Import Data</button>
+                    <p id="importStatus"></p>
+                    <hr style="margin: 20px 0;">
+                    <h3>Reset All User Data</h3>
+                    <p><strong>Warning:</strong> This action is irreversible and will delete all user progress.</p>
+                    <button id="resetDataButton" style="background-color: #D32F2F;">Reset All Data</button>
+                    <p id="resetStatus"></p>
+                </div>
+            </div>
+
             <button id="refreshDataButton" style="margin-top:20px;">Refresh Dashboard Data</button>
         </div>
     </div>
@@ -258,6 +280,13 @@
         const contactListUploadInput = document.getElementById('contactListUpload');
         const uploadButton = document.getElementById('uploadButton');
         const uploadStatusP = document.getElementById('uploadStatus');
+        const exportDataButton = document.getElementById('exportDataButton');
+        const exportStatusP = document.getElementById('exportStatus');
+        const importDataInput = document.getElementById('importDataInput');
+        const importDataButton = document.getElementById('importDataButton');
+        const importStatusP = document.getElementById('importStatus');
+        const resetDataButton = document.getElementById('resetDataButton');
+        const resetStatusP = document.getElementById('resetStatus');
         let overallResponsesChartInstance = null;
         let listVolumeChartInstance = null;
 
@@ -292,19 +321,33 @@
             console.log("Initial representative lists loaded for dashboard reference. Total master reps:", allMasterRepData.length);
         }
         
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                console.log("User logged in:", user.email);
-                adminUserEmailSpan.textContent = user.email;
-                loginSection.classList.add('hidden');
-                dashboardContent.classList.remove('hidden');
-                await loadInitialRepLists(); 
-                fetchAndDisplayDashboardData();
-            } else {
-                console.log("User logged out.");
-                loginSection.classList.remove('hidden');
-                dashboardContent.classList.add('hidden');
-            }
+        function showLoginScreen() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.querySelector('.container').style.display = 'block';
+            loginSection.classList.remove('hidden');
+            dashboardContent.style.display = 'none';
+        }
+
+        async function showDashboard(user) {
+            console.log("User logged in:", user.email, "UID:", user.uid);
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.querySelector('.container').style.display = 'block';
+            adminUserEmailSpan.textContent = user.email;
+            loginSection.classList.add('hidden');
+            dashboardContent.style.display = 'block';
+            await loadInitialRepLists(); 
+            fetchAndDisplayDashboardData();
+        }
+
+        // Initial state on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    showDashboard(user);
+                } else {
+                    showLoginScreen();
+                }
+            });
         });
 
         loginButton.addEventListener('click', () => {
@@ -318,9 +361,83 @@
                 });
         });
 
-        logoutButton.addEventListener('click', () => auth.signOut());
+        logoutButton.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                console.log("User signed out successfully.");
+                // The onAuthStateChanged listener will handle showing the login screen.
+            }).catch(error => {
+                console.error("Sign out error:", error);
+            });
+        });
         refreshDataButton.addEventListener('click', fetchAndDisplayDashboardData);
         uploadButton.addEventListener('click', handleUpload);
+        exportDataButton.addEventListener('click', exportData);
+        importDataButton.addEventListener('click', importData);
+        resetDataButton.addEventListener('click', resetData);
+
+        async function exportData() {
+            exportStatusP.textContent = 'Exporting...';
+            try {
+                const snapshot = await db.ref('devices').once('value');
+                const data = snapshot.val();
+                if (!data) {
+                    exportStatusP.textContent = 'No data to export.';
+                    return;
+                }
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', `sb3_database_export_${new Date().toISOString()}.json`);
+                linkElement.click();
+                linkElement.remove();
+                exportStatusP.textContent = 'Export successful!';
+            } catch (error) {
+                console.error('Export failed:', error);
+                exportStatusP.textContent = `Export failed: ${error.message}`;
+            }
+        }
+
+        function importData() {
+            const file = importDataInput.files[0];
+            if (!file) {
+                importStatusP.textContent = 'Please select a file to import.';
+                return;
+            }
+            if (!confirm('Are you sure you want to import this file? This will overwrite all existing user data.')) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    importStatusP.textContent = 'Importing...';
+                    await db.ref('devices').set(data);
+                    importStatusP.textContent = 'Import successful! Refreshing dashboard...';
+                    fetchAndDisplayDashboardData();
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    importStatusP.textContent = `Import failed: ${error.message}`;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function resetData() {
+            if (!confirm('Are you absolutely sure you want to delete all user data? This action cannot be undone.')) {
+                return;
+            }
+            resetStatusP.textContent = 'Deleting...';
+            try {
+                await db.ref('devices').remove();
+                resetStatusP.textContent = 'All user data has been deleted. Refreshing dashboard...';
+                fetchAndDisplayDashboardData();
+            } catch (error) {
+                console.error('Reset failed:', error);
+                resetStatusP.textContent = `Reset failed: ${error.message}`;
+            }
+        }
 
         async function handleUpload() {
             const file = contactListUploadInput.files[0];
