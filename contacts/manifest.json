@@ -1,5 +1,6 @@
 {
   "contact_lists": [
+    "0_Test_Contacts.json",
     "3_All_House_Reps.json",
     "4_All_Senate_Reps.json"
   ]

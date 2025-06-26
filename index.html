@@ -617,6 +617,17 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Email Generation Spinner */
+        .email-gen-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--accent-green);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
@@ -778,9 +789,9 @@
         <div class="modal-content">
             <span class="close-button" id="closeEmailGenerationModal">×</span>
             <h3 id="emailGenModalTitle">Your Personalized Email Draft</h3>
-            <div id="emailGenSpinner" class="hidden">
+            <div id="emailGenSpinner" class="hidden" style="text-align: center;">
+                <div class="email-gen-spinner"></div>
                 <p>Generating your personalized draft...</p>
-                <!-- Add a cool spinner CSS animation here if you want -->
             </div>
             <div id="emailGenContent" class="hidden">
                 <div class="form-group">
@@ -1324,8 +1335,9 @@
                     if (repIndex === -1) return;
                     currentList[repIndex].response = modalResponseSelect.value;
                     currentList[repIndex].notes = document.getElementById('modalNotesTextarea').value;
-                    const tableBody = document.getElementById(`repsTable${listIdentifier.charAt(0).toUpperCase() + listIdentifier.slice(1)}`).getElementsByTagName('tbody')[0];
-                    if (tableBody) {
+                    const table = document.getElementById(`repsTable-${listIdentifier}`);
+                    if (table) {
+                        const tableBody = table.getElementsByTagName('tbody')[0];
                         const row = tableBody.querySelector(`tr[data-id="${repId}"]`);
                         if (row) updateResponseSummaryCell(row.cells[row.cells.length - 1], currentList[repIndex]);
                     }
