@@ -675,6 +675,7 @@
             <small>Use placeholders: {repName}, {userName}, {userLocation}</small>
         </div>
 
+        <div id="your-representatives-container" class="hidden"></div>
         <div id="dynamic-tables-container"></div>
 
          <div class="footer-actions">
@@ -974,6 +975,7 @@
                                 // Load all necessary data.
                                 await loadContactLists();
                                 await loadDataFromAllSources();
+                                await displayYourReps();
 
                                 // Render the UI.
                                 renderAllTables();
@@ -1418,6 +1420,52 @@
                         window.location.reload();
                     }
                     closeNav();
+                }
+
+                async function displayYourReps() {
+                    const container = document.getElementById('your-representatives-container');
+                    if (!userProfile.zipCode) {
+                        container.classList.add('hidden');
+                        return;
+                    }
+
+                    try {
+                        const getReps = functions.httpsCallable('getRepresentatives');
+                        const result = await getReps({ zipCode: userProfile.zipCode });
+                        const { representatives } = result.data;
+
+                        if (representatives && representatives.length > 0) {
+                            container.innerHTML = `
+                                <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Your State Representatives</h2>
+                                <div class="table-container">
+                                    <table id="repsTable-your-reps">
+                                        <thead>
+                                            <tr>
+                                                <th>Called</th>
+                                                <th>Emailed</th>
+                                                <th>District</th>
+                                                <th>Representative</th>
+                                                <th>Party</th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Response Summary</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>`;
+                            
+                            const tableBody = container.querySelector('tbody');
+                            renderTable(tableBody, representatives, 'your-reps');
+                            container.classList.remove('hidden');
+                        } else {
+                            container.classList.add('hidden');
+                        }
+                    } catch (error) {
+                        console.error("Error fetching your representatives:", error);
+                        container.innerHTML = `<p style="text-align: center; color: orange;">Could not fetch your representatives at this time.</p>`;
+                        container.classList.remove('hidden');
+                    }
                 }
 
                 function renderAllTables() {

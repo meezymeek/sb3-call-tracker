@@ -8,6 +8,46 @@ admin.initializeApp();
 
 // Define the secret for the OpenAI API key
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
+const googleCivicApiKey = defineSecret("GOOGLE_CIVIC_API_KEY");
+
+exports.getRepresentatives = onCall({secrets: [googleCivicApiKey]}, async (request) => {
+  const { zipCode } = request.data;
+  if (!zipCode) {
+    throw new HttpsError("invalid-argument", "The function must be called with a zipCode.");
+  }
+
+  const axios = require("axios");
+  const apiKey = googleCivicApiKey.value();
+  const url = `https://www.googleapis.com/civicinfo/v2/representatives?address=${zipCode}&key=${apiKey}&levels=administrativeArea1&roles=legislatorUpperBody&roles=legislatorLowerBody`;
+
+  try {
+    const response = await axios.get(url);
+    const { offices, officials } = response.data;
+    const representatives = [];
+
+    if (offices && officials) {
+      offices.forEach(office => {
+        if (office.divisionId.includes("country:us/state:tx")) {
+          office.officialIndices.forEach(index => {
+            const official = officials[index];
+            representatives.push({
+              id: `civic-${official.name.replace(/\s+/g, "-").toLowerCase()}`,
+              name: official.name,
+              party: official.party,
+              phone: official.phones ? official.phones[0] : "N/A",
+              email: official.emails ? official.emails[0] : "N/A",
+              district: office.name,
+            });
+          });
+        }
+      });
+    }
+    return { representatives };
+  } catch (error) {
+    console.error("Error fetching representatives:", error);
+    throw new HttpsError("internal", "Failed to fetch representatives.", error);
+  }
+});
 
 exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   // 1. Extract data from the request
