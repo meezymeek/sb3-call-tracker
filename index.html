@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js"></script>
     <style>
         :root {
             --dark-bg-primary: #1e1e1e;
@@ -753,6 +754,24 @@
                 font-size: 1.1em;
             }
         }
+
+        /* Shoelace copy button styles */
+        .form-group.with-copy {
+            position: relative;
+        }
+
+        .form-group.with-copy sl-copy-button {
+            position: absolute;
+            bottom: 25px;
+            right: 8px;
+            --sl-color-neutral-600: rgba(128, 128, 128, 0.8);
+            --sl-color-primary-600: var(--accent-green);
+        }
+
+        .form-group.with-copy input[type="text"],
+        .form-group.with-copy textarea {
+            padding-right: 50px;
+        }
     </style>
 </head>
 <body>
@@ -920,13 +939,15 @@
                 <p>Generating your personalized draft...</p>
             </div>
             <div id="emailGenContent" class="hidden">
-                <div class="form-group">
+                <div class="form-group with-copy">
                     <label for="generatedSubject">Subject:</label>
-                    <input type="text" id="generatedSubject">
+                    <input type="text" id="generatedSubject" oninput="updateCopyButton('subject', this.value)">
+                    <sl-copy-button id="copySubjectBtn" value="" style="position: absolute; bottom: 25px; right: 8px;"></sl-copy-button>
                 </div>
-                <div class="form-group">
+                <div class="form-group with-copy">
                     <label for="generatedBody">Body:</label>
-                    <textarea id="generatedBody" style="min-height: 250px;"></textarea>
+                    <textarea id="generatedBody" style="min-height: 250px;" oninput="updateCopyButton('body', this.value)"></textarea>
+                    <sl-copy-button id="copyBodyBtn" value="" style="position: absolute; bottom: 25px; right: 8px;"></sl-copy-button>
                 </div>
                 <div class="email-rating-container">
                     <button id="thumbsUpBtn" class="icon-btn thumbs-up" data-rating="positive">
@@ -1096,6 +1117,14 @@
                     populateToneAndPersonality();
                     populateRegulations();
                     setupModalListeners();
+                    
+                    // Load saved AI toggle state
+                    const savedToggleState = localStorage.getItem('sb3LlmToggleState');
+                    if (savedToggleState !== null) {
+                        llmToggle.checked = savedToggleState === 'true';
+                        emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
+                    }
+                    
                     // Asynchronous part that should be awaited
                     await loadEmailTemplate();
 
@@ -1165,9 +1194,11 @@
                     modalPrevBtn.addEventListener('click', () => navigateModal(-1));
                     saveOnboardingInfoBtn.addEventListener('click', saveAndCloseOnboarding);
 
-                    llmToggle.addEventListener('change', () => {
-                        emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
-                    });
+                llmToggle.addEventListener('change', () => {
+                    emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
+                    // Save the toggle state
+                    localStorage.setItem('sb3LlmToggleState', llmToggle.checked);
+                });
 
                     // Email Generation Modal buttons
                     document.getElementById('closeEmailGenerationModal').addEventListener('click', () => {
@@ -1220,6 +1251,35 @@
                 function topFunction() {
                     document.body.scrollTop = 0; // For Safari
                     document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+                }
+
+                function toProperCase(str) {
+                    if (!str) return '';
+                    return str.replace(/\w\S*/g, function(txt) {
+                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                    });
+                }
+
+                function formatRepName(name) {
+                    if (!name) return '';
+                    // Check if name is in "Lastname, Firstname" format
+                    if (name.includes(',')) {
+                        const parts = name.split(',').map(part => part.trim());
+                        if (parts.length === 2) {
+                            // Reorder to "Firstname Lastname" and apply proper case
+                            return toProperCase(`${parts[1]} ${parts[0]}`);
+                        }
+                    }
+                    // If not in comma format, just apply proper case
+                    return toProperCase(name);
+                }
+
+                function updateCopyButton(type, value) {
+                    const buttonId = type === 'subject' ? 'copySubjectBtn' : 'copyBodyBtn';
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        button.value = value;
+                    }
                 }
 
                 function showFeedbackToast(message, duration = 3000) {
@@ -1328,6 +1388,10 @@
                         
                         document.getElementById('generatedSubject').value = result.data.subject;
                         document.getElementById('generatedBody').value = result.data.body;
+                        
+                        // Update copy button values
+                        updateCopyButton('subject', result.data.subject);
+                        updateCopyButton('body', result.data.body);
 
                         // Update current email data
                         currentEmailData.subject = result.data.subject;
@@ -1904,6 +1968,10 @@
                             
                             document.getElementById('generatedSubject').value = result.data.subject;
                             document.getElementById('generatedBody').value = result.data.body;
+                            
+                            // Update copy button values
+                            updateCopyButton('subject', result.data.subject);
+                            updateCopyButton('body', result.data.body);
 
                             // Store current email data for rating
                             currentEmailData = {
@@ -1967,16 +2035,22 @@
                         let subject = emailSubjectTemplateInput.value;
                         let body = emailBodyTemplateInput.value;
 
-                        subject = subject.replace(/{repName}/g, rep.name)
+                        const repName = formatRepName(rep.representative_name || 'Representative');
+                        
+                        subject = subject.replace(/{repName}/g, repName)
                                        .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
                                        .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
 
-                        body = body.replace(/{repName}/g, rep.name)
+                        body = body.replace(/{repName}/g, repName)
                                    .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
                                    .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
 
                         document.getElementById('generatedSubject').value = subject;
                         document.getElementById('generatedBody').value = body;
+                        
+                        // Update copy button values
+                        updateCopyButton('subject', subject);
+                        updateCopyButton('body', body);
 
                         spinner.classList.add('hidden');
                         content.classList.remove('hidden');

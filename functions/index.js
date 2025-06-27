@@ -26,7 +26,32 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
     apiKey: openaiApiKey.value(),
   });
 
-  // 3. Helper functions to format regulations
+  // 3. Helper functions
+  
+  // Format name from "Lastname, Firstname" to "Firstname Lastname" with proper casing
+  const formatRepName = (name) => {
+    if (!name) return 'Representative';
+    
+    // Convert to proper case
+    const toProperCase = (str) => {
+      return str.replace(/\w\S*/g, (txt) => 
+        txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      );
+    };
+    
+    // Check if name is in "Lastname, Firstname" format
+    if (name.includes(',')) {
+      const parts = name.split(',').map(part => part.trim());
+      if (parts.length === 2) {
+        // Reorder to "Firstname Lastname" and apply proper case
+        return toProperCase(`${parts[1]} ${parts[0]}`);
+      }
+    }
+    
+    // If not in comma format, just apply proper case
+    return toProperCase(name);
+  };
+  
   const formatRegulations = (regulations, type) => {
     if (!regulations || regulations.length === 0) {
       return `- Regulations the sender ${type.toUpperCase()}: None specified`;
@@ -38,11 +63,12 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   };
 
   // 4. Construct a detailed prompt for the LLM
+  const formattedRepName = formatRepName(representative.representative_name || representative.name);
   const prompt = `
     Generate a professional and respectful email to a legislator.
     
     **Recipient:**
-    - Name: ${representative.representative_name || representative.name || 'Unknown'}
+    - Name: ${formattedRepName}
     - Party: ${representative.party || 'Unknown'}
     - District: ${representative.district || 'Unknown'}
 
