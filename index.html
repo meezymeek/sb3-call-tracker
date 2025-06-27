@@ -1060,7 +1060,7 @@
 
                 async function loadEmailTemplate() {
                     try {
-                        const response = await fetch('email_template.json');
+                        const response = await fetch('/email_template.json');
                         const template = await response.json();
                         emailSubjectTemplateInput.value = template.subject;
                         emailBodyTemplateInput.value = template.body;
