@@ -1060,7 +1060,7 @@
 
                 async function loadEmailTemplate() {
                     try {
-                        const response = await fetch('/email_template.json');
+                        const response = await fetch('email_template.json');
                         const template = await response.json();
                         emailSubjectTemplateInput.value = template.subject;
                         emailBodyTemplateInput.value = template.body;
@@ -1533,8 +1533,8 @@
                         cellEmail.appendChild(emailLink);
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
-                        phoneLink.href = `tel:${rep.phone.replace(/\D/g, '')}`;
-                        phoneLink.textContent = rep.phone;
+                        phoneLink.href = `tel:${(rep.phone_number || '').replace(/\D/g, '')}`;
+                        phoneLink.textContent = rep.phone_number || 'N/A';
                         cellPhone.appendChild(phoneLink);
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
