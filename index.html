@@ -1430,8 +1430,8 @@
                     }
 
                     const representatives = [
-                        { id: 'placeholder-1', name: 'Placeholder Rep 1', party: 'N/A', phone: 'N/A', email: 'N/A', district: 'Placeholder District 1' },
-                        { id: 'placeholder-2', name: 'Placeholder Rep 2', party: 'N/A', phone: 'N/A', email: 'N/A', district: 'Placeholder District 2' }
+                        { id: 'placeholder-1', representative_name: 'Placeholder Rep 1', party: 'N/A', phone_number: 'N/A', email: 'N/A', district: 'Placeholder District 1' },
+                        { id: 'placeholder-2', representative_name: 'Placeholder Rep 2', party: 'N/A', phone_number: 'N/A', email: 'N/A', district: 'Placeholder District 2' }
                     ];
 
                     if (representatives && representatives.length > 0) {
@@ -1518,14 +1518,14 @@
                         emailedCheckbox.addEventListener('change', handleEmailedChange);
                         cellEmailed.appendChild(emailedCheckbox);
                         row.insertCell().textContent = rep.district;
-                        row.insertCell().textContent = rep.name || 'N/A';
+                        row.insertCell().textContent = rep.representative_name || 'N/A';
                         row.insertCell().textContent = rep.party;
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
                         emailLink.href = "#"; 
                         emailLink.textContent = rep.email;
                         emailLink.dataset.email = rep.email;
-                        emailLink.dataset.repName = rep.name || 'N/A';
+                        emailLink.dataset.repName = rep.representative_name || 'N/A';
                         emailLink.dataset.repId = rep.id;
                         emailLink.dataset.list = listIdentifier;
                         emailLink.classList.add('email-link');
@@ -1533,8 +1533,8 @@
                         cellEmail.appendChild(emailLink);
                         const cellPhone = row.insertCell();
                         const phoneLink = document.createElement('a');
-                        phoneLink.href = `tel:${(rep.phone || '').replace(/\D/g, '')}`;
-                        phoneLink.textContent = rep.phone || 'N/A';
+                        phoneLink.href = `tel:${(rep.phone_number || '').replace(/\D/g, '')}`;
+                        phoneLink.textContent = rep.phone_number || 'N/A';
                         cellPhone.appendChild(phoneLink);
                         const cellResponseSummary = row.insertCell();
                         cellResponseSummary.classList.add('response-summary-cell');
