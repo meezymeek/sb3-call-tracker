@@ -13,6 +13,14 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   // 1. Extract data from the request
   const {userProfile, representative} = request.data;
 
+  // Validate input data
+  if (!representative) {
+    throw new HttpsError("invalid-argument", "Representative data is required.");
+  }
+  if (!userProfile) {
+    throw new HttpsError("invalid-argument", "User profile data is required.");
+  }
+
   // 2. Initialize OpenAI with the secret key
   const openai = new OpenAI({
     apiKey: openaiApiKey.value(),
@@ -34,9 +42,9 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
     Generate a professional and respectful email to a legislator.
     
     **Recipient:**
-    - Name: ${representative.name}
-    - Party: ${representative.party}
-    - District: ${representative.district}
+    - Name: ${representative.representative_name || representative.name || 'Unknown'}
+    - Party: ${representative.party || 'Unknown'}
+    - District: ${representative.district || 'Unknown'}
 
     **Sender's Profile:**
     - Name: ${userProfile.userFullName}

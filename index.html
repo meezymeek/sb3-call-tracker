@@ -1422,45 +1422,9 @@
                 }
 
                 async function displayYourReps() {
-                    // TODO: Replace this with a proper lookup table or a different API
+                    // TODO: Implement proper representative lookup functionality
                     const container = document.getElementById('your-representatives-container');
-                    if (!userProfile.zipCode) {
-                        container.classList.add('hidden');
-                        return;
-                    }
-
-                    const representatives = [
-                        { id: 'placeholder-1', representative_name: 'Placeholder Rep 1', party: 'N/A', phone_number: 'N/A', email: 'N/A', district: 'Placeholder District 1' },
-                        { id: 'placeholder-2', representative_name: 'Placeholder Rep 2', party: 'N/A', phone_number: 'N/A', email: 'N/A', district: 'Placeholder District 2' }
-                    ];
-
-                    if (representatives && representatives.length > 0) {
-                        container.innerHTML = `
-                                <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Your State Representatives</h2>
-                                <div class="table-container">
-                                    <table id="repsTable-your-reps">
-                                        <thead>
-                                            <tr>
-                                                <th>Called</th>
-                                                <th>Emailed</th>
-                                                <th>District</th>
-                                                <th>Representative</th>
-                                                <th>Party</th>
-                                                <th>Email</th>
-                                                <th>Phone</th>
-                                                <th>Response Summary</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>`;
-                        
-                        const tableBody = container.querySelector('tbody');
-                        renderTable(tableBody, representatives, 'your-reps');
-                        container.classList.remove('hidden');
-                    } else {
-                        container.classList.add('hidden');
-                    }
+                    container.classList.add('hidden');
                 }
 
                 function renderAllTables() {
