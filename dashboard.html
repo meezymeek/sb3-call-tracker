@@ -450,45 +450,22 @@
             uploadStatusP.textContent = `Uploading ${file.name}...`;
             uploadStatusP.style.color = 'var(--dark-text-secondary)';
 
-            const contactsRef = storage.ref('contacts');
-            const fileRef = contactsRef.child(file.name);
-
-            try {
-                // 1. Upload the new contact list file
-                await fileRef.put(file);
-                uploadStatusP.textContent = 'File uploaded successfully. Now updating manifest...';
-
-                // 2. Download the existing manifest
-                const manifestRef = contactsRef.child('manifest.json');
-                const manifestUrl = await manifestRef.getDownloadURL();
-                const manifestResponse = await fetch(manifestUrl);
-                const manifestData = await manifestResponse.json();
-
-                // 3. Update the manifest data
-                if (!manifestData.contact_lists.includes(file.name)) {
-                    manifestData.contact_lists.push(file.name);
-                    // Sort the lists based on the numeric prefix
-                    manifestData.contact_lists.sort((a, b) => {
-                        const numA = parseInt(a.split('_')[0], 10);
-                        const numB = parseInt(b.split('_')[0], 10);
-                        if (isNaN(numA) || isNaN(numB)) return 0;
-                        return numA - numB;
-                    });
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const listId = file.name.replace('.json', '');
+                    await db.collection('contact_lists').doc(listId).set({ reps: data });
+                    uploadStatusP.textContent = 'Upload complete!';
+                    uploadStatusP.style.color = 'var(--accent-green)';
+                    contactListUploadInput.value = '';
+                } catch (error) {
+                    console.error("Upload failed:", error);
+                    uploadStatusP.textContent = `An error occurred: ${error.message}`;
+                    uploadStatusP.style.color = 'red';
                 }
-
-                // 4. Upload the new manifest
-                const updatedManifestStr = JSON.stringify(manifestData, null, 2);
-                await manifestRef.putString(updatedManifestStr, 'raw', { contentType: 'application/json' });
-
-                uploadStatusP.textContent = 'Upload and manifest update complete!';
-                uploadStatusP.style.color = 'var(--accent-green)';
-                contactListUploadInput.value = ''; // Clear the input
-
-            } catch (error) {
-                console.error("Upload and manifest update failed:", error);
-                uploadStatusP.textContent = `An error occurred: ${error.message}`;
-                uploadStatusP.style.color = 'red';
-            }
+            };
+            reader.readAsText(file);
         }
 
         async function fetchAndDisplayDashboardData() {

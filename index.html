@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --dark-bg-primary: #1e1e1e;
@@ -882,6 +883,7 @@
                 const auth = firebase.auth();
                 const db = firebase.database();
                 const functions = firebase.functions();
+                const firestore = firebase.firestore();
                 
                 // Connect to emulators
                 if (window.location.hostname === "127.0.0.1") {
@@ -1247,25 +1249,22 @@
 
                 async function loadContactLists() {
                     try {
-                        const manifestUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/contacts%2Fmanifest.json?alt=media`;
-                        const response = await fetch(manifestUrl);
-                        const manifest = await response.json();
-                        for (const filename of manifest.contact_lists) {
-                            const match = filename.match(/^(\d+)_(.+)\.json$/);
+                        const snapshot = await firestore.collection('contact_lists').get();
+                        snapshot.forEach(doc => {
+                            const listId = doc.id;
+                            const listData = doc.data();
+                            const match = listId.match(/^(\d+)_(.+)$/);
                             if (match) {
                                 const priority = parseInt(match[1], 10);
                                 const title = match[2].replace(/_/g, ' ');
-                                const listIdentifier = match[2].toLowerCase();
-                                const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/contacts%2F${encodeURIComponent(filename)}?alt=media`;
-                                const reps = await fetchAndProcessData(fileUrl, listIdentifier);
-                                contactLists.set(listIdentifier, { priority, title, reps });
+                                contactLists.set(listId, { priority, title, reps: listData.reps });
                             }
-                        }
+                        });
                         // Sort the map by priority
                         contactLists = new Map([...contactLists.entries()].sort((a, b) => a[1].priority - b[1].priority));
                     } catch (error) {
-                        console.error("Error loading contact lists from Firebase Storage:", error);
-                        alert("Failed to load contact lists from the cloud. Please check your internet connection and refresh.");
+                        console.error("Error loading contact lists from Firestore:", error);
+                        alert("Failed to load contact lists from the database. Please check your internet connection and refresh.");
                         document.getElementById('loader').style.display = 'none';
                     }
                 }
