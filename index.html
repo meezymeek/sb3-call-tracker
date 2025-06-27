@@ -1257,7 +1257,12 @@
                             if (match) {
                                 const priority = parseInt(match[1], 10);
                                 const title = match[2].replace(/_/g, ' ');
-                                contactLists.set(listId, { priority, title, reps: listData.reps });
+                                // Add unique IDs to each representative
+                                const repsWithIds = listData.reps.map((rep, index) => ({
+                                    ...rep,
+                                    id: `${listId}-${index}-${rep.district || index}`
+                                }));
+                                contactLists.set(listId, { priority, title, reps: repsWithIds });
                             }
                         });
                         // Sort the map by priority
@@ -1566,6 +1571,19 @@
                     const listIdentifier = targetLink.dataset.list;
                     const currentList = getRepresentativeListByIdentifier(listIdentifier);
                     const rep = currentList.find(r => r.id === repId);
+
+                    console.log('Debug handleEmailClick:', {
+                        repId,
+                        listIdentifier,
+                        currentListLength: currentList.length,
+                        rep,
+                        firstRepInList: currentList[0]
+                    });
+
+                    if (!rep) {
+                        alert("Representative data not found. Please refresh the page and try again.");
+                        return;
+                    }
 
                     if (!userProfile.onboardingComplete) {
                         alert("Please complete your Communications Profile from 'Edit My Info' before generating emails.");
