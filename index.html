@@ -1518,14 +1518,14 @@
                         emailedCheckbox.addEventListener('change', handleEmailedChange);
                         cellEmailed.appendChild(emailedCheckbox);
                         row.insertCell().textContent = rep.district;
-                        row.insertCell().textContent = rep.name;
+                        row.insertCell().textContent = rep.representative_name || 'N/A';
                         row.insertCell().textContent = rep.party;
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
                         emailLink.href = "#"; 
                         emailLink.textContent = rep.email;
                         emailLink.dataset.email = rep.email;
-                        emailLink.dataset.repName = rep.name;
+                        emailLink.dataset.repName = rep.representative_name || 'N/A';
                         emailLink.dataset.repId = rep.id;
                         emailLink.dataset.list = listIdentifier;
                         emailLink.classList.add('email-link');
