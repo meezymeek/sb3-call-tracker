@@ -633,62 +633,125 @@
         /* Email Rating Styles */
         .email-rating-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color-dark);
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            padding: 0;
+            width: 100%;
         }
 
-        .rating-btn {
-            background-color: var(--dark-bg-tertiary);
-            border: 2px solid var(--border-color-dark);
-            color: var(--dark-text-primary);
-            padding: 10px 20px;
-            border-radius: 8px;
+        /* Icon-only buttons with absolutely no background */
+        .icon-btn {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
             cursor: pointer;
-            font-size: 1.2em;
             transition: all 0.3s ease;
-            display: inline-flex;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 3px;
+            padding: 5px;
+            flex: 1;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
-        .rating-btn:hover {
-            background-color: var(--utility-button-hover-bg);
-            transform: scale(1.05);
+        .icon-btn:focus {
+            outline: none !important;
+            box-shadow: none !important;
         }
 
-        .rating-btn.selected {
-            border-color: var(--accent-green);
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-
-        .rating-btn.thumbs-up.selected {
-            color: var(--accent-green);
-        }
-
-        .rating-btn.thumbs-down.selected {
-            color: #f44336;
-        }
-
-        .new-draft-btn {
-            background-color: var(--utility-button-bg);
-            border: 1px solid var(--border-color-dark);
-            color: var(--dark-text-primary);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+        .icon-btn span {
             font-size: 1em;
+            filter: grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(2);
             transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display: inline-block;
         }
 
-        .new-draft-btn:hover {
-            background-color: var(--utility-button-hover-bg);
+        .icon-btn:hover span {
+            transform: scale(1.15);
+            filter: grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(3) brightness(1.2);
+        }
+
+        .icon-btn:active span {
+            transform: scale(0.95);
+        }
+
+        .icon-btn.selected span {
+            transform: scale(1.1);
+            filter: grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(3) brightness(1.3);
+        }
+
+        .icon-btn.thumbs-down.selected span {
+            filter: grayscale(100%) sepia(100%) hue-rotate(0deg) saturate(3) brightness(1.2);
+        }
+
+        .icon-btn small {
+            font-size: 0.7em;
+            color: var(--dark-text-secondary);
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Feedback notification */
+        .feedback-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-green);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+
+        .feedback-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media screen and (max-width: 768px) {
+            .email-rating-container {
+                gap: 10px;
+            }
+            
+            .rating-btn, .new-draft-btn {
+                padding: 10px 15px;
+                font-size: 0.95em;
+                min-width: 100px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .email-rating-container {
+                gap: 8px;
+            }
+            
+            .rating-btn, .new-draft-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+                min-width: 90px;
+            }
+
+            .rating-btn span, .new-draft-btn span {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
@@ -865,20 +928,26 @@
                     <label for="generatedBody">Body:</label>
                     <textarea id="generatedBody" style="min-height: 250px;"></textarea>
                 </div>
+                <div class="email-rating-container">
+                    <button id="thumbsUpBtn" class="icon-btn thumbs-up" data-rating="positive">
+                        <span>👍</span>
+                        <small>Good</small>
+                    </button>
+                    <button id="thumbsDownBtn" class="icon-btn thumbs-down" data-rating="negative">
+                        <span>👎</span>
+                        <small>Needs Work</small>
+                    </button>
+                    <button id="newDraftBtn" class="icon-btn">
+                        <span>🔄</span>
+                        <small>New Draft</small>
+                    </button>
+                </div>
+                <div id="ratingNoteContainer" class="hidden" style="margin-top: 10px;">
+                    <input type="text" id="ratingNote" placeholder="What's good/bad about this draft? (optional)" style="width: 100%; padding: 8px; background-color: var(--dark-bg-primary); color: var(--dark-text-primary); border: 1px solid var(--border-color-dark); border-radius: 4px;">
+                </div>
                 <div class="modal-navigation">
                     <button id="approveAndSendEmail" class="button-primary">Approve & Send</button>
                     <button id="cancelEmailGeneration" class="button-outline">Cancel</button>
-                </div>
-                <div class="email-rating-container">
-                    <button id="thumbsUpBtn" class="rating-btn thumbs-up" data-rating="positive">
-                        <span>👍</span> Good
-                    </button>
-                    <button id="thumbsDownBtn" class="rating-btn thumbs-down" data-rating="negative">
-                        <span>👎</span> Needs Work
-                    </button>
-                    <button id="newDraftBtn" class="new-draft-btn">
-                        <span>🔄</span> New Draft
-                    </button>
                 </div>
             </div>
         </div>
@@ -916,6 +985,9 @@
             <button id="dismissGuideModal" class="button-outline" style="margin-top: 20px;">Dismiss</button>
         </div>
     </div>
+
+    <!-- Feedback Toast Notification -->
+    <div id="feedbackToast" class="feedback-toast"></div>
 
     <script>
         // Global error handler
@@ -1100,10 +1172,14 @@
                     // Email Generation Modal buttons
                     document.getElementById('closeEmailGenerationModal').addEventListener('click', () => {
                         document.getElementById('emailGenerationModal').style.display = 'none';
+                        document.getElementById('ratingNoteContainer').classList.add('hidden');
+                        document.getElementById('ratingNote').value = '';
                         currentEmailData = null;
                     });
                     document.getElementById('cancelEmailGeneration').addEventListener('click', () => {
                         document.getElementById('emailGenerationModal').style.display = 'none';
+                        document.getElementById('ratingNoteContainer').classList.add('hidden');
+                        document.getElementById('ratingNote').value = '';
                         currentEmailData = null;
                     });
 
@@ -1146,12 +1222,24 @@
                     document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
                 }
 
+                function showFeedbackToast(message, duration = 3000) {
+                    const toast = document.getElementById('feedbackToast');
+                    toast.textContent = message;
+                    toast.classList.add('show');
+                    
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, duration);
+                }
+
                 function handleEmailRating(rating) {
                     if (!currentEmailData) return;
 
                     // Visual feedback - update button states
                     const thumbsUpBtn = document.getElementById('thumbsUpBtn');
                     const thumbsDownBtn = document.getElementById('thumbsDownBtn');
+                    const ratingNoteContainer = document.getElementById('ratingNoteContainer');
+                    const ratingNoteInput = document.getElementById('ratingNote');
                     
                     // Reset both buttons
                     thumbsUpBtn.classList.remove('selected');
@@ -1163,6 +1251,9 @@
                     } else if (rating === 'negative') {
                         thumbsDownBtn.classList.add('selected');
                     }
+
+                    // Show the note input
+                    ratingNoteContainer.classList.remove('hidden');
 
                     // Save the rating to Firebase
                     if (!userProfile.ratedEmails) {
@@ -1180,6 +1271,7 @@
                         subject: currentEmailData.subject,
                         body: currentEmailData.body,
                         rating: rating,
+                        note: ratingNoteInput.value.trim(),
                         timestamp: new Date().toISOString()
                     };
 
@@ -1189,7 +1281,25 @@
                         userProfile.ratedEmails.push(ratedEmail);
                     }
 
+                    // Save whenever the note changes
+                    if (!ratingNoteInput.hasListener) {
+                        ratingNoteInput.hasListener = true;
+                        ratingNoteInput.addEventListener('input', () => {
+                            const idx = userProfile.ratedEmails.findIndex(
+                                email => email.subject === currentEmailData.subject && 
+                                        email.body === currentEmailData.body
+                            );
+                            if (idx >= 0) {
+                                userProfile.ratedEmails[idx].note = ratingNoteInput.value.trim();
+                                saveDataToAllStorages();
+                            }
+                        });
+                    }
+
                     saveDataToAllStorages();
+                    
+                    // Show feedback
+                    showFeedbackToast(rating === 'positive' ? '👍 Marked as Good!' : '👎 Marked as Needs Work');
                 }
 
                 async function handleNewDraft() {
@@ -1197,10 +1307,14 @@
 
                     const spinner = document.getElementById('emailGenSpinner');
                     const content = document.getElementById('emailGenContent');
+                    const ratingNoteContainer = document.getElementById('ratingNoteContainer');
+                    const ratingNoteInput = document.getElementById('ratingNote');
                     
-                    // Reset rating buttons
+                    // Reset rating buttons and note
                     document.getElementById('thumbsUpBtn').classList.remove('selected');
                     document.getElementById('thumbsDownBtn').classList.remove('selected');
+                    ratingNoteContainer.classList.add('hidden');
+                    ratingNoteInput.value = '';
                     
                     spinner.classList.remove('hidden');
                     content.classList.add('hidden');
@@ -1221,6 +1335,9 @@
 
                         spinner.classList.add('hidden');
                         content.classList.remove('hidden');
+                        
+                        // Show feedback
+                        showFeedbackToast('🔄 New draft generated!');
                     } catch (error) {
                         console.error("Error generating new draft:", error);
                         alert("Failed to generate new draft. Please try again.");
@@ -1480,6 +1597,10 @@
                         timestamp: firebase.database.ServerValue.TIMESTAMP
                     };
 
+                    // Debug logging to see what's being saved
+                    console.log("Saving data to Firebase - userProfile:", JSON.stringify(userProfile, null, 2));
+                    console.log("Full dataToSave object:", JSON.stringify(dataToSave, null, 2));
+
                     localStorage.setItem('sb3UserData', JSON.stringify(dataToSave));
                     console.log("Data saved to Local Storage.");
 
@@ -1531,6 +1652,8 @@
                     if (event.target == guideModal) guideModal.style.display = 'none';
                     if (event.target == document.getElementById('emailGenerationModal')) {
                         document.getElementById('emailGenerationModal').style.display = 'none';
+                        document.getElementById('ratingNoteContainer').classList.add('hidden');
+                        document.getElementById('ratingNote').value = '';
                         currentEmailData = null;
                     }
                 };
