@@ -1436,24 +1436,24 @@
 
                     if (representatives && representatives.length > 0) {
                         container.innerHTML = `
-                            <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Your State Representatives</h2>
-                            <div class="table-container">
-                                <table id="repsTable-your-reps">
-                                    <thead>
-                                        <tr>
-                                            <th>Called</th>
-                                            <th>Emailed</th>
-                                            <th>District</th>
-                                            <th>Representative</th>
-                                            <th>Party</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Response Summary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>`;
+                                <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">Your State Representatives</h2>
+                                <div class="table-container">
+                                    <table id="repsTable-your-reps">
+                                        <thead>
+                                            <tr>
+                                                <th>Called</th>
+                                                <th>Emailed</th>
+                                                <th>District</th>
+                                                <th>Representative</th>
+                                                <th>Party</th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Response Summary</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>`;
                         
                         const tableBody = container.querySelector('tbody');
                         renderTable(tableBody, representatives, 'your-reps');
