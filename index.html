@@ -292,6 +292,105 @@
             overflow-wrap: break-word;
         }
         
+        /* Collapsible list styles */
+        .list-section {
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color-dark);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: var(--dark-bg-tertiary);
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        
+        .list-header:hover {
+            background-color: #404040;
+        }
+        
+        .list-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+            color: var(--accent-green);
+            font-size: 1.5em;
+        }
+        
+        .collapse-icon {
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+        
+        .list-section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .rep-count {
+            font-size: 0.8em;
+            color: var(--dark-text-secondary);
+            font-weight: normal;
+        }
+        
+        .list-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .list-section.collapsed .list-content {
+            max-height: 0;
+        }
+        
+        /* Sortable column styles */
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 30px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 60px;
+        }
+        
+        th.sortable:hover {
+            background-color: var(--accent-green-darker);
+        }
+        
+        .sort-indicator {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.9);
+            width: 20px;
+            text-align: center;
+        }
+        
+        th.sort-asc .sort-indicator::after {
+            content: '▲';
+            color: white;
+        }
+        
+        th.sort-desc .sort-indicator::after {
+            content: '▼';
+            color: white;
+        }
+        
+        th.sortable:not(.sort-asc):not(.sort-desc) .sort-indicator::after {
+            content: '⇅';
+            opacity: 0.5;
+        }
+        
         td a { 
             word-break: break-all;
             overflow-wrap: break-word; 
@@ -304,16 +403,18 @@
             position: sticky;
             top: 0;
             z-index: 1;
+            font-size: 0.9em;
+            height: 45px;
         }
         
-        th:nth-child(1), td:nth-child(1) { width: 7%; }  /* Called */
-        th:nth-child(2), td:nth-child(2) { width: 7%; }  /* Emailed */
-        th:nth-child(3), td:nth-child(3) { width: 8%; }  /* District */
+        th:nth-child(1), td:nth-child(1) { width: 6%; }  /* Called */
+        th:nth-child(2), td:nth-child(2) { width: 6%; }  /* Emailed */
+        th:nth-child(3), td:nth-child(3) { width: 6%; }  /* District */
         th:nth-child(4), td:nth-child(4) { width: 18%; } /* Representative */
-        th:nth-child(5), td:nth-child(5) { width: 7%; }  /* Party */
+        th:nth-child(5), td:nth-child(5) { width: 5%; }  /* Party */
         th:nth-child(6), td:nth-child(6) { width: 20%; } /* Email */
-        th:nth-child(7), td:nth-child(7) { width: 13%; } /* Phone */
-        th:nth-child(8), td:nth-child(8) { width: 20%; } /* Response Summary */
+        th:nth-child(7), td:nth-child(7) { width: 14%; } /* Phone */
+        th:nth-child(8), td:nth-child(8) { width: 25%; } /* Response Summary */
 
 
         tr:nth-child(even) {
@@ -1479,6 +1580,7 @@
                     onboardingModal.style.display = 'none';
                     alert('Your Communications Profile has been saved.');
                     saveDataToAllStorages();
+                    displayYourReps(); // Refresh the representatives display
                 }
 
                 function populateOnboardingForm() {
@@ -1601,20 +1703,35 @@
 
                 async function loadContactLists() {
                     try {
+                        // First, load visibility settings
+                        const visibilitySnapshot = await firestore.collection('contact_list_settings').get();
+                        const visibilitySettings = {};
+                        visibilitySnapshot.forEach(doc => {
+                            visibilitySettings[doc.id] = doc.data();
+                        });
+                        
+                        // Then, load contact lists
                         const snapshot = await firestore.collection('contact_lists').get();
                         snapshot.forEach(doc => {
                             const listId = doc.id;
                             const listData = doc.data();
-                            const match = listId.match(/^(\d+)_(.+)$/);
-                            if (match) {
-                                const priority = parseInt(match[1], 10);
-                                const title = match[2].replace(/_/g, ' ');
-                                // Add unique IDs to each representative
-                                const repsWithIds = listData.reps.map((rep, index) => ({
-                                    ...rep,
-                                    id: `${listId}-${index}-${rep.district || index}`
-                                }));
-                                contactLists.set(listId, { priority, title, reps: repsWithIds });
+                            
+                            // Check visibility setting (default to true if not set)
+                            const isVisible = visibilitySettings[listId]?.visible !== false;
+                            
+                            // Only add visible lists
+                            if (isVisible) {
+                                const match = listId.match(/^(\d+)_(.+)$/);
+                                if (match) {
+                                    const priority = parseInt(match[1], 10);
+                                    const title = match[2].replace(/_/g, ' ');
+                                    // Add unique IDs to each representative
+                                    const repsWithIds = listData.reps.map((rep, index) => ({
+                                        ...rep,
+                                        id: `${listId}-${index}-${rep.district || index}`
+                                    }));
+                                    contactLists.set(listId, { priority, title, reps: repsWithIds });
+                                }
                             }
                         });
                         // Sort the map by priority
@@ -1633,9 +1750,8 @@
                         if (firebaseData) {
                             console.log("Loading data from Firebase.");
                             userProfile = firebaseData.userProfile || {};
-                            contactLists.forEach((list, key) => {
-                                list.reps = firebaseData.contactLists?.[key]?.reps || list.reps.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                            });
+                            // Merge user interaction data with current contact lists from Firestore
+                            mergeUserDataWithContactLists(firebaseData.contactLists);
                             localStorage.setItem('sb3UserData', JSON.stringify(firebaseData));
                             return;
                         }
@@ -1644,14 +1760,56 @@
                     console.log("Loading data from Local Storage.");
                     const localData = JSON.parse(localStorage.getItem('sb3UserData') || '{}');
                     userProfile = localData.userProfile || { onboardingComplete: false };
-                    contactLists.forEach((list, key) => {
-                        list.reps = localData.contactLists?.[key]?.reps || list.reps.map(rep => ({ ...rep, called: false, emailed: false, response: 'not_selected', notes: '' }));
-                    });
+                    // Merge user interaction data with current contact lists from Firestore
+                    mergeUserDataWithContactLists(localData.contactLists);
 
                     if (!userProfile.onboardingComplete) {
                         onboardingModal.style.display = 'block';
                         updateModalStepVisibility();
                     }
+                }
+                
+                function mergeUserDataWithContactLists(savedContactLists) {
+                    if (!savedContactLists) return;
+                    
+                    contactLists.forEach((list, key) => {
+                        const savedList = savedContactLists[key];
+                        if (!savedList || !savedList.reps) return;
+                        
+                        // Create a map of saved user interactions by rep ID
+                        const savedDataMap = new Map();
+                        savedList.reps.forEach(savedRep => {
+                            if (savedRep.id) {
+                                savedDataMap.set(savedRep.id, {
+                                    called: savedRep.called || false,
+                                    emailed: savedRep.emailed || false,
+                                    response: savedRep.response || 'not_selected',
+                                    notes: savedRep.notes || ''
+                                });
+                            }
+                        });
+                        
+                        // Apply saved user interactions to current reps from Firestore
+                        list.reps = list.reps.map(rep => {
+                            const savedData = savedDataMap.get(rep.id);
+                            if (savedData) {
+                                return {
+                                    ...rep,
+                                    called: savedData.called,
+                                    emailed: savedData.emailed,
+                                    response: savedData.response,
+                                    notes: savedData.notes
+                                };
+                            }
+                            return {
+                                ...rep,
+                                called: false,
+                                emailed: false,
+                                response: 'not_selected',
+                                notes: ''
+                            };
+                        });
+                    });
                 }
 
                 function saveDataToAllStorages() {
@@ -1789,40 +1947,326 @@
                 }
 
                 async function displayYourReps() {
-                    // TODO: Implement proper representative lookup functionality
                     const container = document.getElementById('your-representatives-container');
-                    container.classList.add('hidden');
+                    
+                    // Check if user has a zip code
+                    if (!userProfile.zipCode) {
+                        container.classList.add('hidden');
+                        return;
+                    }
+                    
+                    try {
+                        // Fetch representatives for the user's zip code
+                        const docRef = firestore.collection('texas_representatives').doc(userProfile.zipCode);
+                        const doc = await docRef.get();
+                        
+                        if (!doc.exists) {
+                            container.innerHTML = '<p style="text-align: center; color: var(--dark-text-secondary);">No representatives found for your zip code.</p>';
+                            container.classList.remove('hidden');
+                            return;
+                        }
+                        
+                        const zipData = doc.data();
+                        
+                        // Filter for Texas House and Senate representatives only
+                        const texasLegislators = zipData.representatives.filter(rep => 
+                            rep.type === 'Texas Senate' || 
+                            rep.type === 'Texas House' || 
+                            rep.type === 'Texas House (from multi)'
+                        );
+                        
+                        if (texasLegislators.length === 0) {
+                            container.classList.add('hidden');
+                            return;
+                        }
+                        
+                        // Process each legislator and find their matching contact list representative
+                        const yourRepsData = [];
+                        for (const rep of texasLegislators) {
+                            const matchedRep = findRepInContactLists(rep);
+                            
+                            if (matchedRep) {
+                                // Use the existing representative object to ensure data syncing
+                                yourRepsData.push(matchedRep.rep);
+                            } else {
+                                // Create a new representative object if not found in contact lists
+                                const chamber = rep.type.includes('Senate') ? 'Senate' : 'House';
+                                const districtMatch = rep.district.match(/\d+/);
+                                const districtNumber = districtMatch ? districtMatch[0] : rep.district;
+                                
+                                yourRepsData.push({
+                                    id: `yourReps-${Date.now()}-${districtNumber}`,
+                                    district: districtNumber,
+                                    representative_name: rep.name,
+                                    party: 'Unknown', // We don't have party info in the zip code data
+                                    email: null,
+                                    phone_number: null,
+                                    called: false,
+                                    emailed: false,
+                                    response: 'not_selected',
+                                    notes: ''
+                                });
+                            }
+                        }
+                        
+                        // Create a collapsible section for Your Texas Representatives
+                        const yourRepsList = {
+                            title: `Your Texas Representatives (Zip: ${userProfile.zipCode})`,
+                            reps: yourRepsData
+                        };
+                        
+                        // Store in contactLists for sorting functionality
+                        contactLists.set('yourReps', yourRepsList);
+                        
+                        // Create the collapsible section
+                        const section = createCollapsibleListSection(yourRepsList, 'yourReps');
+                        container.innerHTML = '';
+                        container.appendChild(section);
+                        
+                        // Get the table body element and render
+                        const tableBody = container.querySelector('tbody');
+                        renderTable(tableBody, yourRepsData, 'yourReps');
+                        
+                        container.classList.remove('hidden');
+                        
+                    } catch (error) {
+                        console.error("Error loading representatives:", error);
+                        container.innerHTML = '<p style="text-align: center; color: var(--dark-text-secondary);">Error loading representatives. Please try again later.</p>';
+                        container.classList.remove('hidden');
+                    }
+                }
+                
+                function findRepInContactLists(zipRep) {
+                    // Helper function to normalize names for matching
+                    const normalizeName = (name) => {
+                        if (!name) return '';
+                        // Remove titles
+                        name = name.replace(/^(Senator|Representative|Congressman|Congresswoman|Rep\.|Sen\.|Mr\.|Ms\.|Mrs\.)\s+/i, '');
+                        // Convert to uppercase and remove extra spaces
+                        return name.toUpperCase().replace(/\s+/g, ' ').trim();
+                    };
+                    
+                    // Parse name from the rep data (e.g., "Senator Tan Parker" -> "TAN PARKER")
+                    const repNameNormalized = normalizeName(zipRep.name);
+                    
+                    // Search through all contact lists
+                    let foundMatch = null;
+                    
+                    contactLists.forEach((list, listId) => {
+                        if (!foundMatch) {
+                            const match = list.reps.find(contact => {
+                                // Handle "LASTNAME, FIRSTNAME" format
+                                let contactName = contact.representative_name || contact.name || '';
+                                
+                                if (contactName.includes(',')) {
+                                    // Convert "PARKER, Tan" to "TAN PARKER"
+                                    const parts = contactName.split(',').map(p => p.trim());
+                                    if (parts.length === 2) {
+                                        contactName = `${parts[1]} ${parts[0]}`;
+                                    }
+                                }
+                                
+                                const contactNameNormalized = normalizeName(contactName);
+                                
+                                // Check if names match
+                                return contactNameNormalized === repNameNormalized ||
+                                       // Also try matching if one name contains the other
+                                       contactNameNormalized.includes(repNameNormalized) ||
+                                       repNameNormalized.includes(contactNameNormalized);
+                            });
+                            
+                            if (match) {
+                                foundMatch = {
+                                    rep: match,
+                                    listId: listId
+                                };
+                            }
+                        }
+                    });
+                    
+                    return foundMatch;
+                }
+                
+                function findRepContactInfo(rep) {
+                    // Helper function to normalize names for matching
+                    const normalizeName = (name) => {
+                        if (!name) return '';
+                        // Remove titles
+                        name = name.replace(/^(Senator|Representative|Congressman|Congresswoman|Rep\.|Sen\.|Mr\.|Ms\.|Mrs\.)\s+/i, '');
+                        // Convert to uppercase and remove extra spaces
+                        return name.toUpperCase().replace(/\s+/g, ' ').trim();
+                    };
+                    
+                    // Parse name from the rep data (e.g., "Senator Tan Parker" -> "TAN PARKER")
+                    const repNameNormalized = normalizeName(rep.name);
+                    
+                    // Search through all contact lists
+                    let foundContact = null;
+                    
+                    contactLists.forEach((list) => {
+                        if (!foundContact) {
+                            const match = list.reps.find(contact => {
+                                // Handle "LASTNAME, FIRSTNAME" format
+                                let contactName = contact.representative_name || contact.name || '';
+                                
+                                if (contactName.includes(',')) {
+                                    // Convert "PARKER, Tan" to "TAN PARKER"
+                                    const parts = contactName.split(',').map(p => p.trim());
+                                    if (parts.length === 2) {
+                                        contactName = `${parts[1]} ${parts[0]}`;
+                                    }
+                                }
+                                
+                                const contactNameNormalized = normalizeName(contactName);
+                                
+                                // Check if names match
+                                return contactNameNormalized === repNameNormalized ||
+                                       // Also try matching if one name contains the other
+                                       contactNameNormalized.includes(repNameNormalized) ||
+                                       repNameNormalized.includes(contactNameNormalized);
+                            });
+                            
+                            if (match) {
+                                foundContact = match;
+                            }
+                        }
+                    });
+                    
+                    return {
+                        email: foundContact?.email || null,
+                        phone: foundContact?.phone_number || foundContact?.phone || null
+                    };
                 }
 
                 function renderAllTables() {
                     dynamicTablesContainer.innerHTML = '';
                     contactLists.forEach((list, listIdentifier) => {
-                        const tableContainer = document.createElement('div');
-                        tableContainer.className = 'table-container';
-                        tableContainer.innerHTML = `
-                            <h2 style="text-align: center; margin-top: 40px; color: var(--accent-green);">${list.title}</h2>
+                        const listSection = createCollapsibleListSection(list, listIdentifier);
+                        dynamicTablesContainer.appendChild(listSection);
+                        const tableBody = listSection.querySelector('tbody');
+                        renderTable(tableBody, list.reps, listIdentifier);
+                    });
+                }
+                
+                function createCollapsibleListSection(list, listIdentifier) {
+                    const section = document.createElement('div');
+                    section.className = 'list-section';
+                    section.id = `section-${listIdentifier}`;
+                    
+                    // Check saved collapse state
+                    const isCollapsed = localStorage.getItem(`collapse-${listIdentifier}`) === 'true';
+                    if (isCollapsed) section.classList.add('collapsed');
+                    
+                    section.innerHTML = `
+                        <div class="list-header" data-list-id="${listIdentifier}">
+                            <h2 class="list-title">
+                                <span class="collapse-icon">▼</span>
+                                ${list.title}
+                                <span class="rep-count">(${list.reps.length} representatives)</span>
+                            </h2>
+                        </div>
+                        <div class="list-content">
                             <div class="table-container">
                                 <table id="repsTable-${listIdentifier}">
                                     <thead>
                                         <tr>
-                                            <th>Called</th>
-                                            <th>Emailed</th>
-                                            <th>District</th>
-                                            <th>Representative</th>
-                                            <th>Party</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Response Summary</th>
+                                            <th class="sortable" data-sort="called" title="Called"><sl-icon name="telephone-fill" style="color: white; font-size: 1.1em;"></sl-icon><span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="emailed" title="Emailed"><sl-icon name="envelope-fill" style="color: white; font-size: 1.1em;"></sl-icon><span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="district">District<span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="representative_name">Representative<span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="party" title="Party">D/R<span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="email">Email<span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="phone_number">Phone<span class="sort-indicator"></span></th>
+                                            <th class="sortable" data-sort="response">Response<span class="sort-indicator"></span></th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
-                        `;
-                        dynamicTablesContainer.appendChild(tableContainer);
-                        const tableBody = tableContainer.querySelector('tbody');
-                        renderTable(tableBody, list.reps, listIdentifier);
+                        </div>
+                    `;
+                    
+                    // Add collapse/expand listener
+                    const header = section.querySelector('.list-header');
+                    header.addEventListener('click', () => toggleListCollapse(listIdentifier));
+                    
+                    // Add sort listeners
+                    section.querySelectorAll('th.sortable').forEach(th => {
+                        th.addEventListener('click', () => handleSort(listIdentifier, th.dataset.sort));
                     });
+                    
+                    return section;
+                }
+                
+                function toggleListCollapse(listIdentifier) {
+                    const section = document.getElementById(`section-${listIdentifier}`);
+                    const isCollapsed = section.classList.toggle('collapsed');
+                    localStorage.setItem(`collapse-${listIdentifier}`, isCollapsed);
+                }
+                
+                let sortState = {}; // Track sort state for each list and column
+                
+                function handleSort(listIdentifier, column) {
+                    const list = contactLists.get(listIdentifier);
+                    if (!list) return;
+                    
+                    // Get current sort state
+                    const stateKey = `${listIdentifier}-${column}`;
+                    if (!sortState[stateKey]) sortState[stateKey] = 'none';
+                    
+                    // Cycle through: none -> asc -> desc -> none
+                    const states = ['none', 'asc', 'desc'];
+                    const currentIndex = states.indexOf(sortState[stateKey]);
+                    sortState[stateKey] = states[(currentIndex + 1) % states.length];
+                    
+                    // Clear other column sorts for this list
+                    Object.keys(sortState).forEach(key => {
+                        if (key.startsWith(listIdentifier) && key !== stateKey) {
+                            sortState[key] = 'none';
+                        }
+                    });
+                    
+                    // Sort the data
+                    const sortedReps = [...list.reps];
+                    if (sortState[stateKey] !== 'none') {
+                        sortedReps.sort((a, b) => {
+                            let aVal = a[column];
+                            let bVal = b[column];
+                            
+                            // Special handling for different column types
+                            if (column === 'district') {
+                                aVal = parseInt(aVal) || 0;
+                                bVal = parseInt(bVal) || 0;
+                            } else if (column === 'called' || column === 'emailed') {
+                                aVal = aVal ? 1 : 0;
+                                bVal = bVal ? 1 : 0;
+                            } else if (column === 'response') {
+                                aVal = a.called ? (a.response || 'zzz') : 'zzzz';
+                                bVal = b.called ? (b.response || 'zzz') : 'zzzz';
+                            } else {
+                                aVal = (aVal || '').toString().toLowerCase();
+                                bVal = (bVal || '').toString().toLowerCase();
+                            }
+                            
+                            if (aVal < bVal) return sortState[stateKey] === 'asc' ? -1 : 1;
+                            if (aVal > bVal) return sortState[stateKey] === 'asc' ? 1 : -1;
+                            return 0;
+                        });
+                    }
+                    
+                    // Update UI
+                    const table = document.getElementById(`repsTable-${listIdentifier}`);
+                    const headers = table.querySelectorAll('th.sortable');
+                    headers.forEach(th => {
+                        th.classList.remove('sort-asc', 'sort-desc');
+                        if (th.dataset.sort === column && sortState[stateKey] !== 'none') {
+                            th.classList.add(`sort-${sortState[stateKey]}`);
+                        }
+                    });
+                    
+                    // Re-render table body
+                    const tableBody = table.querySelector('tbody');
+                    renderTable(tableBody, sortedReps, listIdentifier);
                 }
 
                 function renderTable(tableBodyElement, dataArray, listIdentifier) {
