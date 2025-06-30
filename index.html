@@ -1177,6 +1177,8 @@
                 let userProfile = {};
                 let currentModalStep = 1;
                 let currentEmailData = null; // Store current email data for rating
+                let subjectLineQueue = []; // Pre-generated subject lines
+                let isGeneratingSubjects = false; // Prevent duplicate generation calls
 
                 // --- DOM Element Caching ---
                 const dynamicTablesContainer = document.getElementById('dynamic-tables-container');
@@ -1219,6 +1221,39 @@
                 const guideModal = document.getElementById('guideModal');
 
                 // --- Main Logic ---
+                
+                async function generateSubjectLines() {
+                    if (isGeneratingSubjects || !userProfile.onboardingComplete) return;
+                    
+                    isGeneratingSubjects = true;
+                    console.log('Generating subject lines...');
+                    
+                    try {
+                        const generateSubjectLines = functions.httpsCallable('generateSubjectLines');
+                        const result = await generateSubjectLines({ userProfile });
+                        
+                        if (result.data && result.data.subjects) {
+                            subjectLineQueue.push(...result.data.subjects);
+                            console.log(`Generated ${result.data.subjects.length} subject lines. Queue size: ${subjectLineQueue.length}`);
+                        }
+                    } catch (error) {
+                        console.error("Error generating subject lines:", error);
+                    } finally {
+                        isGeneratingSubjects = false;
+                    }
+                }
+                
+                function getNextSubjectLine() {
+                    // Get the next subject line from the queue
+                    const subject = subjectLineQueue.shift() || "Support Common-Sense Hemp Regulation - Not Prohibition";
+                    
+                    // Check if we need to generate more (when down to 3 or less)
+                    if (subjectLineQueue.length <= 3 && !isGeneratingSubjects) {
+                        generateSubjectLines(); // Generate more in the background
+                    }
+                    
+                    return subject;
+                }
                 
                 async function initializeApp() {
                     // Synchronous setup parts
@@ -1265,6 +1300,11 @@
                                 renderAllTables();
                                 displayHomepageDistrictInfo(); // Display districts on homepage
                                 document.getElementById('loader').style.display = 'none';
+                                
+                                // Generate subject lines after user profile is loaded
+                                if (userProfile.onboardingComplete) {
+                                    generateSubjectLines();
+                                }
 
                                 resolve(); // Signal that initialization is complete.
                             } catch (error) {
@@ -1648,6 +1688,9 @@
                     saveDataToAllStorages();
                     await displayYourReps(); // Refresh the representatives display and detect districts
                     displayHomepageDistrictInfo(); // Update the homepage district display
+                    
+                    // Generate subject lines now that we have a complete profile
+                    generateSubjectLines();
                 }
 
                 function displayDistrictInfo() {
@@ -2696,8 +2739,8 @@
                             emailGenModal.style.display = 'none';
                         }
                     } else {
-                        // Use the template
-                        let subject = emailSubjectTemplateInput.value;
+                        // Use the template with AI-generated subject
+                        let subject = getNextSubjectLine(); // Use AI-generated subject
                         let body = emailBodyTemplateInput.value;
 
                         const repName = formatRepName(rep.representative_name || 'Representative');
@@ -2711,10 +2754,7 @@
                             userLocationText = `your constituent from ${userLocationText}`;
                         }
                         
-                        subject = subject.replace(/{repName}/g, repName)
-                                       .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
-                                       .replace(/{userLocation}/g, userLocationText);
-
+                        // Only replace placeholders in body now (subject is already complete)
                         body = body.replace(/{repName}/g, repName)
                                    .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
                                    .replace(/{userLocation}/g, userLocationText);

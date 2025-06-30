@@ -9,6 +9,70 @@ admin.initializeApp();
 // Define the secret for the OpenAI API key
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
+exports.generateSubjectLines = onCall({secrets: [openaiApiKey]}, async (request) => {
+  // Extract user profile from the request
+  const {userProfile} = request.data;
+
+  // Validate input data
+  if (!userProfile) {
+    throw new HttpsError("invalid-argument", "User profile data is required.");
+  }
+
+  // Initialize OpenAI with the secret key
+  const openai = new OpenAI({
+    apiKey: openaiApiKey.value(),
+  });
+
+  // Construct prompt for multiple subject lines
+  const prompt = `
+    Generate 5 different compelling email subject lines for emails to Texas legislators about hemp regulation.
+    
+    **Context:**
+    - The sender is advocating for common-sense hemp regulation instead of prohibition
+    - Key talking points: jobs, tax revenue, consumer safety, personal freedom
+    - The tone should be professional but attention-grabbing
+    - Each subject should be unique and take a slightly different angle
+    
+    **Sender's Profile:**
+    - Works in Hemp Industry: ${userProfile.intelligentDraftingProfile?.worksInHempIndustry ? "Yes" : "No"}
+    - Primary Tone: ${userProfile.intelligentDraftingProfile?.communicationTone?.primaryTone || "Professional"}
+    
+    **Instructions:**
+    - Generate exactly 5 subject lines
+    - Each should be 50-80 characters max
+    - Make them varied - some urgent, some economic-focused, some personal, etc.
+    - Return as a JSON object with a "subjects" array
+    
+    Example format:
+    {
+      "subjects": [
+        "Support Texas Jobs - Regulate, Don't Ban Hemp",
+        "Your Constituent Urges Smart Hemp Policy",
+        "Protect 53,000 Texas Jobs with Hemp Regulation",
+        "Common-Sense Hemp Rules Benefit All Texans",
+        "Urgent: Vote for Hemp Regulation, Not Prohibition"
+      ]
+    }
+  `;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-turbo-preview",
+      messages: [{role: "user", content: prompt}],
+      response_format: {type: "json_object"},
+      temperature: 0.9, // Higher temperature for more variety
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+    return {
+      subjects: result.subjects || []
+    };
+  } catch (error) {
+    console.error("Error calling OpenAI API for subject lines:", error);
+    throw new HttpsError("internal", "Failed to generate subject lines.", error);
+  }
+});
+
 exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   // 1. Extract data from the request
   const {userProfile, representative} = request.data;
