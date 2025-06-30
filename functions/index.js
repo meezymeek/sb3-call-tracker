@@ -194,6 +194,48 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
     return toProperCase(name);
   };
   
+  // Get the last name from a full name for salutation
+  const getLastName = (fullName) => {
+    if (!fullName) return '';
+    
+    // Handle "Lastname, Firstname" format
+    if (fullName.includes(',')) {
+      const parts = fullName.split(',').map(part => part.trim());
+      if (parts.length === 2) {
+        return parts[0]; // First part is the last name
+      }
+    }
+    
+    // For "Firstname Lastname" format, get the last word
+    const nameParts = fullName.trim().split(' ');
+    return nameParts[nameParts.length - 1];
+  };
+  
+  // Determine the chamber (House or Senate) from district or list data
+  const determineChamber = (representative) => {
+    // Check if district number can help determine chamber
+    // In Texas, House districts are 1-150, Senate districts are 1-31
+    const districtNum = parseInt(representative.district);
+    
+    // Check list identifier if available
+    if (representative.listIdentifier) {
+      if (representative.listIdentifier.toLowerCase().includes('senate')) {
+        return 'Senate';
+      }
+      if (representative.listIdentifier.toLowerCase().includes('house')) {
+        return 'House';
+      }
+    }
+    
+    // If we have explicit chamber info
+    if (representative.chamber) {
+      return representative.chamber;
+    }
+    
+    // Default to House as it's more common
+    return 'House';
+  };
+  
   const formatRegulations = (regulations, type) => {
     if (!regulations || regulations.length === 0) {
       return `- Regulations the sender ${type.toUpperCase()}: None specified`;
@@ -206,6 +248,9 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
 
   // 4. Construct a detailed prompt for the LLM
   const formattedRepName = formatRepName(representative.representative_name || representative.name);
+  const lastName = getLastName(representative.representative_name || representative.name);
+  const chamber = determineChamber(representative);
+  const title = chamber === 'Senate' ? 'Senator' : 'Representative';
   const isConstituent = isUserConstituentOf(userProfile, representative);
   const userDescriptor = getUserDescriptor(userProfile, isConstituent);
   const profile = userProfile.intelligentDraftingProfile || {};
@@ -282,13 +327,23 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
       : '  - No specific oppositions stated'}
 
     **EMAIL STRUCTURE FRAMEWORK:**
-    1. Opening: Identify yourself using the EXACT identity descriptor provided
-    2. Clear Position: Support common-sense regulation, not prohibition
-    3. Context: Reference Governor Abbott's understanding and the will of Texans
-    4. Impact Points: Weave in relevant statistics based on communication style
-    5. Personal Perspective: Include if provided, making it authentic to their voice
-    6. Policy Specifics: Emphasize regulations they support, acknowledge concerns about those they oppose
-    7. Call to Action: Clear ask for support of balanced regulation
+    1. Salutation: MUST begin with "Dear ${title} ${lastName}," - DO NOT use generic terms like "Dear Legislator" or "Dear Politician"
+    2. Opening: Identify yourself using the EXACT identity descriptor provided
+    3. Clear Position: Support common-sense regulation, not prohibition
+    4. Context: Reference Governor Abbott's understanding and the will of Texans
+    5. Impact Points: Weave in relevant statistics based on communication style
+    6. Personal Perspective: Include if provided, making it authentic to their voice
+    7. Policy Specifics: Emphasize regulations they support, acknowledge concerns about those they oppose
+    8. Call to Action: Clear ask for support of balanced regulation
+
+    **SALUTATION REQUIREMENTS:**
+    - You MUST begin the email with exactly: "Dear ${title} ${lastName},"
+    - The title is: "${title}" (either "Representative" or "Senator")
+    - The last name is: "${lastName}"
+    - DO NOT use any generic salutation like "Dear Legislator", "Dear Politician", "Dearest Representative", etc.
+    - DO NOT add any adjectives or modifiers to the salutation
+    - Example: If the representative is John Smith in the House, use "Dear Representative Smith,"
+    - Example: If the senator is Jane Doe in the Senate, use "Dear Senator Doe,"
 
     **AUTHENTICITY REQUIREMENTS:**
     - You MUST use this exact phrasing in the introduction: "I am ${userDescriptor}"
