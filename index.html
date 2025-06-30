@@ -902,6 +902,9 @@
                 <h1>SB3 Call Tool</h1>
                 <span class="version-number">v2.0 (IntelliDraft)</span>
                 <p>Track your calls and emails to representatives, their responses, and your notes. Progress is saved automatically to your device and backed up to a secure cloud database.</p>
+                <div id="homepageDistrictInfo" class="hidden" style="background-color: var(--dark-bg-primary); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <div id="homepageDistrictDetails" style="color: var(--accent-green); font-size: 0.9em; line-height: 1.4;"></div>
+                </div>
                 <div class="report-problem-link">
                     <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
                 </div>
@@ -950,6 +953,10 @@
                 <div class="form-group">
                     <label for="onboardingZipCode">What is your Zip Code?</label>
                     <input type="text" id="onboardingZipCode" placeholder="e.g., 78701">
+                </div>
+                <div id="districtInfo" class="form-group hidden" style="background-color: var(--dark-bg-primary); padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <label style="color: var(--accent-green); margin-bottom: 10px; display: block;">Your Legislative Districts:</label>
+                    <div id="districtDetails" style="color: var(--dark-text-secondary); line-height: 1.6;"></div>
                 </div>
                 <div class="form-group">
                     <label>Do you work in the Hemp Industry?</label>
@@ -1256,6 +1263,7 @@
 
                                 // Render the UI.
                                 renderAllTables();
+                                displayHomepageDistrictInfo(); // Display districts on homepage
                                 document.getElementById('loader').style.display = 'none';
 
                                 resolve(); // Signal that initialization is complete.
@@ -1289,6 +1297,56 @@
                         radio.addEventListener('change', (e) => {
                             occupationGroup.classList.toggle('hidden', e.target.value !== 'no');
                         });
+                    });
+                    
+                    // Add listener for zip code changes to fetch and display districts
+                    onboardingZipCodeInput.addEventListener('input', async (e) => {
+                        const zipCode = e.target.value.trim();
+                        
+                        // Only fetch if we have a valid 5-digit zip code
+                        if (zipCode.match(/^\d{5}$/)) {
+                            try {
+                                // Fetch representatives for this zip code
+                                const docRef = firestore.collection('texas_representatives').doc(zipCode);
+                                const doc = await docRef.get();
+                                
+                                if (doc.exists) {
+                                    const zipData = doc.data();
+                                    const texasLegislators = zipData.representatives.filter(rep => 
+                                        rep.type === 'Texas Senate' || 
+                                        rep.type === 'Texas House' || 
+                                        rep.type === 'Texas House (from multi)'
+                                    );
+                                    
+                                    if (texasLegislators.length > 0) {
+                                        // Detect districts for this zip code
+                                        const detectedDistricts = detectUserDistricts(texasLegislators);
+                                        
+                                        // Temporarily update the user profile to show districts
+                                        userProfile.assignedDistricts = {
+                                            ...detectedDistricts,
+                                            zipCode: zipCode,
+                                            detectedAt: new Date().toISOString()
+                                        };
+                                        
+                                        // Display the districts
+                                        displayDistrictInfo();
+                                    } else {
+                                        // No Texas legislators found
+                                        document.getElementById('districtInfo').classList.add('hidden');
+                                    }
+                                } else {
+                                    // Invalid zip code
+                                    document.getElementById('districtInfo').classList.add('hidden');
+                                }
+                            } catch (error) {
+                                console.error('Error fetching districts:', error);
+                                document.getElementById('districtInfo').classList.add('hidden');
+                            }
+                        } else {
+                            // Hide district info if zip code is not valid
+                            document.getElementById('districtInfo').classList.add('hidden');
+                        }
                     });
 
                     modalNextBtn.addEventListener('click', () => navigateModal(1));
@@ -1538,7 +1596,7 @@
                     saveOnboardingInfoBtn.classList.toggle('hidden', currentModalStep !== 5);
                 }
 
-                function saveAndCloseOnboarding() {
+                async function saveAndCloseOnboarding() {
                     // Gather data from form
                     const supportedRegulations = [];
                     document.querySelectorAll('#supportedRegulationsContainer input[type="checkbox"]:checked').forEach(cb => {
@@ -1560,9 +1618,12 @@
 
                     const selectedPersonalityElements = Array.from(document.querySelectorAll('#personalityElementsContainer input[type="checkbox"]:checked')).map(cb => cb.value);
 
+                    const newZipCode = onboardingZipCodeInput.value.trim();
+                    const zipCodeChanged = userProfile.zipCode !== newZipCode;
+
                     userProfile.userFullName = onboardingUserNameInput.value.trim();
                     userProfile.userLocation = onboardingUserLocationInput.value.trim();
-                    userProfile.zipCode = onboardingZipCodeInput.value.trim();
+                    userProfile.zipCode = newZipCode;
                     userProfile.onboardingComplete = true;
                     userProfile.intelligentDraftingProfile = {
                         worksInHempIndustry: document.querySelector('input[name="hempIndustry"]:checked').value === 'yes',
@@ -1577,12 +1638,88 @@
                         opposedRegulations: opposedRegulations
                     };
                     
+                    // If zip code changed, clear the assigned districts to force re-detection
+                    if (zipCodeChanged && userProfile.assignedDistricts) {
+                        userProfile.assignedDistricts = null;
+                    }
+                    
                     onboardingModal.style.display = 'none';
                     alert('Your Communications Profile has been saved.');
                     saveDataToAllStorages();
-                    displayYourReps(); // Refresh the representatives display
+                    await displayYourReps(); // Refresh the representatives display and detect districts
+                    displayHomepageDistrictInfo(); // Update the homepage district display
                 }
 
+                function displayDistrictInfo() {
+                    const districtInfoDiv = document.getElementById('districtInfo');
+                    const districtDetailsDiv = document.getElementById('districtDetails');
+                    
+                    if (!userProfile.assignedDistricts || !userProfile.zipCode) {
+                        districtInfoDiv.classList.add('hidden');
+                        return;
+                    }
+                    
+                    const districts = userProfile.assignedDistricts;
+                    let html = '';
+                    
+                    // House Districts
+                    if (districts.houseDistricts && districts.houseDistricts.length > 0) {
+                        html += `<div style="margin-bottom: 8px;">
+                            <strong>Texas House District${districts.multipleHouseDistricts ? 's' : ''}:</strong> 
+                            ${districts.houseDistricts.join(', ')}
+                        </div>`;
+                    }
+                    
+                    // Senate Districts
+                    if (districts.senateDistricts && districts.senateDistricts.length > 0) {
+                        html += `<div style="margin-bottom: 8px;">
+                            <strong>Texas Senate District${districts.multipleSenateDistricts ? 's' : ''}:</strong> 
+                            ${districts.senateDistricts.join(', ')}
+                        </div>`;
+                    }
+                    
+                    // Note about multiple districts
+                    if (districts.multipleHouseDistricts || districts.multipleSenateDistricts) {
+                        html += `<small style="color: var(--dark-text-secondary); font-style: italic;">
+                            Note: Your zip code spans multiple districts.
+                        </small>`;
+                    }
+                    
+                    districtDetailsDiv.innerHTML = html;
+                    districtInfoDiv.classList.remove('hidden');
+                }
+                
+                function displayHomepageDistrictInfo() {
+                    const homepageDistrictInfoDiv = document.getElementById('homepageDistrictInfo');
+                    const homepageDistrictDetailsDiv = document.getElementById('homepageDistrictDetails');
+                    
+                    if (!userProfile.assignedDistricts || !userProfile.zipCode) {
+                        homepageDistrictInfoDiv.classList.add('hidden');
+                        return;
+                    }
+                    
+                    const districts = userProfile.assignedDistricts;
+                    let html = '';
+                    
+                    // Build compact district display
+                    const districtParts = [];
+                    
+                    if (districts.houseDistricts && districts.houseDistricts.length > 0) {
+                        districtParts.push(`House: ${districts.houseDistricts.join(', ')}`);
+                    }
+                    
+                    if (districts.senateDistricts && districts.senateDistricts.length > 0) {
+                        districtParts.push(`Senate: ${districts.senateDistricts.join(', ')}`);
+                    }
+                    
+                    if (districtParts.length > 0) {
+                        html = `<strong>Your Districts (${userProfile.zipCode}):</strong> ${districtParts.join(' | ')}`;
+                    }
+                    
+                    homepageDistrictDetailsDiv.innerHTML = html;
+                    homepageDistrictInfoDiv.classList.remove('hidden');
+                }
+                
                 function populateOnboardingForm() {
                     const profile = userProfile.intelligentDraftingProfile || {};
                     const tone = profile.communicationTone || {};
@@ -1590,6 +1727,9 @@
                     onboardingUserNameInput.value = userProfile.userFullName || '';
                     onboardingUserLocationInput.value = userProfile.userLocation || '';
                     onboardingZipCodeInput.value = userProfile.zipCode || '';
+                    
+                    // Display district info if available
+                    displayDistrictInfo();
                     
                     const worksInHemp = profile.worksInHempIndustry;
                     const hempRadio = document.querySelector(`input[name="hempIndustry"][value="${worksInHemp ? 'yes' : 'no'}"]`);
@@ -1980,6 +2120,20 @@
                             return;
                         }
                         
+                        // Detect and save districts if not already saved or if zip code changed
+                        if (!userProfile.assignedDistricts || userProfile.assignedDistricts.zipCode !== userProfile.zipCode) {
+                            const detectedDistricts = detectUserDistricts(texasLegislators);
+                            
+                            userProfile.assignedDistricts = {
+                                ...detectedDistricts,
+                                zipCode: userProfile.zipCode,
+                                detectedAt: new Date().toISOString()
+                            };
+                            
+                            console.log('Districts detected and saved:', userProfile.assignedDistricts);
+                            saveDataToAllStorages();
+                        }
+                        
                         // Process each legislator and find their matching contact list representative
                         const yourRepsData = [];
                         for (const rep of texasLegislators) {
@@ -2034,6 +2188,46 @@
                         container.innerHTML = '<p style="text-align: center; color: var(--dark-text-secondary);">Error loading representatives. Please try again later.</p>';
                         container.classList.remove('hidden');
                     }
+                }
+                
+                function detectUserDistricts(texasLegislators) {
+                    const districts = {
+                        houseDistricts: [],
+                        senateDistricts: [],
+                        multipleHouseDistricts: false,
+                        multipleSenateDistricts: false
+                    };
+                    
+                    texasLegislators.forEach(rep => {
+                        // Extract district number from the district string
+                        const districtMatch = rep.district.match(/\d+/);
+                        const districtNumber = districtMatch ? districtMatch[0] : null;
+                        
+                        if (!districtNumber) return;
+                        
+                        // Determine if it's House or Senate based on the type
+                        if (rep.type === 'Texas Senate') {
+                            if (!districts.senateDistricts.includes(districtNumber)) {
+                                districts.senateDistricts.push(districtNumber);
+                            }
+                        } else if (rep.type === 'Texas House' || rep.type === 'Texas House (from multi)') {
+                            if (!districts.houseDistricts.includes(districtNumber)) {
+                                districts.houseDistricts.push(districtNumber);
+                            }
+                        }
+                    });
+                    
+                    // Check for multiple districts (zip code spans boundaries)
+                    districts.multipleHouseDistricts = districts.houseDistricts.length > 1;
+                    districts.multipleSenateDistricts = districts.senateDistricts.length > 1;
+                    
+                    // Sort districts for consistency
+                    districts.houseDistricts.sort((a, b) => parseInt(a) - parseInt(b));
+                    districts.senateDistricts.sort((a, b) => parseInt(a) - parseInt(b));
+                    
+                    console.log('Districts detected:', districts);
+                    
+                    return districts;
                 }
                 
                 function findRepInContactLists(zipRep) {
