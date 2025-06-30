@@ -3076,34 +3076,50 @@
                             saveDataToAllStorages();
                         }
                         
-                        // Process each legislator and find their matching contact list representative
-                        const yourRepsData = [];
-                        for (const rep of texasLegislators) {
-                            const matchedRep = findRepInContactLists(rep);
-                            
-                            if (matchedRep) {
-                                // Use the existing representative object to ensure data syncing
-                                yourRepsData.push(matchedRep.rep);
-                            } else {
-                                // Create a new representative object if not found in contact lists
-                                const chamber = rep.type.includes('Senate') ? 'Senate' : 'House';
-                                const districtMatch = rep.district.match(/\d+/);
-                                const districtNumber = districtMatch ? districtMatch[0] : rep.district;
-                                
-                                yourRepsData.push({
-                                    id: `yourReps-${Date.now()}-${districtNumber}`,
-                                    district: districtNumber,
-                                    representative_name: rep.name,
-                                    party: 'Unknown', // We don't have party info in the zip code data
-                                    email: null,
-                                    phone_number: null,
-                                    called: false,
-                                    emailed: false,
-                                    response: 'not_selected',
-                                    notes: ''
-                                });
-                            }
+                // Process each legislator and find their matching contact list representative
+                const yourRepsData = [];
+                const seenReps = new Set(); // Track representatives we've already added
+                
+                for (const rep of texasLegislators) {
+                    // Create a unique key based on name and district to avoid duplicates
+                    const normalizedName = rep.name.replace(/^(Senator|Representative|Rep\.|Sen\.)\s+/i, '').trim().toUpperCase();
+                    const districtMatch = rep.district.match(/\d+/);
+                    const districtNumber = districtMatch ? districtMatch[0] : rep.district;
+                    const chamber = rep.type.includes('Senate') ? 'Senate' : 'House';
+                    const uniqueKey = `${normalizedName}-${chamber}-${districtNumber}`;
+                    
+                    // Skip if we've already added this representative
+                    if (seenReps.has(uniqueKey)) {
+                        console.log(`Skipping duplicate representative: ${rep.name} (${rep.type})`);
+                        continue;
+                    }
+                    seenReps.add(uniqueKey);
+                    
+                    const matchedRep = findRepInContactLists(rep);
+                    
+                    if (matchedRep) {
+                        // Check if we've already added this matched rep by ID
+                        const alreadyAdded = yourRepsData.some(r => r.id === matchedRep.rep.id);
+                        if (!alreadyAdded) {
+                            // Use the existing representative object to ensure data syncing
+                            yourRepsData.push(matchedRep.rep);
                         }
+                    } else {
+                        // Create a new representative object if not found in contact lists
+                        yourRepsData.push({
+                            id: `yourReps-${Date.now()}-${districtNumber}-${Math.random().toString(36).substr(2, 5)}`,
+                            district: districtNumber,
+                            representative_name: rep.name,
+                            party: 'Unknown', // We don't have party info in the zip code data
+                            email: null,
+                            phone_number: null,
+                            called: false,
+                            emailed: false,
+                            response: 'not_selected',
+                            notes: ''
+                        });
+                    }
+                }
                         
                         // Create a collapsible section for Your Texas Representatives
                         const yourRepsList = {
