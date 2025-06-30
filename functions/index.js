@@ -6,6 +6,9 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
+// Import the new zip code functions
+const {getRepresentativesByZipCode, getRepresentativesForMultipleZips} = require("./getRepsByZipCode");
+
 // Define the secret for the OpenAI API key
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
@@ -325,3 +328,7 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
     throw new HttpsError("internal", "Failed to generate email.", error);
   }
 });
+
+// Export the zip code lookup functions
+exports.getRepresentativesByZipCode = getRepresentativesByZipCode;
+exports.getRepresentativesForMultipleZips = getRepresentativesForMultipleZips;

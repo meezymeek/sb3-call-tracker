@@ -13,5 +13,13 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+    match /zip_representatives/{zipCode} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /zip_representatives_metadata/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }

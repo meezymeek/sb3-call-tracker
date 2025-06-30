@@ -2225,13 +2225,55 @@
 
                 function toProperCase(str) {
                     if (!str) return '';
-                    return str.replace(/\w\S*/g, function(txt) {
+                    
+                    // First, apply basic proper casing
+                    str = str.replace(/\w\S*/g, function(txt) {
+                        const word = txt.toLowerCase();
+                        
+                        // Special cases that should remain lowercase
+                        const lowercaseWords = ['de', 'del', 'la', 'las', 'los', 'van', 'von', 'der'];
+                        if (lowercaseWords.includes(word)) {
+                            return word;
+                        }
+                        
+                        // Handle Irish/Scottish prefixes
+                        if (word.startsWith("o'")) {
+                            return "O'" + word.charAt(2).toUpperCase() + word.substr(3);
+                        }
+                        if (word.startsWith("mc")) {
+                            return "Mc" + word.charAt(2).toUpperCase() + word.substr(3);
+                        }
+                        if (word.startsWith("mac") && word.length > 3) {
+                            return "Mac" + word.charAt(3).toUpperCase() + word.substr(4);
+                        }
+                        
+                        // Standard proper case
                         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
                     });
+                    
+                    // Handle Roman numerals and common suffixes
+                    str = str.replace(/\b(ii|iii|iv|jr|sr)\b/gi, function(match) {
+                        const upper = match.toUpperCase();
+                        if (upper === 'JR' || upper === 'SR') {
+                            return match.charAt(0).toUpperCase() + match.charAt(1).toLowerCase() + '.';
+                        }
+                        return upper;
+                    });
+                    
+                    // Handle hyphenated names
+                    str = str.replace(/(\w+)-(\w+)/g, function(match, p1, p2) {
+                        return toProperCase(p1) + '-' + toProperCase(p2);
+                    });
+                    
+                    return str;
                 }
 
-                function formatRepName(name) {
+                function formatName(name) {
                     if (!name) return '';
+                    
+                    // Remove any leading/trailing whitespace
+                    name = name.trim();
+                    
                     // Check if name is in "Lastname, Firstname" format
                     if (name.includes(',')) {
                         const parts = name.split(',').map(part => part.trim());
@@ -2240,7 +2282,11 @@
                             return toProperCase(`${parts[1]} ${parts[0]}`);
                         }
                     }
-                    // If not in comma format, just apply proper case
+                    
+                    // Remove titles like Senator, Representative, etc.
+                    name = name.replace(/^(Senator|Representative|Rep\.|Sen\.|Dr\.|Mr\.|Ms\.|Mrs\.)\s+/i, '');
+                    
+                    // Apply proper case
                     return toProperCase(name);
                 }
 
@@ -2527,7 +2573,7 @@
                     // Get email drafting preference
                     const emailDraftingPreference = document.querySelector('input[name="emailDraftingPreference"]:checked').value;
 
-                    userProfile.userFullName = onboardingUserNameInput.value.trim();
+                    userProfile.userFullName = formatName(onboardingUserNameInput.value.trim());
                     userProfile.userLocation = onboardingUserLocationInput.value.trim();
                     userProfile.zipCode = newZipCode;
                     userProfile.onboardingComplete = true;
@@ -3475,7 +3521,7 @@
                         emailedCheckbox.addEventListener('change', handleEmailedChange);
                         cellEmailed.appendChild(emailedCheckbox);
                         row.insertCell().textContent = rep.district;
-                        row.insertCell().textContent = rep.representative_name || 'N/A';
+                        row.insertCell().textContent = formatName(rep.representative_name) || 'N/A';
                         row.insertCell().textContent = rep.party;
                         const cellEmail = row.insertCell();
                         const emailLink = document.createElement('a');
@@ -3539,7 +3585,7 @@
                                     District ${rep.district} - ${rep.party}
                                 </div>
                             </div>
-                            <div class="card-name">${rep.representative_name || 'N/A'}</div>
+                            <div class="card-name">${formatName(rep.representative_name) || 'N/A'}</div>
                             <div class="card-contact">
                                 ${rep.email ? `
                                     <div class="card-contact-item">
@@ -3661,7 +3707,7 @@
                     if (rep.called) { 
                         document.getElementById('currentRepIdForModal').value = rep.id;
                         document.getElementById('currentListIdentifierForModal').value = listIdentifier;
-                        document.getElementById('responseModalTitle').textContent = `Log Response: ${rep.name}`;
+                        document.getElementById('responseModalTitle').textContent = `Log Response: ${formatName(rep.representative_name)}`;
                         modalResponseSelect.value = rep.response || 'not_selected';
                         document.getElementById('modalNotesTextarea').value = rep.notes || '';
                         responseModal.style.display = 'block';
@@ -3850,7 +3896,7 @@
                         let subject = getNextSubjectLine(); // Use AI-generated subject
                         let body = emailBodyTemplateInput.value;
 
-                        const repName = formatRepName(rep.representative_name || 'Representative');
+                        const repName = formatName(rep.representative_name || 'Representative');
                         
                         // Determine user identity based on constituent status
                         const isConstituent = isUserConstituentOf(rep);
