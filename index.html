@@ -218,13 +218,19 @@
             margin-left: 50px;
         }
         .hamburger-btn {
-            font-size: 24px;
             cursor: pointer;
             color: var(--dark-text-primary);
             background-color: var(--utility-button-bg);
             border: none;
             padding: 8px 12px;
             border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hamburger-btn sl-icon {
+            font-size: 24px;
         }
         .hamburger-btn:hover {
             background-color: var(--utility-button-hover-bg);
@@ -274,7 +280,96 @@
         
         .table-container {
             overflow-x: auto; 
+            overflow-y: auto;
+            max-height: 600px;
             margin-bottom: 20px; 
+            border: 1px solid var(--border-color-dark);
+            border-radius: 4px;
+            position: relative;
+            /* Force scrollbar to always show on desktop */
+            overflow-y: scroll !important;
+            /* Ensure minimum height for scrollbar visibility */
+            min-height: 200px;
+        }
+        
+        /* Custom scrollbar styling for table containers */
+        .table-container::-webkit-scrollbar {
+            width: 16px; /* Increased from 12px */
+            height: 16px; /* Increased from 12px */
+        }
+        
+        .table-container::-webkit-scrollbar-track {
+            background: var(--dark-bg-tertiary);
+            border: 1px solid var(--border-color-dark);
+            border-radius: 8px;
+            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 8px;
+            border: 2px solid var(--accent-green-darker);
+            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green-darker);
+            box-shadow: 0 0 4px 2px rgba(76, 175, 80, 0.6);
+        }
+        
+        /* Firefox scrollbar styling */
+        .table-container {
+            scrollbar-width: thick;
+            scrollbar-color: var(--accent-green) var(--dark-bg-tertiary);
+        }
+        
+        /* Ensure scrollbar corner is visible */
+        .table-container::-webkit-scrollbar-corner {
+            background: var(--dark-bg-tertiary);
+        }
+        
+        /* Add a visual indicator when content is scrollable */
+        .table-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 16px; /* Account for scrollbar width */
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, rgba(30, 30, 30, 0.9));
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+        
+        .table-container.has-scroll::after {
+            opacity: 1;
+        }
+        
+        /* Add a scroll indicator message */
+        .scroll-indicator-message {
+            position: absolute;
+            bottom: 5px;
+            right: 25px;
+            background-color: var(--accent-green);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            z-index: 3;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+        
+        .table-container.has-scroll .scroll-indicator-message {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
         }
 
         table {
@@ -355,9 +450,8 @@
             user-select: none;
             position: relative;
             padding-right: 30px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal; /* Allow text wrapping */
+            overflow: visible; /* Show all content */
             min-width: 60px;
         }
         
@@ -640,7 +734,7 @@
             display: none; /* Hidden by default */
         }
         .hidden {
-            display: none;
+            display: none !important;
         }
         .close-button:hover,
         .close-button:focus {
@@ -650,47 +744,144 @@
         }
 
         @media screen and (max-width: 768px) {
-            .container { width: 98%; padding: 15px; margin-top: 10px; }
-            header h1 { font-size: 1.6em; }
-            header p { font-size: 0.95em; }
-            .controls { flex-direction: row; }
+            .container { 
+                width: 98%; 
+                padding: 10px; 
+                margin-top: 10px;
+                border-radius: 4px;
+            }
+            header h1 { font-size: 1.8em; }
+            header p { font-size: 1em; }
+            .controls { 
+                flex-direction: column;
+                gap: 8px;
+            }
             .controls button, .controls label.button-like { 
-                width: auto; 
-                flex-grow: 0; 
-                margin-bottom: 5px; 
-            }
-            @media (max-width: 600px) { 
-                .controls { flex-direction: column; }
-                .controls button, .controls label.button-like { width: 100%; margin-bottom: 10px; }
+                width: 100%; 
+                padding: 12px 20px;
+                font-size: 1em;
             }
 
-            th, td { padding: 8px 4px; font-size: 0.7em; } 
-            th:nth-child(1), td:nth-child(1) { width: 8%; }
-            th:nth-child(2), td:nth-child(2) { width: 8%; }
-            th:nth-child(3), td:nth-child(3) { width: 8%; }
-            th:nth-child(4), td:nth-child(4) { width: 18%; }
-            th:nth-child(5), td:nth-child(5) { width: 7%; }
-            th:nth-child(6), td:nth-child(6) { width: 13%; }
-            th:nth-child(7), td:nth-child(7) { width: 20%; }
-            th:nth-child(8), td:nth-child(8) { width: 18%; }
+            /* Table container adjustments for mobile */
+            .table-container {
+                max-height: none; /* Remove height restriction on mobile */
+                border-radius: 0;
+                margin: -10px; /* Extend to edges */
+                border-left: none;
+                border-right: none;
+            }
 
-            .modal-content { width: 90%; margin: 10% auto; padding: 20px; }
+            /* Table adjustments */
+            table {
+                table-layout: auto; /* Let content determine width */
+                min-width: 700px; /* Ensure table has minimum width for scrolling */
+            }
+
+            th, td { 
+                padding: 10px 8px; 
+                font-size: 0.875em; /* Minimum readable size */
+                white-space: normal; /* Allow text wrapping */
+            }
+            
+            /* Remove fixed widths - let content determine */
+            th:nth-child(1), td:nth-child(1), 
+            th:nth-child(2), td:nth-child(2) { 
+                width: auto;
+                min-width: 50px;
+            }
+            th:nth-child(3), td:nth-child(3) { 
+                width: auto;
+                min-width: 60px;
+            }
+            th:nth-child(4), td:nth-child(4) { 
+                width: auto;
+                min-width: 150px;
+            }
+            th:nth-child(5), td:nth-child(5) { 
+                width: auto;
+                min-width: 40px;
+            }
+            th:nth-child(6), td:nth-child(6), 
+            th:nth-child(7), td:nth-child(7) { 
+                width: auto;
+                min-width: 120px;
+            }
+            th:nth-child(8), td:nth-child(8) { 
+                width: auto;
+                min-width: 150px;
+            }
+
+            /* Larger touch targets */
+            input[type="checkbox"] {
+                transform: scale(1.5);
+                margin: 5px;
+            }
+
+            /* Modal adjustments */
+            .modal-content { 
+                width: 95%; 
+                margin: 5% auto; 
+                padding: 15px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            /* List header adjustments */
+            .list-header {
+                padding: 15px;
+            }
+            
+            .list-title {
+                font-size: 1.2em;
+                flex-wrap: wrap;
+            }
+            
+            .rep-count {
+                display: block;
+                margin-top: 5px;
+            }
         }
-         @media screen and (max-width: 480px) {
-            header h1 { font-size: 1.4em; }
-            .version-number { font-size: 0.75em; }
-            .report-problem-link { font-size: 0.8em; }
+        
+        @media screen and (max-width: 480px) {
+            header h1 { font-size: 1.5em; }
+            .version-number { font-size: 0.8em; }
+            .report-problem-link { font-size: 0.85em; }
 
-            th, td { padding: 6px 3px; font-size: 0.60em; } 
-
-            th:nth-child(3), td:nth-child(3) { display: none; } 
-            th:nth-child(5), td:nth-child(5) { display: none; } 
-            th:nth-child(1), td:nth-child(1) { width: 10%; } 
-            th:nth-child(2), td:nth-child(2) { width: 10%; } 
-            th:nth-child(4), td:nth-child(4) { width: 25%; } 
-            th:nth-child(6), td:nth-child(6) { width: 15%; } 
-            th:nth-child(7), td:nth-child(7) { width: 20%; } 
-            th:nth-child(8), td:nth-child(8) { width: 20%; } 
+            /* Ensure minimum readable font size */
+            th, td { 
+                padding: 8px 6px; 
+                font-size: 0.8125em; /* ~13px minimum */
+            }
+            
+            /* All columns remain visible - no hiding */
+            th, td { 
+                display: table-cell !important; 
+            }
+            
+            /* Ensure table scrolls horizontally on very small screens */
+            .table-container {
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+            
+            /* Better button sizing for small screens */
+            .controls button, .controls label.button-like { 
+                padding: 14px 20px;
+                font-size: 0.95em;
+            }
+            
+            /* Email template section on mobile */
+            .email-template-section {
+                padding: 10px;
+            }
+            
+            .email-template-section textarea {
+                min-height: 100px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .email-template-section input[type="text"] {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
          }
 
         /* Loader Styles */
@@ -873,12 +1064,116 @@
         .form-group.with-copy textarea {
             padding-right: 50px;
         }
+        
+        /* Mobile card layout */
+        .cards-container {
+            display: none;
+            padding: 10px 0;
+        }
+        
+        .rep-card {
+            background-color: var(--dark-bg-tertiary);
+            border: 1px solid var(--border-color-dark);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .rep-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: #404040;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color-dark);
+        }
+        
+        .card-checkboxes {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .card-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: var(--dark-text-secondary);
+        }
+        
+        .card-district-party {
+            font-size: 0.9em;
+            color: var(--accent-green);
+        }
+        
+        .card-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--dark-text-primary);
+            margin-bottom: 10px;
+        }
+        
+        .card-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .card-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-contact-item sl-icon {
+            color: var(--accent-green);
+            font-size: 1.1em;
+        }
+        
+        .card-contact-item a {
+            color: var(--accent-green);
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .card-response {
+            background-color: var(--dark-bg-secondary);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: var(--dark-text-secondary);
+        }
+        
+        .card-response strong {
+            color: var(--dark-text-primary);
+        }
+        
+        @media screen and (max-width: 768px) {
+            .table-container {
+                display: none;
+            }
+            
+            .cards-container {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="loader"></div>
     <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNavBtn">×</a>
+        <a href="javascript:void(0)" class="closebtn" id="closeNavBtn"><sl-icon name="x-lg"></sl-icon></a>
         <a href="#" id="sideNavGuide">User Guide</a>
         <a href="#" id="sideNavExport">Export Progress</a>
         <label for="sideNavImportFile" class="sidenav-link">Import Progress</label>
@@ -894,7 +1189,7 @@
         </div>
     </div>
 
-    <button class="hamburger-btn floating-hamburger-btn" id="floatingNavBtn">☰</button>
+    <button class="hamburger-btn floating-hamburger-btn" id="floatingNavBtn"><sl-icon name="list"></sl-icon></button>
 
     <div class="container">
         <header>
@@ -909,7 +1204,7 @@
                     <a href="mailto:hayden@delta8denton.com?subject=Problem Report - SB3 Call Tracker v1.1">Report Problems</a>
                 </div>
             </div>
-            <button class="hamburger-btn" id="openNavBtn">☰</button>
+            <button class="hamburger-btn" id="openNavBtn"><sl-icon name="list"></sl-icon></button>
         </header>
 
         <div class="controls">
@@ -920,7 +1215,7 @@
             <input type="text" id="emailSubjectTemplate">
             <label for="emailBodyTemplate">Template Body:</label>
             <textarea id="emailBodyTemplate"></textarea>
-            <small>Use placeholders: {repName}, {userName}, {userLocation}</small>
+            <small>Use placeholders: {repName}, {userName}, {userIdentity}</small>
         </div>
 
         <div id="your-representatives-container" class="hidden"></div>
@@ -931,11 +1226,11 @@
         </div>
     </div>
 
-    <button id="scrollTopBtn" title="Go to top">↑</button>
+    <button id="scrollTopBtn" title="Go to top"><sl-icon name="arrow-up"></sl-icon></button>
 
     <div id="onboardingModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
-            <span class="close-button" id="closeOnboardingModal">×</span>
+            <span class="close-button" id="closeOnboardingModal"><sl-icon name="x-lg"></sl-icon></span>
             <h2>Create Your Communications Profile</h2>
             <p>This optional info helps generate more personalized, effective messages. Your answers are saved to your device and backed up securely.</p>
 
@@ -1052,13 +1347,17 @@
                 <button id="modalPrevBtn" class="button-outline">Previous</button>
                 <button id="modalNextBtn">Next</button>
                 <button id="saveOnboardingInfo" class="hidden">Save Profile</button>
+                <button id="saveOnboardingInfoAnytime" class="button-primary" style="margin-left: auto;">
+                    <sl-icon name="save" style="margin-right: 5px;"></sl-icon>
+                    Save & Exit
+                </button>
             </div>
         </div>
     </div>
 
     <div id="responseModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeResponseModal">×</span>
+            <span class="close-button" id="closeResponseModal"><sl-icon name="x-lg"></sl-icon></span>
             <h3 id="responseModalTitle">Log Call Response</h3>
             <input type="hidden" id="currentRepIdForModal">
             <input type="hidden" id="currentListIdentifierForModal">
@@ -1073,7 +1372,7 @@
 
     <div id="emailGenerationModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeEmailGenerationModal">×</span>
+            <span class="close-button" id="closeEmailGenerationModal"><sl-icon name="x-lg"></sl-icon></span>
             <h3 id="emailGenModalTitle">Your Personalized Email Draft</h3>
             <div id="emailGenSpinner" class="hidden" style="text-align: center;">
                 <div class="email-gen-spinner"></div>
@@ -1092,16 +1391,27 @@
                 </div>
                 <div class="email-rating-container">
                     <button id="thumbsUpBtn" class="icon-btn thumbs-up" data-rating="positive">
-                        <span>👍</span>
+                        <span><sl-icon name="hand-thumbs-up"></sl-icon></span>
                         <small>Good</small>
                     </button>
                     <button id="thumbsDownBtn" class="icon-btn thumbs-down" data-rating="negative">
-                        <span>👎</span>
+                        <span><sl-icon name="hand-thumbs-down"></sl-icon></span>
                         <small>Needs Work</small>
                     </button>
                     <button id="newDraftBtn" class="icon-btn">
-                        <span>🔄</span>
+                        <span><sl-icon name="arrow-repeat"></sl-icon></span>
                         <small>New Draft</small>
+                    </button>
+                </div>
+                <div id="draftNavigationContainer" class="hidden" style="justify-content: center; align-items: center; gap: 15px; margin-top: 10px;">
+                    <button id="prevDraftBtn" class="icon-btn" style="padding: 8px 12px;">
+                        <span><sl-icon name="arrow-left"></sl-icon></span>
+                        <small>Previous</small>
+                    </button>
+                    <span id="draftCounter" style="color: var(--dark-text-secondary); font-size: 0.9em;">Draft 1 of 1</span>
+                    <button id="nextDraftBtn" class="icon-btn" style="padding: 8px 12px;">
+                        <span><sl-icon name="arrow-right"></sl-icon></span>
+                        <small>Next</small>
                     </button>
                 </div>
                 <div id="ratingNoteContainer" class="hidden" style="margin-top: 10px;">
@@ -1117,7 +1427,7 @@
 
     <div id="guideModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="closeGuideModal">×</span>
+            <span class="close-button" id="closeGuideModal"><sl-icon name="x-lg"></sl-icon></span>
             <h2>SB3 Call Tracker - Easy Mobile Guide (v1.1 - Firebase Beta)</h2>
             <p>This tool helps you contact lawmakers. Your progress is saved automatically to this device and backed up to a secure cloud database (Firebase) linked to this device only.</p>
             <h4>1. First Time Opening? (Quick Setup):</h4>
@@ -1212,6 +1522,377 @@
                 let currentEmailData = null; // Store current email data for rating
                 let subjectLineQueue = []; // Pre-generated subject lines
                 let isGeneratingSubjects = false; // Prevent duplicate generation calls
+                
+                // Email pre-generation cache system
+                const emailCache = {
+                    cache: new Map(), // Max 10 entries: rep.id -> {subject, body, generatedAt, repData}
+                    currentlyGenerating: null, // Rep currently being generated
+                    nextInQueue: null, // Next rep to generate
+                    generationPromise: null, // Current generation promise
+                    cacheOrder: [], // Track order for LRU eviction
+                    maxCacheSize: 10,
+                    cacheExpiryDays: 30
+                };
+                
+                // Session-based draft storage for multiple regenerations
+                const draftHistory = {
+                    drafts: new Map(), // rep.id -> array of {subject, body, timestamp}
+                    currentIndex: new Map(), // rep.id -> current draft index
+                    maxDraftsPerRep: 5
+                };
+                
+                // Generation controller to prevent runaway scenarios
+                const generationController = {
+                    // Concurrent generation control (technical limit, not usage limit)
+                    maxConcurrent: 2,
+                    activeGenerations: new Map(), // repId -> promise
+                    
+                    // Error tracking (for stability, not limiting)
+                    consecutiveErrors: 0,
+                    maxConsecutiveErrors: 5,
+                    
+                    // Queue safety (prevent infinite loops from bugs)
+                    processedInCycle: new Set(),
+                    cycleStartTime: Date.now(),
+                    
+                    // State tracking (for debugging and user info)
+                    stats: {
+                        totalGenerated: 0,
+                        cacheHits: 0,
+                        totalRequests: 0,
+                        lastGenerationTime: 0
+                    },
+                    
+                    // Background generation control
+                    isPaused: false,
+                    pauseReason: null,
+                    lastUserActivity: Date.now()
+                };
+                
+                // Cache management functions
+                function getUserProfileHash() {
+                    // Create a hash of user profile to detect changes
+                    return JSON.stringify({
+                        userFullName: userProfile.userFullName,
+                        userLocation: userProfile.userLocation,
+                        intelligentDraftingProfile: userProfile.intelligentDraftingProfile,
+                        assignedDistricts: userProfile.assignedDistricts
+                    });
+                }
+                
+                function isEmailCacheValid(cachedEmail) {
+                    if (!cachedEmail || !cachedEmail.generatedAt) return false;
+                    
+                    const generatedDate = new Date(cachedEmail.generatedAt);
+                    const expiryDate = new Date();
+                    expiryDate.setDate(expiryDate.getDate() - emailCache.cacheExpiryDays);
+                    
+                    return generatedDate > expiryDate;
+                }
+                
+                async function loadEmailCache() {
+                    // Load from local storage first
+                    try {
+                        const keys = Object.keys(localStorage).filter(k => k.startsWith('sb3EmailCache_'));
+                        keys.forEach(key => {
+                            const repId = key.replace('sb3EmailCache_', '');
+                            const cachedData = JSON.parse(localStorage.getItem(key));
+                            if (isEmailCacheValid(cachedData)) {
+                                emailCache.cache.set(repId, cachedData);
+                                emailCache.cacheOrder.push(repId);
+                            } else {
+                                localStorage.removeItem(key); // Clean up expired entries
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error loading email cache from localStorage:', error);
+                    }
+                    
+                    // Then sync with Firebase
+                    if (currentUser && deviceId) {
+                        try {
+                            const snapshot = await db.ref(`devices/${deviceId}/emailCache/emails`).once('value');
+                            const firebaseCache = snapshot.val() || {};
+                            
+                            Object.entries(firebaseCache).forEach(([repId, cachedData]) => {
+                                if (isEmailCacheValid(cachedData) && cachedData.userProfileHash === getUserProfileHash()) {
+                                    emailCache.cache.set(repId, cachedData);
+                                    if (!emailCache.cacheOrder.includes(repId)) {
+                                        emailCache.cacheOrder.push(repId);
+                                    }
+                                    // Update local storage
+                                    localStorage.setItem(`sb3EmailCache_${repId}`, JSON.stringify(cachedData));
+                                }
+                            });
+                            
+                            // Enforce cache size limit
+                            while (emailCache.cache.size > emailCache.maxCacheSize) {
+                                const oldestKey = emailCache.cacheOrder.shift();
+                                emailCache.cache.delete(oldestKey);
+                                localStorage.removeItem(`sb3EmailCache_${oldestKey}`);
+                                if (currentUser && deviceId) {
+                                    db.ref(`devices/${deviceId}/emailCache/emails/${oldestKey}`).remove();
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error loading email cache from Firebase:', error);
+                        }
+                    }
+                }
+                
+                async function saveEmailToCache(repId, emailData) {
+                    const cacheEntry = {
+                        ...emailData,
+                        generatedAt: new Date().toISOString(),
+                        userProfileHash: getUserProfileHash()
+                    };
+                    
+                    // Check cache size and evict if necessary
+                    if (emailCache.cache.size >= emailCache.maxCacheSize && !emailCache.cache.has(repId)) {
+                        const oldestKey = emailCache.cacheOrder.shift();
+                        emailCache.cache.delete(oldestKey);
+                        localStorage.removeItem(`sb3EmailCache_${oldestKey}`);
+                        if (currentUser && deviceId) {
+                            db.ref(`devices/${deviceId}/emailCache/emails/${oldestKey}`).remove();
+                        }
+                    }
+                    
+                    // Add to cache
+                    emailCache.cache.set(repId, cacheEntry);
+                    if (!emailCache.cacheOrder.includes(repId)) {
+                        emailCache.cacheOrder.push(repId);
+                    } else {
+                        // Move to end (most recently used)
+                        emailCache.cacheOrder = emailCache.cacheOrder.filter(id => id !== repId);
+                        emailCache.cacheOrder.push(repId);
+                    }
+                    
+                    // Save to local storage
+                    localStorage.setItem(`sb3EmailCache_${repId}`, JSON.stringify(cacheEntry));
+                    
+                    // Save to Firebase
+                    if (currentUser && deviceId) {
+                        try {
+                            await db.ref(`devices/${deviceId}/emailCache/emails/${repId}`).set(cacheEntry);
+                            await db.ref(`devices/${deviceId}/emailCache/metadata`).set({
+                                lastUpdated: firebase.database.ServerValue.TIMESTAMP,
+                                cacheVersion: 1
+                            });
+                        } catch (error) {
+                            console.error('Error saving email to Firebase cache:', error);
+                        }
+                    }
+                }
+                
+                function clearEmailCache() {
+                    emailCache.cache.clear();
+                    emailCache.cacheOrder = [];
+                    emailCache.currentlyGenerating = null;
+                    emailCache.generationPromise = null;
+                    
+                    // Clear local storage
+                    const keys = Object.keys(localStorage).filter(k => k.startsWith('sb3EmailCache_'));
+                    keys.forEach(key => localStorage.removeItem(key));
+                    
+                    // Clear Firebase
+                    if (currentUser && deviceId) {
+                        db.ref(`devices/${deviceId}/emailCache`).remove();
+                    }
+                }
+                
+                function determineNextRep(currentRep, listIdentifier) {
+                    const currentList = contactLists.get(listIdentifier);
+                    if (!currentList) return null;
+                    
+                    const currentIndex = currentList.reps.findIndex(r => r.id === currentRep.id);
+                    if (currentIndex === -1) return null;
+                    
+                    // Find next rep with email in same list
+                    for (let i = currentIndex + 1; i < currentList.reps.length; i++) {
+                        if (currentList.reps[i].email) {
+                            return { rep: currentList.reps[i], listId: listIdentifier };
+                        }
+                    }
+                    
+                    // Loop back to beginning of current list
+                    for (let i = 0; i < currentIndex; i++) {
+                        if (currentList.reps[i].email) {
+                            return { rep: currentList.reps[i], listId: listIdentifier };
+                        }
+                    }
+                    
+                    return null; // No more reps in this list
+                }
+                
+                async function generateEmailInBackground(rep, listId) {
+                    if (!llmToggle.checked || !userProfile.onboardingComplete) return;
+                    
+                    // Check if paused
+                    if (generationController.isPaused) {
+                        console.log('Background generation is paused:', generationController.pauseReason);
+                        return;
+                    }
+                    
+                    // Duplicate prevention - check if already generating for this rep
+                    if (generationController.activeGenerations.has(rep.id)) {
+                        return generationController.activeGenerations.get(rep.id);
+                    }
+                    
+                    // Check concurrent limit
+                    if (generationController.activeGenerations.size >= generationController.maxConcurrent) {
+                        console.log('Max concurrent generations reached, skipping for now');
+                        return;
+                    }
+                    
+                    // Queue safety - prevent infinite loops
+                    if (generationController.processedInCycle.has(rep.id)) {
+                        console.log('Already processed this rep in current cycle, skipping');
+                        return;
+                    }
+                    
+                    // Update user activity
+                    generationController.lastUserActivity = Date.now();
+                    
+                    const promise = (async () => {
+                        try {
+                            // Mark as processing
+                            generationController.processedInCycle.add(rep.id);
+                            generationController.stats.totalRequests++;
+                            
+                            const generateEmail = functions.httpsCallable('generateEmail');
+                            const result = await generateEmail({ userProfile, representative: rep });
+                            
+                            await saveEmailToCache(rep.id, {
+                                subject: result.data.subject,
+                                body: result.data.body,
+                                repData: rep
+                            });
+                            
+                            // Success - reset consecutive errors
+                            generationController.consecutiveErrors = 0;
+                            generationController.stats.totalGenerated++;
+                            generationController.stats.lastGenerationTime = Date.now();
+                            
+                            console.log(`Pre-generated email for ${rep.representative_name} (Total: ${generationController.stats.totalGenerated})`);
+                            
+                            // Queue next rep if still active
+                            const next = determineNextRep(rep, listId);
+                            if (next) {
+                                // Check if we've completed a full cycle
+                                const cycleAge = Date.now() - generationController.cycleStartTime;
+                                if (cycleAge > 3600000) { // 1 hour
+                                    console.log('Starting new generation cycle');
+                                    generationController.processedInCycle.clear();
+                                    generationController.cycleStartTime = Date.now();
+                                }
+                                
+                                // Check if user is still active (within last 5 minutes)
+                                const timeSinceActivity = Date.now() - generationController.lastUserActivity;
+                                if (timeSinceActivity > 300000) { // 5 minutes
+                                    console.log('User inactive, pausing background generation');
+                                    generationController.isPaused = true;
+                                    generationController.pauseReason = 'User inactive';
+                                    return result.data;
+                                }
+                                
+                                // Schedule next generation
+                                setTimeout(() => {
+                                    if (!generationController.isPaused) {
+                                        generateEmailInBackground(next.rep, next.listId);
+                                    }
+                                }, 1000);
+                            }
+                            
+                            return result.data;
+                        } catch (error) {
+                            console.error('Error generating email in background:', error);
+                            
+                            // Track consecutive errors
+                            generationController.consecutiveErrors++;
+                            
+                            if (generationController.consecutiveErrors >= generationController.maxConsecutiveErrors) {
+                                console.log('Too many consecutive errors, pausing background generation');
+                                generationController.isPaused = true;
+                                generationController.pauseReason = 'Too many errors';
+                                showFeedbackToast('⚠️ Background pre-generation paused due to errors. You can still generate emails on-demand.');
+                            }
+                            
+                            return null;
+                        } finally {
+                            // Clean up
+                            generationController.activeGenerations.delete(rep.id);
+                            if (emailCache.currentlyGenerating === rep.id) {
+                                emailCache.currentlyGenerating = null;
+                                emailCache.generationPromise = null;
+                            }
+                        }
+                    })();
+                    
+                    // Set the promise in activeGenerations AFTER it's created
+                    generationController.activeGenerations.set(rep.id, promise);
+                    
+                    // Track this generation
+                    emailCache.currentlyGenerating = rep.id;
+                    emailCache.generationPromise = promise;
+                    
+                    return promise;
+                }
+                
+                // Resume background generation when user is active
+                function resumeBackgroundGeneration() {
+                    if (generationController.isPaused && generationController.pauseReason === 'User inactive') {
+                        generationController.isPaused = false;
+                        generationController.pauseReason = null;
+                        generationController.lastUserActivity = Date.now();
+                        console.log('Resuming background generation - user active');
+                        // Start generating if there's a queued rep
+                        if (emailCache.nextInQueue) {
+                            generateEmailInBackground(emailCache.nextInQueue.rep, emailCache.nextInQueue.listId);
+                        }
+                    }
+                }
+                
+                // Track user activity
+                document.addEventListener('click', () => {
+                    generationController.lastUserActivity = Date.now();
+                    resumeBackgroundGeneration();
+                });
+                
+                document.addEventListener('keypress', () => {
+                    generationController.lastUserActivity = Date.now();
+                    resumeBackgroundGeneration();
+                });
+                
+                // Pause when tab is hidden
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        generationController.isPaused = true;
+                        generationController.pauseReason = 'Tab hidden';
+                        console.log('Pausing background generation - tab hidden');
+                    } else {
+                        generationController.isPaused = false;
+                        generationController.pauseReason = null;
+                        generationController.lastUserActivity = Date.now();
+                        console.log('Resuming background generation - tab visible');
+                        if (emailCache.nextInQueue) {
+                            generateEmailInBackground(emailCache.nextInQueue.rep, emailCache.nextInQueue.listId);
+                        }
+                    }
+                });
+                
+                function startPreGeneration() {
+                    if (!llmToggle.checked || !userProfile.onboardingComplete) return;
+                    
+                    // Find the first rep with email in visible lists
+                    for (const [listId, list] of contactLists) {
+                        for (const rep of list.reps) {
+                            if (rep.email) {
+                                generateEmailInBackground(rep, listId);
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 // --- DOM Element Caching ---
                 const dynamicTablesContainer = document.getElementById('dynamic-tables-container');
@@ -1324,20 +2005,25 @@
                                     localStorage.setItem('sb3CallToolDeviceId', deviceId);
                                 }
 
-                                // Load all necessary data.
-                                await loadContactLists();
-                                await loadDataFromAllSources();
-                                await displayYourReps();
+                    // Load all necessary data.
+                    await loadContactLists();
+                    await loadDataFromAllSources();
+                    await displayYourReps();
 
-                                // Render the UI.
-                                renderAllTables();
-                                displayHomepageDistrictInfo(); // Display districts on homepage
-                                document.getElementById('loader').style.display = 'none';
-                                
-                                // Generate subject lines after user profile is loaded
-                                if (userProfile.onboardingComplete) {
-                                    generateSubjectLines();
-                                }
+                    // Render the UI.
+                    renderAllTables();
+                    displayHomepageDistrictInfo(); // Display districts on homepage
+                    document.getElementById('loader').style.display = 'none';
+                    
+                    // Load email cache and start pre-generation if appropriate
+                    if (userProfile.onboardingComplete) {
+                        await loadEmailCache();
+                        generateSubjectLines();
+                        // Start pre-generation if AI mode is enabled
+                        if (llmToggle.checked) {
+                            setTimeout(startPreGeneration, 2000); // Start after a short delay
+                        }
+                    }
 
                                 resolve(); // Signal that initialization is complete.
                             } catch (error) {
@@ -1425,11 +2111,20 @@
                     modalNextBtn.addEventListener('click', () => navigateModal(1));
                     modalPrevBtn.addEventListener('click', () => navigateModal(-1));
                     saveOnboardingInfoBtn.addEventListener('click', saveAndCloseOnboarding);
+                    document.getElementById('saveOnboardingInfoAnytime').addEventListener('click', saveAndCloseOnboarding);
 
                 llmToggle.addEventListener('change', () => {
                     emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
                     // Save the toggle state
                     localStorage.setItem('sb3LlmToggleState', llmToggle.checked);
+                    
+                    // Clear cache when toggling AI mode
+                    clearEmailCache();
+                    
+                    // Start pre-generation if AI mode is enabled
+                    if (llmToggle.checked && userProfile.onboardingComplete) {
+                        setTimeout(startPreGeneration, 1000);
+                    }
                 });
 
                     // Email Generation Modal buttons
@@ -1450,6 +2145,10 @@
                     document.getElementById('thumbsUpBtn').addEventListener('click', () => handleEmailRating('positive'));
                     document.getElementById('thumbsDownBtn').addEventListener('click', () => handleEmailRating('negative'));
                     document.getElementById('newDraftBtn').addEventListener('click', handleNewDraft);
+                    
+                    // Draft navigation buttons
+                    document.getElementById('prevDraftBtn').addEventListener('click', () => navigateDrafts(-1));
+                    document.getElementById('nextDraftBtn').addEventListener('click', () => navigateDrafts(1));
 
                     // Sidenav listeners
                     openNavBtn.addEventListener('click', openNav);
@@ -1596,6 +2295,26 @@
 
                 async function handleNewDraft() {
                     if (!currentEmailData || !currentEmailData.rep) return;
+                    
+                    const repId = currentEmailData.rep.id;
+                    
+                    // Initialize draft history for this rep if not exists
+                    if (!draftHistory.drafts.has(repId)) {
+                        draftHistory.drafts.set(repId, [{
+                            subject: currentEmailData.subject,
+                            body: currentEmailData.body,
+                            timestamp: new Date().toISOString()
+                        }]);
+                        draftHistory.currentIndex.set(repId, 0);
+                    }
+                    
+                    const drafts = draftHistory.drafts.get(repId);
+                    
+                    // Check if we've reached the limit
+                    if (drafts.length >= draftHistory.maxDraftsPerRep) {
+                        showFeedbackToast('⚠️ Maximum 5 drafts per representative reached');
+                        return;
+                    }
 
                     const spinner = document.getElementById('emailGenSpinner');
                     const content = document.getElementById('emailGenContent');
@@ -1618,13 +2337,20 @@
                             representative: currentEmailData.rep 
                         });
                         
-                        document.getElementById('generatedSubject').value = result.data.subject;
-                        document.getElementById('generatedBody').value = result.data.body;
+                        // Add new draft to history
+                        const newDraft = {
+                            subject: result.data.subject,
+                            body: result.data.body,
+                            timestamp: new Date().toISOString()
+                        };
                         
-                        // Update copy button values
-                        updateCopyButton('subject', result.data.subject);
-                        updateCopyButton('body', result.data.body);
-
+                        drafts.push(newDraft);
+                        draftHistory.currentIndex.set(repId, drafts.length - 1);
+                        
+                        // Update UI
+                        updateDraftDisplay(result.data.subject, result.data.body);
+                        updateDraftNavigation(repId);
+                        
                         // Update current email data
                         currentEmailData.subject = result.data.subject;
                         currentEmailData.body = result.data.body;
@@ -1633,13 +2359,78 @@
                         content.classList.remove('hidden');
                         
                         // Show feedback
-                        showFeedbackToast('🔄 New draft generated!');
+                        showFeedbackToast(`🔄 New draft generated! (${drafts.length}/${draftHistory.maxDraftsPerRep})`);
                     } catch (error) {
                         console.error("Error generating new draft:", error);
                         alert("Failed to generate new draft. Please try again.");
                         spinner.classList.add('hidden');
                         content.classList.remove('hidden');
                     }
+                }
+                
+                function updateDraftDisplay(subject, body) {
+                    document.getElementById('generatedSubject').value = subject;
+                    document.getElementById('generatedBody').value = body;
+                    
+                    // Update copy button values
+                    updateCopyButton('subject', subject);
+                    updateCopyButton('body', body);
+                }
+                
+                function updateDraftNavigation(repId) {
+                    const navContainer = document.getElementById('draftNavigationContainer');
+                    const drafts = draftHistory.drafts.get(repId) || [];
+                    const currentIndex = draftHistory.currentIndex.get(repId) || 0;
+                    
+                    if (drafts.length > 1) {
+                        navContainer.classList.remove('hidden');
+                        navContainer.style.display = 'flex'; // Ensure it's visible
+                        
+                        // Update counter
+                        document.getElementById('draftCounter').textContent = `Draft ${currentIndex + 1} of ${drafts.length}`;
+                        
+                        // Update button states
+                        document.getElementById('prevDraftBtn').disabled = currentIndex === 0;
+                        document.getElementById('nextDraftBtn').disabled = currentIndex === drafts.length - 1;
+                    } else {
+                        navContainer.classList.add('hidden');
+                        navContainer.style.display = 'none';
+                    }
+                }
+                
+                function navigateDrafts(direction) {
+                    if (!currentEmailData || !currentEmailData.rep) return;
+                    
+                    const repId = currentEmailData.rep.id;
+                    const drafts = draftHistory.drafts.get(repId);
+                    if (!drafts || drafts.length <= 1) return;
+                    
+                    let currentIndex = draftHistory.currentIndex.get(repId) || 0;
+                    currentIndex += direction;
+                    
+                    // Ensure index is within bounds
+                    currentIndex = Math.max(0, Math.min(currentIndex, drafts.length - 1));
+                    draftHistory.currentIndex.set(repId, currentIndex);
+                    
+                    // Update display
+                    const draft = drafts[currentIndex];
+                    updateDraftDisplay(draft.subject, draft.body);
+                    updateDraftNavigation(repId);
+                    
+                    // Update current email data
+                    currentEmailData.subject = draft.subject;
+                    currentEmailData.body = draft.body;
+                    
+                    // Reset rating for this draft
+                    const thumbsUpBtn = document.getElementById('thumbsUpBtn');
+                    const thumbsDownBtn = document.getElementById('thumbsDownBtn');
+                    const ratingNoteContainer = document.getElementById('ratingNoteContainer');
+                    const ratingNoteInput = document.getElementById('ratingNote');
+                    
+                    thumbsUpBtn.classList.remove('selected');
+                    thumbsDownBtn.classList.remove('selected');
+                    ratingNoteContainer.classList.add('hidden');
+                    ratingNoteInput.value = '';
                 }
 
                 async function loadEmailTemplate() {
@@ -1727,12 +2518,21 @@
                     
                     onboardingModal.style.display = 'none';
                     alert('Your Communications Profile has been saved.');
+                    
+                    // Clear email cache since profile changed
+                    clearEmailCache();
+                    
                     saveDataToAllStorages();
                     await displayYourReps(); // Refresh the representatives display and detect districts
                     displayHomepageDistrictInfo(); // Update the homepage district display
                     
                     // Generate subject lines now that we have a complete profile
                     generateSubjectLines();
+                    
+                    // Start pre-generation if AI mode is enabled
+                    if (llmToggle.checked) {
+                        setTimeout(startPreGeneration, 2000);
+                    }
                 }
 
                 function displayDistrictInfo() {
@@ -1933,6 +2733,9 @@
                     });
                 }
 
+                // Create a separate map for all contact lists (used for matching)
+                let allContactLists = new Map();
+                
                 async function loadContactLists() {
                     try {
                         // First, load visibility settings
@@ -1942,32 +2745,40 @@
                             visibilitySettings[doc.id] = doc.data();
                         });
                         
-                        // Then, load contact lists
+                        // Then, load ALL contact lists
                         const snapshot = await firestore.collection('contact_lists').get();
                         snapshot.forEach(doc => {
                             const listId = doc.id;
                             const listData = doc.data();
                             
-                            // Check visibility setting (default to true if not set)
-                            const isVisible = visibilitySettings[listId]?.visible !== false;
-                            
-                            // Only add visible lists
-                            if (isVisible) {
-                                const match = listId.match(/^(\d+)_(.+)$/);
-                                if (match) {
-                                    const priority = parseInt(match[1], 10);
-                                    const title = match[2].replace(/_/g, ' ');
-                                    // Add unique IDs to each representative
-                                    const repsWithIds = listData.reps.map((rep, index) => ({
-                                        ...rep,
-                                        id: `${listId}-${index}-${rep.district || index}`
-                                    }));
-                                    contactLists.set(listId, { priority, title, reps: repsWithIds });
+                            const match = listId.match(/^(\d+)_(.+)$/);
+                            if (match) {
+                                const priority = parseInt(match[1], 10);
+                                const title = match[2].replace(/_/g, ' ');
+                                // Add unique IDs to each representative
+                                const repsWithIds = listData.reps.map((rep, index) => ({
+                                    ...rep,
+                                    id: `${listId}-${index}-${rep.district || index}`
+                                }));
+                                
+                                const listInfo = { priority, title, reps: repsWithIds };
+                                
+                                // Add to allContactLists for matching purposes
+                                allContactLists.set(listId, listInfo);
+                                
+                                // Check visibility setting (default to true if not set)
+                                const isVisible = visibilitySettings[listId]?.visible !== false;
+                                
+                                // Only add visible lists to the main contactLists
+                                if (isVisible) {
+                                    contactLists.set(listId, listInfo);
                                 }
                             }
                         });
-                        // Sort the map by priority
+                        
+                        // Sort both maps by priority
                         contactLists = new Map([...contactLists.entries()].sort((a, b) => a[1].priority - b[1].priority));
+                        allContactLists = new Map([...allContactLists.entries()].sort((a, b) => a[1].priority - b[1].priority));
                     } catch (error) {
                         console.error("Error loading contact lists from Firestore:", error);
                         alert("Failed to load contact lists from the database. Please check your internet connection and refresh.");
@@ -2352,6 +3163,8 @@
                         if (!name) return '';
                         // Remove titles
                         name = name.replace(/^(Senator|Representative|Congressman|Congresswoman|Rep\.|Sen\.|Mr\.|Ms\.|Mrs\.)\s+/i, '');
+                        // Remove suffixes like Jr., Sr., III, etc.
+                        name = name.replace(/\s+(Jr\.?|Sr\.?|III|II|IV|PhD|MD|JD)$/i, '');
                         // Convert to uppercase and remove extra spaces
                         return name.toUpperCase().replace(/\s+/g, ' ').trim();
                     };
@@ -2359,10 +3172,10 @@
                     // Parse name from the rep data (e.g., "Senator Tan Parker" -> "TAN PARKER")
                     const repNameNormalized = normalizeName(zipRep.name);
                     
-                    // Search through all contact lists
+                    // Search through ALL contact lists (including hidden ones)
                     let foundMatch = null;
                     
-                    contactLists.forEach((list, listId) => {
+                    allContactLists.forEach((list, listId) => {
                         if (!foundMatch) {
                             const match = list.reps.find(contact => {
                                 // Handle "LASTNAME, FIRSTNAME" format
@@ -2473,7 +3286,7 @@
                     section.innerHTML = `
                         <div class="list-header" data-list-id="${listIdentifier}">
                             <h2 class="list-title">
-                                <span class="collapse-icon">▼</span>
+                                <span class="collapse-icon"><sl-icon name="chevron-down"></sl-icon></span>
                                 ${list.title}
                                 <span class="rep-count">(${list.reps.length} representatives)</span>
                             </h2>
@@ -2496,6 +3309,7 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                            <div class="cards-container" id="cards-${listIdentifier}"></div>
                         </div>
                     `;
                     
@@ -2628,7 +3442,139 @@
                         cellResponseSummary.classList.add('response-summary-cell');
                         updateResponseSummaryCell(cellResponseSummary, rep);
                     });
+                    
+                    // After rendering table, also render cards for mobile
+                    const cardsContainer = document.getElementById(`cards-${listIdentifier}`);
+                    if (cardsContainer) {
+                        renderCards(cardsContainer, dataArray, listIdentifier);
+                    }
+                    
+                    // After rendering, check if table container is scrollable
+                    setTimeout(() => {
+                        const tableContainer = tableBodyElement.closest('.table-container');
+                        if (tableContainer) {
+                            checkScrollable(tableContainer);
+                        }
+                    }, 100);
                 }
+                
+                function renderCards(cardsContainer, dataArray, listIdentifier) {
+                    cardsContainer.innerHTML = '';
+                    dataArray.forEach((rep) => {
+                        const card = document.createElement('div');
+                        card.className = 'rep-card';
+                        card.setAttribute('data-id', rep.id);
+                        card.setAttribute('data-list', listIdentifier);
+                        
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <div class="card-checkboxes">
+                                    <label class="card-checkbox-label">
+                                        <input type="checkbox" ${rep.called ? 'checked' : ''} data-rep-id="${rep.id}" data-list="${listIdentifier}" class="card-called-checkbox">
+                                        <sl-icon name="telephone-fill"></sl-icon>
+                                        Called
+                                    </label>
+                                    <label class="card-checkbox-label">
+                                        <input type="checkbox" ${rep.emailed ? 'checked' : ''} data-rep-id="${rep.id}" data-list="${listIdentifier}" class="card-emailed-checkbox">
+                                        <sl-icon name="envelope-fill"></sl-icon>
+                                        Emailed
+                                    </label>
+                                </div>
+                                <div class="card-district-party">
+                                    District ${rep.district} - ${rep.party}
+                                </div>
+                            </div>
+                            <div class="card-name">${rep.representative_name || 'N/A'}</div>
+                            <div class="card-contact">
+                                ${rep.email ? `
+                                    <div class="card-contact-item">
+                                        <sl-icon name="envelope"></sl-icon>
+                                        <a href="#" class="card-email-link" data-email="${rep.email}" data-rep-name="${rep.representative_name || 'N/A'}" data-rep-id="${rep.id}" data-list="${listIdentifier}">${rep.email}</a>
+                                    </div>
+                                ` : ''}
+                                ${rep.phone_number ? `
+                                    <div class="card-contact-item">
+                                        <sl-icon name="telephone"></sl-icon>
+                                        <a href="tel:${rep.phone_number.replace(/\D/g, '')}">${rep.phone_number}</a>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="card-response">
+                                ${rep.called ? 
+                                    `<strong>Response:</strong> ${getResponseText(rep.response)}<br>
+                                    ${rep.notes ? `<strong>Notes:</strong> ${rep.notes}` : ''}` :
+                                    '<em>Not called yet</em>'
+                                }
+                            </div>
+                        `;
+                        
+                        // Add event listeners
+                        const calledCheckbox = card.querySelector('.card-called-checkbox');
+                        calledCheckbox.addEventListener('change', handleCalledChange);
+                        
+                        const emailedCheckbox = card.querySelector('.card-emailed-checkbox');
+                        emailedCheckbox.addEventListener('change', handleEmailedChange);
+                        
+                        const emailLink = card.querySelector('.card-email-link');
+                        if (emailLink) {
+                            emailLink.addEventListener('click', handleEmailClick);
+                        }
+                        
+                        cardsContainer.appendChild(card);
+                    });
+                }
+                
+                function getResponseText(response) {
+                    const selectedOptionText = responseOptions.find(opt => opt.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^$/, 'not_selected') === response);
+                    return selectedOptionText || (response !== 'not_selected' ? String(response).replace(/_/g, ' ') : 'No response logged');
+                }
+                
+                function checkScrollable(container) {
+                    // Check if content is taller than container
+                    const isScrollable = container.scrollHeight > container.clientHeight;
+                    
+                    if (isScrollable) {
+                        container.classList.add('has-scroll');
+                        // Force scrollbar visibility
+                        container.style.overflowY = 'scroll';
+                        
+                        // Add scroll indicator message if not already present
+                        if (!container.querySelector('.scroll-indicator-message')) {
+                            const indicator = document.createElement('div');
+                            indicator.className = 'scroll-indicator-message';
+                            indicator.textContent = '↓ Scroll for more';
+                            container.appendChild(indicator);
+                        }
+                        
+                        console.log(`Table container is scrollable. Height: ${container.clientHeight}px, Content: ${container.scrollHeight}px, Overflow: ${container.style.overflowY}`);
+                        
+                        // Log the specific list that's having issues
+                        const table = container.querySelector('table');
+                        if (table) {
+                            const listId = table.id;
+                            const rowCount = table.querySelectorAll('tbody tr').length;
+                            console.log(`List ${listId} has ${rowCount} rows`);
+                        }
+                    } else {
+                        container.classList.remove('has-scroll');
+                        // Remove indicator if present
+                        const indicator = container.querySelector('.scroll-indicator-message');
+                        if (indicator) {
+                            indicator.remove();
+                        }
+                        console.log(`Table container is not scrollable. Height: ${container.clientHeight}px, Content: ${container.scrollHeight}px`);
+                    }
+                    
+                    // Force a reflow to ensure browser updates
+                    container.offsetHeight;
+                }
+                
+                // Check all table containers on window resize
+                window.addEventListener('resize', () => {
+                    document.querySelectorAll('.table-container').forEach(container => {
+                        checkScrollable(container);
+                    });
+                });
 
                 function updateResponseSummaryCell(cell, rep) {
                     if (rep.called) { 
@@ -2720,28 +3666,85 @@
 
                     if (llmToggle.checked) {
                         try {
-                            const generateEmail = functions.httpsCallable('generateEmail');
-                            const result = await generateEmail({ userProfile, representative: rep });
+                            let emailData = null;
                             
-                            document.getElementById('generatedSubject').value = result.data.subject;
-                            document.getElementById('generatedBody').value = result.data.body;
+                            // Check cache first
+                            const cachedEmail = emailCache.cache.get(repId);
+                            if (cachedEmail && isEmailCacheValid(cachedEmail) && cachedEmail.userProfileHash === getUserProfileHash()) {
+                                console.log(`Using cached email for ${rep.representative_name}`);
+                                emailData = cachedEmail;
+                            } else {
+                                // Check if already generating for this rep
+                                if (emailCache.currentlyGenerating === repId) {
+                                    console.log(`Waiting for in-progress generation for ${rep.representative_name}`);
+                                    const result = await emailCache.generationPromise;
+                                    if (result) {
+                                        emailData = emailCache.cache.get(repId);
+                                    }
+                                } else {
+                                    // Generate fresh
+                                    console.log(`Generating fresh email for ${rep.representative_name}`);
+                                    const generateEmail = functions.httpsCallable('generateEmail');
+                                    const result = await generateEmail({ userProfile, representative: rep });
+                                    
+                                    // Save to cache
+                                    await saveEmailToCache(repId, {
+                                        subject: result.data.subject,
+                                        body: result.data.body,
+                                        repData: rep
+                                    });
+                                    
+                                    emailData = {
+                                        subject: result.data.subject,
+                                        body: result.data.body
+                                    };
+                                }
+                            }
+                            
+                            // Queue the next rep for background generation
+                            const next = determineNextRep(rep, listIdentifier);
+                            if (next && !emailCache.cache.has(next.rep.id)) {
+                                setTimeout(() => {
+                                    generateEmailInBackground(next.rep, next.listId);
+                                }, 500);
+                            }
+                            
+                            // Use the email data
+                            document.getElementById('generatedSubject').value = emailData.subject;
+                            document.getElementById('generatedBody').value = emailData.body;
                             
                             // Update copy button values
-                            updateCopyButton('subject', result.data.subject);
-                            updateCopyButton('body', result.data.body);
+                            updateCopyButton('subject', emailData.subject);
+                            updateCopyButton('body', emailData.body);
 
                             // Store current email data for rating
                             currentEmailData = {
                                 repName: rep.representative_name || rep.name || 'N/A',
-                                subject: result.data.subject,
-                                body: result.data.body,
+                                subject: emailData.subject,
+                                body: emailData.body,
                                 rep: rep  // Store the full rep object for new drafts
                             };
 
                             // Reset rating buttons
                             document.getElementById('thumbsUpBtn').classList.remove('selected');
                             document.getElementById('thumbsDownBtn').classList.remove('selected');
-
+                            
+                            // Show rating buttons for AI mode
+                            document.querySelector('.email-rating-container').style.display = 'flex';
+                            
+                            // Initialize draft history for this rep if needed
+                            if (!draftHistory.drafts.has(repId)) {
+                                draftHistory.drafts.set(repId, [{
+                                    subject: emailData.subject,
+                                    body: emailData.body,
+                                    timestamp: new Date().toISOString()
+                                }]);
+                                draftHistory.currentIndex.set(repId, 0);
+                            }
+                            
+                            // Update draft navigation (will be hidden if only 1 draft)
+                            updateDraftNavigation(repId);
+                            
                             spinner.classList.add('hidden');
                             content.classList.remove('hidden');
 
@@ -2794,19 +3797,44 @@
 
                         const repName = formatRepName(rep.representative_name || 'Representative');
                         
-                        // Check if user is a constituent and adjust the location accordingly
+                        // Determine user identity based on constituent status
                         const isConstituent = isUserConstituentOf(rep);
-                        let userLocationText = userProfile.userLocation || 'concerned Texan';
+                        let userIdentity = '';
                         
-                        // If they are a constituent, prepend "your constituent from"
-                        if (isConstituent && userLocationText && !userLocationText.toLowerCase().includes('constituent')) {
-                            userLocationText = `your constituent from ${userLocationText}`;
+                        if (isConstituent) {
+                            // They are a constituent - use their location
+                            const location = userProfile.userLocation || 'your district';
+                            userIdentity = `your constituent from ${location}`;
+                        } else {
+                            // Not a constituent - use tone-based Texas identity
+                            const primaryTone = userProfile.intelligentDraftingProfile?.communicationTone?.primaryTone;
+                            
+                            // Select appropriate identity based on communication tone
+                            switch(primaryTone) {
+                                case 'CIVIC_PATRIOTIC':
+                                    userIdentity = 'a proud Texan';
+                                    break;
+                                case 'POLICY_ANALYTICAL':
+                                    userIdentity = 'a Texas policy advocate';
+                                    break;
+                                case 'PERSONAL_NARR':
+                                    userIdentity = 'a fellow Texan';
+                                    break;
+                                case 'SOLUTION_ORIENT':
+                                    userIdentity = 'a Texas resident focused on solutions';
+                                    break;
+                                case 'INSPIRATIONAL':
+                                    userIdentity = 'a hopeful Texas resident';
+                                    break;
+                                default:
+                                    userIdentity = 'a concerned Texan';
+                            }
                         }
                         
-                        // Only replace placeholders in body now (subject is already complete)
+                        // Replace placeholders in body (subject is already complete)
                         body = body.replace(/{repName}/g, repName)
                                    .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
-                                   .replace(/{userLocation}/g, userLocationText);
+                                   .replace(/{userIdentity}/g, userIdentity);
 
                         document.getElementById('generatedSubject').value = subject;
                         document.getElementById('generatedBody').value = body;
@@ -2814,6 +3842,9 @@
                         // Update copy button values
                         updateCopyButton('subject', subject);
                         updateCopyButton('body', body);
+
+                        // Hide rating buttons for template mode
+                        document.querySelector('.email-rating-container').style.display = 'none';
 
                         spinner.classList.add('hidden');
                         content.classList.remove('hidden');

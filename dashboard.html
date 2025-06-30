@@ -110,12 +110,17 @@
         tr:nth-child(even) { background-color: var(--dark-bg-tertiary); }
         tr:hover { background-color: #404040; }
 
-        .collapsible-section {
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color-dark);
-            border-radius: 6px;
-            background-color: var(--dark-bg-tertiary);
+        /* Container for Representative Details - no scrolling here */
+        #representativeDetailsContainer {
+            /* Remove all scrolling from this container */
         }
+
+        .esectsigin-smction 20px;
+            bor in-boptomx 2oid var(--border-color-dark);
+            bbrdrd: 1px sorid var(--b-rdera:6x-drk)
+            bbrdcknradius-c6px: var(--dark-bg-tertiary);
+        }ackground-colr: va(--ark-bg-trtiay);
+     }
         .collapsible-toggle {
             background-color: var(--accent-green-darker);
             color: white;
@@ -154,6 +159,11 @@
         }
         .collapsible-content.active {
             display: block; 
+        }
+        
+        /* Special handling for Representative Details section to allow scrolling */
+        .representative-details-section .collapsible-content {
+            overflow: visible !important;
         }
         .chart-metric canvas { max-height: 300px; } 
 
@@ -205,10 +215,10 @@
                 </div>
             </div>
             
-            <div class="collapsible-section">
+            <div class="collapsible-section representative-details-section">
                 <button class="collapsible-toggle">Representative Details</button>
                 <div class="collapsible-content">
-                    <div id="representativeDetailsContainer" class="table-container">
+                    <div id="representativeDetailsContainer">
                         <!-- Representative details table will be loaded here -->
                     </div>
                 </div>
@@ -733,10 +743,26 @@
             metricsContainer.innerHTML += `<div class="metric"><h3>Contact Volume by List</h3>${listVolumeHTML}</div>`;
             
             representativeDetailsContainer.innerHTML = ''; 
+            
+            // Create a wrapper div for the table
+            const tableWrapper = document.createElement('div');
+            tableWrapper.style.cssText = `
+                max-height: 600px;
+                overflow-y: scroll;
+                overflow-x: auto;
+                border: 1px solid var(--border-color-dark);
+                border-radius: 4px;
+                padding: 5px;
+                background-color: var(--dark-bg-secondary);
+            `;
+            
             const repTable = document.createElement('table');
             repTable.innerHTML = `<thead><tr><th>Representative</th><th>District</th><th>Party</th><th>List</th><th>Calls</th><th>Emails</th><th>"Against" Responses</th><th>"For" Responses</th><th>Against/For Ratio</th></tr></thead><tbody></tbody>`;
             const repTableBody = repTable.getElementsByTagName('tbody')[0];
             const sortedReps = Array.from(repDataMap.values()).sort((a,b) => (b.responses.against || 0) - (a.responses.against || 0)); 
+            
+            console.log(`Loading ${sortedReps.length} representatives into table`);
+            
             sortedReps.forEach(detail => {
                 if (!detail.party) console.warn("Detail missing party before rendering table:", detail);
                 const row = repTableBody.insertRow();
@@ -755,7 +781,16 @@
                 else if (againstResp > 0) ratio = 'Infinity';
                 row.insertCell().textContent = ratio;
             });
-            representativeDetailsContainer.appendChild(repTable);
+            
+            tableWrapper.appendChild(repTable);
+            representativeDetailsContainer.appendChild(tableWrapper);
+            
+            // Log table dimensions for debugging
+            setTimeout(() => {
+                console.log('Table wrapper height:', tableWrapper.scrollHeight);
+                console.log('Table wrapper client height:', tableWrapper.clientHeight);
+                console.log('Scroll needed:', tableWrapper.scrollHeight > tableWrapper.clientHeight);
+            }, 100);
 
             if (overallResponsesChartCtx && Object.keys(overallResponsesCount).length > 0) {
                 const responseLabels = Object.keys(overallResponsesCount).map(key => key.replace(/_/g, ' '));

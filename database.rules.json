@@ -10,6 +10,9 @@
         },
         "history": {
           ".write": "auth != null && auth.uid == $deviceId"
+        },
+        "emailCache": {
+          ".write": "auth != null && auth.uid == $deviceId"
         }
       }
     }
