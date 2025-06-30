@@ -1015,6 +1015,39 @@
                 </div>
             </div>
 
+            <!-- Step 6: Email Drafting Preference -->
+            <div id="modalStep6" class="modal-step">
+                <h3>Step 6: Email Drafting Preference</h3>
+                <div class="form-group">
+                    <label>How would you like to draft your emails?</label>
+                    <div class="radio-group" style="margin-top: 20px;">
+                        <label style="padding: 15px; border: 1px solid var(--border-color-dark); border-radius: 5px; margin-bottom: 15px; display: block; cursor: pointer;">
+                            <input type="radio" name="emailDraftingPreference" value="ai" checked>
+                            <strong>AI-Assisted Drafting (Recommended)</strong>
+                            <p style="margin: 10px 0 0 25px; color: var(--dark-text-secondary); font-size: 0.9em;">
+                                • Creates unique, personalized emails for each representative<br>
+                                • Helps avoid the "flooding effect" where reps ignore identical messages<br>
+                                • Takes a few extra seconds but produces more effective communications<br>
+                                • Uses your profile to craft compelling, varied messages
+                            </p>
+                        </label>
+                        <label style="padding: 15px; border: 1px solid var(--border-color-dark); border-radius: 5px; display: block; cursor: pointer;">
+                            <input type="radio" name="emailDraftingPreference" value="template">
+                            <strong>Template-Based Drafting</strong>
+                            <p style="margin: 10px 0 0 25px; color: var(--dark-text-secondary); font-size: 0.9em;">
+                                • Uses a standard template with your information filled in<br>
+                                • Faster, but all emails will be very similar<br>
+                                • May be less effective if many people send identical messages<br>
+                                • Good for quick communication when time is critical
+                            </p>
+                        </label>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 0.85em; color: var(--dark-text-secondary); font-style: italic;">
+                        Note: You can always change this preference later using the toggle in the menu.
+                    </p>
+                </div>
+            </div>
+
             <div class="modal-navigation">
                 <button id="modalPrevBtn" class="button-outline">Previous</button>
                 <button id="modalNextBtn">Next</button>
@@ -1632,8 +1665,8 @@
                         step.classList.toggle('active', (index + 1) === currentModalStep);
                     });
                     modalPrevBtn.classList.toggle('hidden', currentModalStep === 1);
-                    modalNextBtn.classList.toggle('hidden', currentModalStep === 5);
-                    saveOnboardingInfoBtn.classList.toggle('hidden', currentModalStep !== 5);
+                    modalNextBtn.classList.toggle('hidden', currentModalStep === 6);
+                    saveOnboardingInfoBtn.classList.toggle('hidden', currentModalStep !== 6);
                 }
 
                 async function saveAndCloseOnboarding() {
@@ -1660,6 +1693,9 @@
 
                     const newZipCode = onboardingZipCodeInput.value.trim();
                     const zipCodeChanged = userProfile.zipCode !== newZipCode;
+                    
+                    // Get email drafting preference
+                    const emailDraftingPreference = document.querySelector('input[name="emailDraftingPreference"]:checked').value;
 
                     userProfile.userFullName = onboardingUserNameInput.value.trim();
                     userProfile.userLocation = onboardingUserLocationInput.value.trim();
@@ -1675,8 +1711,14 @@
                             personalityElements: selectedPersonalityElements
                         },
                         supportedRegulations: supportedRegulations,
-                        opposedRegulations: opposedRegulations
+                        opposedRegulations: opposedRegulations,
+                        emailDraftingPreference: emailDraftingPreference
                     };
+                    
+                    // Update the AI toggle based on user preference
+                    llmToggle.checked = (emailDraftingPreference === 'ai');
+                    localStorage.setItem('sb3LlmToggleState', llmToggle.checked);
+                    emailTemplateSection.classList.toggle('hidden', llmToggle.checked);
                     
                     // If zip code changed, clear the assigned districts to force re-detection
                     if (zipCodeChanged && userProfile.assignedDistricts) {
@@ -1792,6 +1834,13 @@
 
                     populateRegulationCheckboxes(supportedRegulationsContainer, profile.supportedRegulations || [], 'sup');
                     populateRegulationCheckboxes(opposedRegulationsContainer, profile.opposedRegulations || [], 'opp');
+                    
+                    // Populate email drafting preference
+                    const emailPref = profile.emailDraftingPreference || 'ai';
+                    const emailPrefRadio = document.querySelector(`input[name="emailDraftingPreference"][value="${emailPref}"]`);
+                    if (emailPrefRadio) {
+                        emailPrefRadio.checked = true;
+                    }
                 }
                 
                 function populateRegulationCheckboxes(container, savedData, prefix) {
