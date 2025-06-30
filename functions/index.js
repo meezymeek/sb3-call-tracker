@@ -28,6 +28,59 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
 
   // 3. Helper functions
   
+  // Check if user is a constituent of the representative
+  const isUserConstituentOf = (userProfile, representative) => {
+    if (!userProfile.assignedDistricts || !representative.district) {
+      return false;
+    }
+    
+    const repDistrict = String(representative.district);
+    const districts = userProfile.assignedDistricts;
+    
+    // Check both House and Senate districts
+    if (districts.houseDistricts && districts.houseDistricts.includes(repDistrict)) {
+      return true;
+    }
+    
+    if (districts.senateDistricts && districts.senateDistricts.includes(repDistrict)) {
+      return true;
+    }
+    
+    return false;
+  };
+  
+  // Determine appropriate user descriptor based on profile
+  const getUserDescriptor = (userProfile, isConstituent) => {
+    if (isConstituent) {
+      return `your constituent from ${userProfile.userLocation || 'your district'}`;
+    }
+    
+    // Not a constituent - use descriptive language
+    const profile = userProfile.intelligentDraftingProfile || {};
+    
+    if (profile.worksInHempIndustry) {
+      return "concerned hemp industry professional from Texas";
+    }
+    
+    // Based on tone preference
+    const tone = profile.communicationTone?.primaryTone;
+    if (tone === 'CIVIC_PATRIOTIC') {
+      return "proud Texan";
+    } else if (tone === 'CONCERNED' || tone === 'URGENT_RESPECT') {
+      return "concerned Texas citizen";
+    } else if (tone === 'COMMUNITY_VOICE') {
+      return "engaged member of the Texas community";
+    }
+    
+    // Default based on location
+    const location = userProfile.userLocation || '';
+    if (location && !location.toLowerCase().includes('texas')) {
+      return `${location} resident and concerned Texan`;
+    }
+    
+    return "concerned Texan";
+  };
+  
   // Format name from "Lastname, Firstname" to "Firstname Lastname" with proper casing
   const formatRepName = (name) => {
     if (!name) return 'Representative';
@@ -64,6 +117,9 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
 
   // 4. Construct a detailed prompt for the LLM
   const formattedRepName = formatRepName(representative.representative_name || representative.name);
+  const isConstituent = isUserConstituentOf(userProfile, representative);
+  const userDescriptor = getUserDescriptor(userProfile, isConstituent);
+  
   const prompt = `
     Generate a professional and respectful email to a legislator.
     
@@ -74,7 +130,8 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
 
     **Sender's Profile:**
     - Name: ${userProfile.userFullName}
-    - Location: ${userProfile.userLocation}
+    - User Descriptor: ${userDescriptor}
+    - Is Direct Constituent: ${isConstituent ? "Yes" : "No"}
     - Works in Hemp Industry: ${userProfile.intelligentDraftingProfile.worksInHempIndustry ? "Yes" : "No"}
     - Occupation: ${userProfile.intelligentDraftingProfile.occupation || "Not specified"}
 
@@ -91,6 +148,7 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
     **Instructions:**
     - Draft a compelling email subject and body.
     - The email should be concise, persuasive, and tailored to the recipient's political party and district if possible.
+    - IMPORTANT: In the introduction, identify the sender as "${userDescriptor}" - do NOT claim to be a constituent if "Is Direct Constituent" is "No".
     - Incorporate the sender's personal story and regulation preferences naturally.
     - The tone should reflect the sender's selected style.
     - The email should be ready to send. Do not include any introductory text like "Here is the draft".

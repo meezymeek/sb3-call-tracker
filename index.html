@@ -2230,6 +2230,30 @@
                     return districts;
                 }
                 
+                function isUserConstituentOf(rep) {
+                    // Check if user is a constituent of the given representative
+                    if (!userProfile.assignedDistricts || !rep.district) {
+                        return false;
+                    }
+                    
+                    const repDistrict = String(rep.district);
+                    const districts = userProfile.assignedDistricts;
+                    
+                    // Check if it's a House or Senate member based on available data
+                    // If we have party info, we can assume House vs Senate
+                    // Otherwise, check both lists
+                    
+                    if (districts.houseDistricts && districts.houseDistricts.includes(repDistrict)) {
+                        return true;
+                    }
+                    
+                    if (districts.senateDistricts && districts.senateDistricts.includes(repDistrict)) {
+                        return true;
+                    }
+                    
+                    return false;
+                }
+                
                 function findRepInContactLists(zipRep) {
                     // Helper function to normalize names for matching
                     const normalizeName = (name) => {
@@ -2678,13 +2702,22 @@
 
                         const repName = formatRepName(rep.representative_name || 'Representative');
                         
+                        // Check if user is a constituent and adjust the location accordingly
+                        const isConstituent = isUserConstituentOf(rep);
+                        let userLocationText = userProfile.userLocation || 'concerned Texan';
+                        
+                        // If they are a constituent, prepend "your constituent from"
+                        if (isConstituent && userLocationText && !userLocationText.toLowerCase().includes('constituent')) {
+                            userLocationText = `your constituent from ${userLocationText}`;
+                        }
+                        
                         subject = subject.replace(/{repName}/g, repName)
                                        .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
-                                       .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
+                                       .replace(/{userLocation}/g, userLocationText);
 
                         body = body.replace(/{repName}/g, repName)
                                    .replace(/{userName}/g, userProfile.userFullName || 'a concerned constituent')
-                                   .replace(/{userLocation}/g, userProfile.userLocation || 'Texas');
+                                   .replace(/{userLocation}/g, userLocationText);
 
                         document.getElementById('generatedSubject').value = subject;
                         document.getElementById('generatedBody').value = body;
