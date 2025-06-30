@@ -762,6 +762,25 @@
                 font-size: 1em;
             }
 
+            /* List content scrolling on mobile */
+            .list-content {
+                max-height: 500px; /* Set a reasonable height for mobile */
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+                position: relative;
+            }
+
+            /* Cards container scrolling */
+            .cards-container {
+                max-height: 500px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
+                padding: 10px 0;
+                scroll-behavior: smooth;
+            }
+
             /* Table container adjustments for mobile */
             .table-container {
                 max-height: none; /* Remove height restriction on mobile */
@@ -1069,6 +1088,26 @@
         .cards-container {
             display: none;
             padding: 10px 0;
+            position: relative;
+        }
+        
+        /* Mobile scrollbar styling for cards container */
+        .cards-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .cards-container::-webkit-scrollbar-track {
+            background: var(--dark-bg-secondary);
+            border-radius: 4px;
+        }
+        
+        .cards-container::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 4px;
+        }
+        
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green-darker);
         }
         
         .rep-card {
