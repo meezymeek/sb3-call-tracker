@@ -2335,6 +2335,9 @@
                 function renderAllTables() {
                     dynamicTablesContainer.innerHTML = '';
                     contactLists.forEach((list, listIdentifier) => {
+                        // Skip "yourReps" as it's already displayed at the top
+                        if (listIdentifier === 'yourReps') return;
+                        
                         const listSection = createCollapsibleListSection(list, listIdentifier);
                         dynamicTablesContainer.appendChild(listSection);
                         const tableBody = listSection.querySelector('tbody');
