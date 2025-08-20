@@ -197,17 +197,24 @@ exports.generateEmail = onCall({secrets: [openaiApiKey]}, async (request) => {
   const getLastName = (fullName) => {
     if (!fullName) return "";
 
+    // Helper function to convert to proper case
+    const toProperCase = (str) => {
+      return str.replace(/\w\S*/g, (txt) =>
+        txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+      );
+    };
+
     // Handle "Lastname, Firstname" format
     if (fullName.includes(",")) {
       const parts = fullName.split(",").map((part) => part.trim());
       if (parts.length === 2) {
-        return parts[0]; // First part is the last name
+        return toProperCase(parts[0]); // First part is the last name, apply proper case
       }
     }
 
     // For "Firstname Lastname" format, get the last word
     const nameParts = fullName.trim().split(" ");
-    return nameParts[nameParts.length - 1];
+    return toProperCase(nameParts[nameParts.length - 1]);
   };
 
   // Determine the chamber (House or Senate) from district or list data
